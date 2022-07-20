@@ -8,6 +8,9 @@ export interface HeadingProps {
   primary?: boolean;
   secondary?: boolean;
   color?: string;
+  className?: string,
+  white?: boolean,
+
 }
 
 interface headProps {
@@ -23,6 +26,9 @@ const Head = styled.h1<headProps>`
 const Heading = (props: HeadingProps) => {
     
     var backgroundColorF = () => {
+        if(props.white){
+          return(theme.white)
+        }
         if (props.primary) {
           return theme.primary;
         } else if (props.secondary) {
@@ -62,6 +68,7 @@ const Heading = (props: HeadingProps) => {
   }
 
   return <Head
+             className={props.className}
              color={BC}
              size={fontSize}
              >

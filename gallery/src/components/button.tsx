@@ -11,6 +11,8 @@ export interface buttonProps {
   secondary?: boolean;
   backgroundColor?: string;
   border?: boolean;
+  className?: string,
+  inverse?: boolean,
 }
 interface BtnProps {
   background: any;
@@ -42,6 +44,12 @@ const Btn = styled.button<BtnProps>`
 const Button = (props: buttonProps) => {
   const [light, setLight] = useState(0);
   var backgroundColorF = () => {
+    if(props.inverse){
+      if(props.primary){
+      
+      }
+    }
+
     if (props.primary) {
       return theme.primary;
     } else if (props.secondary) {
@@ -68,6 +76,7 @@ const Button = (props: buttonProps) => {
   return (
     <Btn
       background={[BC1, BC2, BC3]}
+      className={props.className}
       onClick={props.onClick}
       style={{
         width: props.width ? props.width : "auto",

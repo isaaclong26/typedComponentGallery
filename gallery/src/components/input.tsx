@@ -9,6 +9,8 @@ export interface InputProps {
   backgroundColor?: string;
   onChange?: any;
   width?: string | number;
+  className?: string,
+
 }
 interface InpProps {
   background: string;
@@ -22,25 +24,25 @@ const Inp = styled.input<InpProps>`
   color: ${(props) => props.background};
   border-radius: ${theme.borderRadius ? ".35rem" : "0"};
   padding: 5px 3px;
-  margin: 5px;
 
   &:hover {
-    transition: border-width 0.1s ease, margin 0.1s ease;
-
-    margin: 4px;
+    transition: border-width 0.1s ease, padding 0.1s ease, text-shadow 0.1s ease;
+    text-shadow:0px 0px 1px black;
+    padding: 4px 3px;
     border-width: 3px;
   }
 
   &:focus {
     outline: none !important;
+    padding: 4px 3px;
 
     border-color: ${(props) => props.background};
-    transition: border-width 0.1s ease, margin 0.1s ease;
-
-    margin: 4px;
+    transition: border-width 0.1s ease, padding 0.1s ease;
+    text-shadow:0px 0px 1px black;
     border-width: 3px;
   }
   &::placeholder {
+    
     color: ${(props) => props.background};
   }
 `;
@@ -64,7 +66,8 @@ const Input = (props: InputProps) => {
   var BC = backgroundColorF();
   return (
     <Inp
-      width={props.width ? props.width : "auto"}
+      className={props.className}
+      width={props.width ? props.width : "100%"}
       background={BC}
       placeholder={props.label}
       onChange={props.onChange}
