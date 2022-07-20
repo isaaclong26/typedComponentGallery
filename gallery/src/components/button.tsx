@@ -13,17 +13,18 @@ export interface buttonProps {
   border?: boolean;
   className?: string,
   inverse?: boolean,
+  margin?: string,
+  posClassName?: string,
 }
 interface BtnProps {
   background: any;
 }
 const Btn = styled.button<BtnProps>`
   white-space: nowrap;
-
+  font-weight: bold;
   cursor: pointer;
   outline: none;
 
-  text-shadow: 0.1rem 0.1rem 0.5rem hsla(0, 0%, 0%, 0.5);
   letter-spacing: 0.1rem;
   user-select: none;
   transition: all 0.1s ease-in;
@@ -43,14 +44,35 @@ const Btn = styled.button<BtnProps>`
 
 const Button = (props: buttonProps) => {
   const [light, setLight] = useState(0);
-  var backgroundColorF = () => {
+
+
+  const getC = () =>{
     if(props.inverse){
       if(props.primary){
-      
+        return theme.primary
+      }
+      else if(props.secondary){
+        return theme.secondary
+      }
+      else if(props.color){
+        return props.color
+      }
+      else{
+        return theme.primary
       }
     }
+    else{
+      return theme.white
+    }
+  }
+  let c = getC()
+ 
+  var backgroundColorF = () => {
+    if(props.inverse){
+      return theme.white;
+    }
 
-    if (props.primary) {
+    else if (props.primary) {
       return theme.primary;
     } else if (props.secondary) {
       return theme.secondary;
@@ -74,14 +96,16 @@ const Button = (props: buttonProps) => {
   BC = `hsla(${BC1}, ${BC2}%, ${BC3}%, 1)`;
 
   return (
+
+    <div style={{padding: props.margin? props.margin :" 0", maxWidth: '100%'}} className={props.posClassName}>
     <Btn
-      background={[BC1, BC2, BC3]}
+      background={[BC1, BC2, BC3]} 
       className={props.className}
       onClick={props.onClick}
       style={{
-        width: props.width ? props.width : "auto",
+        width: props.width ? props.width : "100%",
         backgroundColor: BC,
-        color: props.color ? props.color : theme.color,
+        color: c,
         padding: ".6rem 1.5rem",
         fontSize: theme.relFontSize,
         borderRadius: theme.borderRadius ? ".5rem" : "0",
@@ -92,6 +116,7 @@ const Button = (props: buttonProps) => {
     >
       {props.children}
     </Btn>
+    </div>
   );
 };
 

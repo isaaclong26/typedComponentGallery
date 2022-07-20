@@ -15,38 +15,26 @@ function App() {
   };
 
   return (
-    <div className="app container-fluid">
+    <div className="app container-fluid" style={{backgroundColor: theme.white, height: "100vh"}}>
       <div className=" row">
         <div className="col-lg-3">
-        <div style={{ marginTop: "20px" }}>
-          <Button
-            onClick={() => {
-              console.log(test);
-            }}
-          >
-            Click Me
-          </Button>
+        <Button primary margin="20px">Click Me</Button>
+        <Button secondary margin="20px">Click Me</Button>
+        <div style={{backgroundColor: theme.primary}}>
+        <Button primary inverse margin="20px">Click Me</Button>
+        <Button secondary inverse margin="20px">Click Me</Button>
         </div>
-        <div style={{ marginTop: "20px" }}>
-          <Button
-            secondary
-            onClick={() => {
-              console.log("PrimaryButton");
-            }}
-          >
-            Right now
-          </Button>
+    
         </div>
-        <div style={{ marginTop: "20px" }}>
-          <Input label="Username" onChange={inputHandler}></Input>
-        </div>
-        <div style={{ marginTop: "20px" }}>
-          <Input secondary label="Username"></Input>
-        </div>
-        
-        </div>
+
         <div className="col-lg-3">
-        <div style={{ marginTop: "20px" }}>
+          <Input label="Username" margin="20px"></Input>
+          <Input  secondary label="Username"  margin="20px"></Input>
+
+        </div>
+
+        {/*  Headers  */}
+        <div className="col-lg-3">
           <Heading  size={5}>Sup</Heading>
           <Heading size={4}>Sup</Heading>
           <Heading size={3}>Sup</Heading>
@@ -54,7 +42,6 @@ function App() {
           <Heading size={2}>Sup</Heading>
 
           <Heading size={1}>Sup</Heading>
-        </div>
         </div>
         <div className="col-lg-3" >
           <div
@@ -67,7 +54,13 @@ function App() {
             }}>
           <Heading size={3} white>Login</Heading>
             <Input secondary label="Username" />
-            <Input secondary label="password" />
+            <Input secondary label="Password" />
+            <div className="row">
+              <Button  inverse posClassName="col-lg-6" margin="20px ">Log in</Button>
+              <Button posClassName="col-lg-6" margin="20px ">Sign up</Button>
+            </div>
+            
+
           </div>    
           </div>
 

@@ -10,6 +10,11 @@ export interface InputProps {
   onChange?: any;
   width?: string | number;
   className?: string,
+  margin?: string,
+  inverse?: boolean,
+  extLabel?: boolean,
+  color?: string,
+
 
 }
 interface InpProps {
@@ -48,7 +53,33 @@ const Inp = styled.input<InpProps>`
 `;
 
 const Input = (props: InputProps) => {
+
+  const getC = () =>{
+    if(props.inverse){
+      if(props.primary){
+        return theme.primary
+      }
+      else if(props.secondary){
+        return theme.secondary
+      }
+      else if(props.color){
+        return props.color
+      }
+      else{
+        return theme.primary
+      }
+    }
+    else{
+      return theme.white
+    }
+  }
+  let c = getC()
+
+
   var backgroundColorF = () => {
+    if(props.inverse){
+      return theme.white
+    }
     if (props.primary) {
       return theme.primary;
     } else if (props.secondary) {
@@ -65,6 +96,8 @@ const Input = (props: InputProps) => {
   };
   var BC = backgroundColorF();
   return (
+    <div style={{padding: props.margin? props.margin :" 0"}}>
+
     <Inp
       className={props.className}
       width={props.width ? props.width : "100%"}
@@ -73,6 +106,7 @@ const Input = (props: InputProps) => {
       onChange={props.onChange}
       style={{}}
     ></Inp>
+    </div>
   );
 };
 

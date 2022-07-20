@@ -1,7 +1,7 @@
 export default {
-    primary: 'hsla(273, 14%, 49%, 1)',
-    secondary: 'hsla(352, 68%, 55%, 1)',
-    white: "white",
+    primary: 'hsla(353, 42%, 64%, 1)',
+    secondary: 'hsla(205, 35%, 60%, 1)',
+    white: 'hsla(40, 33%, 96%, 1)',
     font: "roboto",
     color: "white",
     relFontSize: "1rem",

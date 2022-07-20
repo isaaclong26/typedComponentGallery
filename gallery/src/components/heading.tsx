@@ -10,6 +10,9 @@ export interface HeadingProps {
   color?: string;
   className?: string,
   white?: boolean,
+  margin?: string
+  inverse?: boolean,
+
 
 }
 
@@ -67,13 +70,17 @@ const Heading = (props: HeadingProps) => {
       break;
   }
 
-  return <Head
+  return (
+  <div style={{padding: props.margin? props.margin :" 0"}}>
+
+  <Head
              className={props.className}
              color={BC}
              size={fontSize}
              >
             {props.children}
-            </Head>;
-};
+            </Head>
+            </div>
+)};
 
 export default Heading;
