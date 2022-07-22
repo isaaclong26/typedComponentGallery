@@ -15,7 +15,7 @@ function App() {
   };
 
   return (
-    <div className="app container-fluid" style={{backgroundColor: theme.white, height: "100vh"}}>
+    <div className="app container-fluid" style={{backgroundColor: "#666", height: "100vh"}}>
       <div className=" row">
         <div className="col-lg-3">
         <Button primary margin="20px">Click Me</Button>
@@ -28,8 +28,8 @@ function App() {
         </div>
 
         <div className="col-lg-3">
-          <Input label="Username" margin="20px"></Input>
-          <Input  secondary label="Username"  margin="20px"></Input>
+          <Input   label="Username" margin="20px"></Input>
+          <Input externalLabel secondary label="Username"  margin="20px"></Input>
 
         </div>
 
@@ -53,8 +53,8 @@ function App() {
 
             }}>
           <Heading size={3} white>Login</Heading>
-            <Input secondary label="Username" />
-            <Input secondary label="Password" />
+            <Input externalLabel whiteLabel label="Username" />
+            <Input  externalLabel whiteLabel label="Password" />
             <div className="row">
               <Button  inverse posClassName="col-lg-6" margin="20px ">Log in</Button>
               <Button posClassName="col-lg-6" margin="20px ">Sign up</Button>

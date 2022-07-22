@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import theme from "../theme";
 import styled from "styled-components";
-
+import Input2 from "./input2"
 export interface InputProps {
   label: string;
   primary?: boolean;
@@ -14,6 +14,8 @@ export interface InputProps {
   inverse?: boolean,
   extLabel?: boolean,
   color?: string,
+  externalLabel?: boolean,
+  whiteLabel?: boolean
 
 
 }
@@ -51,6 +53,7 @@ const Inp = styled.input<InpProps>`
     color: ${(props) => props.background};
   }
 `;
+
 
 const Input = (props: InputProps) => {
 
@@ -95,6 +98,16 @@ const Input = (props: InputProps) => {
     }
   };
   var BC = backgroundColorF();
+  if(props.externalLabel){
+    return(
+      <div style={{padding: props.margin? props.margin :" 0"}}>
+
+      <Input2 {...props} /> 
+
+       </div>
+    )
+  }
+  else{
   return (
     <div style={{padding: props.margin? props.margin :" 0"}}>
 
@@ -108,6 +121,7 @@ const Input = (props: InputProps) => {
     ></Inp>
     </div>
   );
+  }
 };
 
 export default Input;
