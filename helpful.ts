@@ -14,3 +14,6 @@ function camelize(str: string) {
     return index === 0 ? match.toLowerCase() : match.toUpperCase();
   });
 }
+
+//Regex to Remove special Characters 
+//.replace(/[^\w\s]/gi, '');
