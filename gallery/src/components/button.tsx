@@ -91,8 +91,8 @@ const Button = (props: buttonProps) => {
   let BCList = BC.slice(5, BC.length - 1).split(",");
   console.log(BCList);
   const BC1 = BCList[0];
-  const BC2 = BCList[1].slice(0, 3);
-  const BC3 = BCList[2].slice(0, 3);
+  const BC2 = BCList[1].replace(/[^\w\s]/gi, '');
+  const BC3 = BCList[2].replace(/[^\w\s]/gi, '');;
   BC = `hsla(${BC1}, ${BC2}%, ${BC3}%, 1)`;
 
   return (
