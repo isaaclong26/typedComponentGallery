@@ -17,3 +17,9 @@ function camelize(str: string) {
 
 //Regex to Remove special Characters 
 //.replace(/[^\w\s]/gi, '');
+
+
+
+// Unique Id for React "child elements should have unique ids check render method" bull shit 
+import {v4 as uuidv4} from 'uuid';
+<Component key={uuidv4()}/>
