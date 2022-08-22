@@ -23,3 +23,6 @@ function camelize(str: string) {
 // Unique Id for React "child elements should have unique ids check render method" bull shit 
 import {v4 as uuidv4} from 'uuid';
 <Component key={uuidv4()}/>
+
+// Array Method removes duplicate entries                
+temp2 = [...new Set(temp2)]
