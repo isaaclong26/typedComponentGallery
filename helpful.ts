@@ -26,3 +26,18 @@ import {v4 as uuidv4} from 'uuid';
 
 // Array Method removes duplicate entries                
 temp2 = [...new Set(temp2)]
+
+
+// Removes Empty Lines from Multiline String
+
+        const lines = (text: string)=>{
+            let ots: string[]
+            ots = text
+                .split(/\r\n|\n\r|\n|\r/)
+                .map((x:string)=> x.trim())
+                .filter((x:string) => x !== "")
+            
+            return ots
+        }
+        
+
