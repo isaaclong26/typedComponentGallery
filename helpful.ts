@@ -40,4 +40,11 @@ temp2 = [...new Set(temp2)]
             return ots
         }
         
+const average = (list:number[])=>{
+    let sum = list.reduce(function (previousValue, currentValue) {
+        return previousValue + currentValue;
+    });
+    return sum/list.length
+}
+        
 
