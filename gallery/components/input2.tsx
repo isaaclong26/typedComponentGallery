@@ -1,24 +1,30 @@
 import { InputProps } from "./input";
 import styled from "styled-components";
-import theme from "../theme";
+import theme from "../../theme";
 
-const Wrapper = styled.div<InpProps>`
+const Wrapper =
+  styled.div <
+  InpProps >
+  `
   position: relative;
   padding: 15px 0 0;
   margin-top: 10px;
   width: ${(props) => props.width};
 `;
 
-const Inp = styled.input<InpProps>`
-  outline: 2px solid ${(props) => props.background};
+const Inp =
+  styled.input <
+  InpProps >
+  `
+  outline: 2px solid white;
 
   font-family: inherit;
   width: 100%;
   border: 0;
   font-size: 1.3rem;
-  color: ${(props) => props.background};
+  color: white;
   padding: 3px 5px;
-  background: #fff;
+  background:transparent;
   border-radius: ${theme.borderRadius ? "3px" : 0};
   &::placeholder {
     color: transparent;
@@ -34,12 +40,15 @@ const Inp = styled.input<InpProps>`
   }
 `;
 
-const Lbl = styled.label<InpProps>`
+const Lbl =
+  styled.label <
+  InpProps >
+  `
   position: absolute;
-  color: ${(props) => props.background};
+  pointer-events: inherit;
+  font-weight: 700;
+  color: white;
   top: 20px;
-  left: 5px;
-  pointer-events:none;
   display: block;
   transition: 0.2s;
   font-size: 1rem;
@@ -48,7 +57,7 @@ const Lbl = styled.label<InpProps>`
     top: -15px;
     display: block;
     transition: 0.2s;
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: ${(props) =>
       props.whiteLabel ? theme.white : props.background} !important;
@@ -58,7 +67,7 @@ const Lbl = styled.label<InpProps>`
     top: -15px;
     display: block;
     transition: 0.2s;
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: ${(props) =>
       props.whiteLabel ? theme.white : props.background} !important;
@@ -76,7 +85,7 @@ interface InpProps {
   whiteLabel?: boolean;
 }
 const Input2 = (props: InputProps) => {
-  const BC =  () => {
+  const BC = () => {
     if (props.inverse) {
       return theme.white;
     }
@@ -101,7 +110,7 @@ const Input2 = (props: InputProps) => {
         required
         value={props.value}
         id="x"
-        className={props.className}
+        className={props.posClassName}
         width={props.width ? props.width : "100%"}
         background={bc}
         placeholder={props.label}
@@ -118,4 +127,4 @@ const Input2 = (props: InputProps) => {
   );
 };
 
-export default Input2;
+export { Input2 };

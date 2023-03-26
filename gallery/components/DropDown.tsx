@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import theme from "../theme";
+import theme from "../../theme";
 import styled from "styled-components";
 import Dropdown from 'react-bootstrap/Dropdown';
 
@@ -21,7 +21,8 @@ export interface dropdownProps{
     whiteLabel?: boolean,
     posClassName?: string,
     onParent?: any
-    state?: any
+    state?: any,
+    value?:any
 
 }
 
@@ -32,7 +33,7 @@ export interface dropdownProps{
 
 
 const DropDown = (props: dropdownProps)=>{
-    const [selected, setSelected] = useState<string>("Select One")
+    const [selected, setSelected] = useState<string>()
 
     const handleSelect= (option:string)=>{
         setSelected(option)
@@ -93,12 +94,12 @@ const DropDown = (props: dropdownProps)=>{
                 backgroundColor: BC,
                 color: c
             }} variant="success" id="dropdown-basic">
-             {selected}
+             {selected? selected : props.value? props.value : "Select One"}
             </Dropdown.Toggle>
       
             <Dropdown.Menu>
                 {props.options.map(option=>
-                        <Dropdown.Item key={option} onClick={()=> {handleSelect(option)}}>{option}</Dropdown.Item>
+                        <Dropdown.Item  active={props.value == option? true : false}key={option} onClick={()=> {handleSelect(option)}}>{option}</Dropdown.Item>
 
                 )}
            
@@ -108,4 +109,4 @@ const DropDown = (props: dropdownProps)=>{
 }
 
 
-export default DropDown;
+export{ DropDown};
