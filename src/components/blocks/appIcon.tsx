@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import styled from "styled-components";
 
 import Icon from "@mdi/react";
-import { useTheme } from "../../App";
+import { useEloise } from "../../App";
 
 const IconContainer = styled.div`
   &:hover {
@@ -21,7 +21,7 @@ const AppIcon = (props: {
   inverse?: boolean
 }) => {
 
-  const themeC = useTheme()
+  const {theme} = useEloise()
   
 
   return (
@@ -39,7 +39,7 @@ const AppIcon = (props: {
         }}
         title={props.title}
         size={props.size? props.size: 1.6}
-        color={props.color? props.color: themeC.mode =="chalk"? props.inverse? "black": "white" : props.inverse? "white": "black"}
+        color={props.color? props.color: theme.mode =="dark"? props.inverse? "black": "white" : props.inverse? "white": "black"}
   
       />
     </IconContainer>

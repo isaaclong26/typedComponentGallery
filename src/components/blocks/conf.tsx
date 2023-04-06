@@ -2,18 +2,18 @@ import React, { useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
 import {Heading, Button } from "./"
 import { Row } from 'react-bootstrap';
-import { useTheme } from '../../App';
+import { useEloise } from '../../App';
 
 interface Props {
     open: boolean;
   question: string;
-  onConfirm: Function;
-  onCancel:Function;
+  onConfirm: (()=> undefined);
+  onCancel:(()=> undefined);
 }
 
 const ConfirmationModal: React.FC<Props> = ({ open,question, onConfirm, onCancel }) => {
 
-  const themeC = useTheme
+  const {theme, logic}  = useEloise()
 
   return (
     <>
@@ -22,8 +22,8 @@ const ConfirmationModal: React.FC<Props> = ({ open,question, onConfirm, onCancel
           <ModalContent  onClick={e => e.stopPropagation()}>
             <Heading  posClassName="p-3"   size={2}>{question}</Heading>
             <Row>
-            <Button posClassName='col-lg-5 mx-auto' onClick={onConfirm}>Confirm</Button>
-            <Button posClassName='col-lg-5 mx-auto' onClick={onCancel}>Cancel</Button>
+            <Button onClick={onConfirm}>Confirm</Button>
+            <Button onClick={onCancel}>Cancel</Button>
             </Row>
           </ModalContent>
         </ModalOverlay>

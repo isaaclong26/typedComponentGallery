@@ -95,16 +95,16 @@ const loadingBlack = `<svg width="57" height="57" viewBox="0 0 57 57" xmlns="htt
 </svg>`
 
 
-import { useTheme} from "../../App";
+import { useEloise} from "../../App";
 
 const Loading  = ()=>{
 
-const themeC = useTheme()
+const {theme} = useEloise()
 
     return(
     
     <div className="text-center">
-    <img src={themeC.mode=="chalk"? loadingWhite:loadingBlack}></img>
+    <img src={theme.mode=="dark"? loadingWhite:loadingBlack}></img>
     </div>)
 }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import theme from "../../theme";
 import styled from "styled-components";
 import Dropdown from 'react-bootstrap/Dropdown';
+import { useEloise } from "../../App";
 
 
 export interface dropdownProps{
@@ -34,6 +34,8 @@ export interface dropdownProps{
 
 const DropDown = (props: dropdownProps)=>{
     const [selected, setSelected] = useState<string>()
+
+    const {theme, logic} = useEloise()
 
     const handleSelect= (option:string)=>{
         setSelected(option)

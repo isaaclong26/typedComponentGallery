@@ -1,55 +1,70 @@
 import React, { useState, useEffect } from "react"
+import { Nav, Navbar, NavDropdown, Container } from 'react-bootstrap'
+import { useEloise } from "../../App"
+import { EloisePage } from "../.."
+import { useLocation } from "react-router"
 
-import {Nav, Navbar, NavDropdown, Container} from 'react-bootstrap'
+const color = "103, 90, 128"
 
-const color= "103, 90, 128"
-const Header: React.FC<
-    {
+const Header: React.FC = () => {
+  const { siteConfig } = useEloise()
 
+  const location = useLocation()
+
+  const sideWidget = useLocation().state?.sideWidget;
+  if (sideWidget) {
+    return null;
     }
-> = (props) => {
 
+  const renderNavItems = (pages: EloisePage[]) => {
+    return pages.map(page => {
+      if (page.pages) {
+        // If the page has nested pages, render a NavDropdown component
+        return (
+          <NavDropdown title={page.name} id={page.name}>
+            {renderNavItems(page.pages)}
+          </NavDropdown>
+        )
+      } else {
+        // Otherwise, render a Nav.Link component
+        return (
+          <Nav.Link href={page.name} style={{
+            borderBottom: `3px solid ${location.pathname === `/${page.name}` ? `#fff` : `#6f73d2`}`
+          }}>
+            {page.name}
+          </Nav.Link>
+        )
+      }
+    })
+  }
 
-
-    return (
-        <>
-            <Navbar sticky="top"  bg="white"  expand="lg">
-                <Container className="mx-1">
-                    <Navbar.Brand href="#home">
-                        <img
-                        src="./conquester.png"
-                        width="75"
-                        height="75"
-                        className="d-inline-block align-top"
-                        alt="React Bootstrap logo"
-                        />
-                    </Navbar.Brand>  
-                  <Navbar.Brand href="/">Vibez</Navbar.Brand>
-
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav">
-                        <Nav className="me-auto">
-                            <Nav.Link href="Account">Account</Nav.Link>
-                            {/* <Nav.Link href="Gallery">Protocols</Nav.Link>
-                            <Nav.Link href="Gallery">Inititives</Nav.Link> */}
-                            {/* <NavDropdown title="Services" id="basic-nav-dropdown">
-                                <NavDropdown.Item href="#action/3.1">Custom Applications</NavDropdown.Item>
-                                <NavDropdown.Item href="#action/3.3">Digital Marketing</NavDropdown.Item>
-                                <NavDropdown.Item href="#action/3.3">E-Commerce Development</NavDropdown.Item>
-                                <NavDropdown.Item href="#action/3.2">Social Media Managment and Automation </NavDropdown.Item>
-                            </NavDropdown>
-
-                            <NavDropdown title="Software" id="basic-nav-dropdown">
-                                <NavDropdown.Item href="#action/3.2">Array Methods</NavDropdown.Item>
-                                <NavDropdown.Item href="#action/3.1">Eloise.Life</NavDropdown.Item>
-                                <NavDropdown.Item href="#action/3.3">TaskMaster</NavDropdown.Item>
-                            </NavDropdown> */}
-                        </Nav>
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar>
-        </>
-    )
+  return (
+    <>
+      <Navbar sticky="top"  expand="lg" >
+        <Container className="mx-1">
+          <Navbar.Brand href="#home">
+            <img
+              src={siteConfig.logo}
+              width="50"
+              height="50"
+              className="d-inline-block align-top"
+              alt="React Bootstrap logo"
+            />
+          </Navbar.Brand>
+          <Navbar.Brand href="/">{siteConfig.name}</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              <Nav.Link href="Account" style={{
+                borderBottom: `3px solid ${location.pathname === `/Account` ? `#fff` : `#6f73d2`}`
+              }}>Account</Nav.Link>
+              {renderNavItems(siteConfig.pages.slice(1))}
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+    </>
+  )
 }
 
 export default Header

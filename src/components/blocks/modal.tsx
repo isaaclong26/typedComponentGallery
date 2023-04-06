@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
-import { useTheme } from '../../App';
+import { useEloise } from '../../App';
 import { CSSTransition } from 'react-transition-group';
 
 interface Props {
@@ -12,7 +12,8 @@ interface Props {
 
 const ChildrenModal: React.FC<Props> = ({ open, onClose, children, style }) => {
   const [show, setShow] = useState(false);
-  const themeC =useTheme()
+  const {theme, logic} =useEloise()
+  const themeC = theme
 
   useEffect(() => {
     if (open) {

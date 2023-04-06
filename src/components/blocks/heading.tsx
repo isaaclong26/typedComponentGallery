@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import styled from "styled-components";
-import { useTheme} from "../../App";
+import { useEloise} from "../../App";
 
 export interface HeadingProps {
   children: string;
@@ -47,7 +47,7 @@ const Head =
 const Heading = (props: HeadingProps) => {
 
   
-  const theme = useTheme()
+  const {theme,logic} = useEloise()
 
 
 

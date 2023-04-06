@@ -1,7 +1,8 @@
 
 import { FC, useState, useRef, useCallback, useContext } from "react";
 import useInterval from "./useInterval";
-import { useTheme } from "../../App";
+import { useEloise } from "../../App";
+import React from "react";
 const numRows = 25;
 const numCols = 35;
 
@@ -35,7 +36,7 @@ const randomTiles = (): number[][] => {
 
 const Life: FC = () => {
 
-    const themeC = useTheme()
+    const {theme, logic} = useEloise()
 
 
   const [grid, setGrid] = useState(() => {
@@ -104,7 +105,7 @@ const Life: FC = () => {
               style={{
                 width: 20,
                 height: 20,
-                backgroundColor: grid[i][k] ? themeC.primary : undefined,
+                backgroundColor: grid[i][k] ? theme.primary : undefined,
                 border: "none",
               }}
             ></div>

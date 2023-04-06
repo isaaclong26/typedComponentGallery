@@ -1,158 +1,62 @@
-import React, { useState, useEffect, useContext, FocusEventHandler } from "react";
+import React from "react";
 import styled from "styled-components";
-import { Input2 } from "./input2";
-import { useTheme } from "../../App";
+import { InputWrapper, StyledInput, StyledLabel } from "../styles/styledInput";
+import { InputProps } from "../../";
 
-export interface InputProps {
-  label: string;
-  primary?: boolean;
-  secondary?: boolean;
-  backgroundColor?: string;
-  onChange?: any;
-  width?: string | number;
-  className?: string;
-  margin?: string;
-  inverse?: boolean;
-  extLabel?: boolean;
-  color?: string;
-  externalLabel?: boolean;
-  whiteLabel?: boolean;
-  posClassName?: string;
-  value?: string;
-  type?: string;
-  onEnter?: Function;
-  onEmpty?: Function;
-  borderless?: boolean;
-  style?: any;
-  onBlur?: FocusEventHandler<HTMLInputElement>;
-}
-interface InpProps {
-  borderless?: boolean;
-  background: string;
-  width: string | number;
-  value?: string;
-  ref?: any;
-  $mode?: string;
-}
-const Inp =
-  styled.input <
-  InpProps >
-  `
-  font-size: 1rem;
-  background-color: transparent;
-  border: ${(props) => props.borderless ? "none" : props.$mode == "chalk"? " 1px solid rgba(255,255,255,.8)": "1px solid black"};
-  width: ${(props) => props.width};
-  font-weight: 700;
-  color: ${(props) => props.$mode == "chalk"? "white" : "black" };
-  padding: 5px 3px;
-  &:hover {
-    transition: border-width 0.1s ease, padding 0.1s ease, text-shadow 0.1s ease;
-    border-color:${(props) => (props.borderless ? "none" : "white")};
 
-  }
+/**
+ * A styled input component that can be used for various purposes.
+ * 
+ * @component
+ * @example
+ * ```jsx
+ * <Input
+ *   label="Username"
+ *   state={username}
+ *   setState={setUsername}
+ *   placeholder="Enter your username"
+ * />
+ * ```
+ * @param {Object} props - The props object for the component.
+ * @param {string} props.label - The label to display above the input field.
+ * @param {boolean} [props.extLabel=false] - Whether the label is outside of the input field or not.
+ * @param {boolean} [props.border=true] - Whether the input field has a border or not.
+ * @param {string} props.state - The state value for the input field.
+ * @param {function} props.setState - The function to set the state value for the input field.
+ * @param {string} [props.placeholder=""] - The placeholder text for the input field.
+ * @returns {JSX.Element} A styled input component.
+ * ```
+**/
 
-  &:focus {
-    outline: none !important;
+const Input: React.FC<InputProps> = ({
+  label,
+  extLabel = false,
+  border = true,
+  state,
+  setState,
+  placeholder = "",
+  type,
+}) => {
+  const hasValue = Boolean(state);
 
-    border-color:${(props) => (props.borderless ? "none" : "white")};
-  }
-  &::placeholder {
-    color: ${(props) => props.$mode == "chalk"? "white" : "black" };
-  }
-  
-`;
-
-const Input = React.forwardRef((props: InputProps, ref) => {
-
-  const theme = useTheme()
-
-  const getC = () => {
-    if (props.inverse) {
-      if (props.primary) {
-        return theme.primary;
-      } else if (props.secondary) {
-        return theme.secondary;
-      } else if (props.color) {
-        return props.color;
-      } else {
-        return theme.primary;
-      }
-    } else {
-      return theme.white;
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setState(e.target.value);
   };
-  let c = getC();
 
-  var backgroundColorF = () => {
-    if (props.inverse) {
-      return theme.white;
-    }
-    if (props.primary) {
-      return theme.primary;
-    } else if (props.secondary) {
-      return theme.secondary;
-    } else if (props.backgroundColor !== undefined) {
-      return props.backgroundColor;
-    } else {
-      if (theme.primary !== undefined) {
-        return "#fff";
-      } else {
-        return "#666";
-      }
-    }
-  };
-  const blur = (e:any)=>{}
-  const handleKeyDown = (event: any) => {
+  return (
+    <InputWrapper extLabel={extLabel}>
+      {extLabel && <StyledLabel hasValue={hasValue}>{label}</StyledLabel>}
+      <StyledInput
+        border={border}
+        value={state}
+        onChange={handleInputChange}
+        placeholder={!extLabel ? placeholder : undefined}
+        type={type}
+      />
+    </InputWrapper>
+  );
+};
 
-    if (event.key === "Enter") {
-      if(props.onEnter)
-         props.onEnter(event.target.value)
-    }
-    if (event.key === "Backspace") {
-      if(event.target.value === ""){
+export default Input;
 
-        if(props.onEmpty){
-            event.stopPropagation()
-            event.preventDefault()
 
-             props.onEmpty(event.target.value)
-        }
-      }
-    }
-  };
-  var BC = backgroundColorF();
-  if (props.externalLabel) {
-    return (
-      <div
-        style={{ padding: props.margin ? props.margin : " 0" }}
-        className={props.posClassName}
-      >
-        <Input2 {...props} />
-      </div>
-    );
-  } else {
-    return (
-      <div
-        style={{ padding: props.margin ? props.margin : " 0" }}
-        className={props.posClassName}
-      >
-        <Inp
-          ref={ref}
-          type={props.type ? props.type : "text"}
-          value={props.value}
-          onBlur={props.onBlur ?? blur}
-          className={props.className}
-          width={props.width ? props.width : "100%"}
-          background={BC}
-          placeholder={props.label}
-          onChange={props.onChange}
-          style={{...props.style}}
-          onKeyDown={handleKeyDown}
-          borderless={props.borderless}
-        ></Inp>
-      </div>
-    );
-  }
-});
-
-export { Input };

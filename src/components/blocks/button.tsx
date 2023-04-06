@@ -1,155 +1,137 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useTheme } from "../../App";
-import styled from "styled-components";
+import { UndefinedLogic, useEloise } from "../../App";
+import styled, { ThemeProps } from "styled-components";
+import { Logic } from "../../functions";
+import {
+	ButtonProps,
+	FirebaseButtonProps,
+	RegularButtonProps,
+	Theme,
+} from "../../";
+
+/**
+ * A customizable button component that can be used for various purposes.
+ * Supports regular buttons and buttons that interact with Firebase.
+ *
+ * @example_without_firebase
+ * ```tsx
+ * <Button 
+ * onClick={() => console.log('Button clicked!')}
+ * >Click me!</Button>
+ * ```
+ *
+ * @example_with_firebase
+ * 
+ * ```tsx
+ * <Button 
+ *     firebase
+ *     data={{ name: 'Eloise' }} 
+ *     path="plans/id" // user is already handled
+ *     next={afterPost}// function to call on sucessful post
+ * >  Submit </Button>
+ * ```
+ */
 
 
-import { Logic } from '../../functions';
-import { Col, Container, Row } from 'react-bootstrap';
+const Button: React.FC<ButtonProps> = ({
+	color = "primary",
+	rounded = true,
+	className,
+	children,
+	firebase = false,
+	...props
+}) => {
+	const { theme, logic } = useEloise(); // Accesses the theme and logic from the app context using the useEloise hook
 
-const errorHandler = async (e: any) => {
+	// Handling firebase case
+	if (firebase) {
+		const { data, path, next } = props as FirebaseButtonProps;
+		// Perform any required action with data and path
 
-}; const logic = new Logic(errorHandler, errorHandler, errorHandler)
+		const submit = async () => {
+			let post = await logic.fb.setUserDoc(path, data); // Sends the data to Firebase to be stored
+			if (post) {
+				next(); // Runs the next function if post is successful
+			}
+		};
 
+		// Renders the ButtonWrapper component with the appropriate props
+		return (
+			<ButtonWrapper
+				logic={logic}
+				backgroundColor={color}
+				theme={theme}
+				rounded={rounded}
+				className={className}
+				onClick={submit}
+				aria-label={props["aria-label"]}
+				role={props.role}
+				tabIndex={props.tabIndex}>
+				{children}
+			</ButtonWrapper>
+		);
+	}
 
+	const { onClick } = props as RegularButtonProps;
 
-interface BtnProps {
-  background: any;
-  transparent?: boolean;
-  noHover?: boolean;
-}
-const Btn = styled.button<BtnProps>`
-  white-space: nowrap;
-  font-weight: bold;
-  cursor: pointer;
-  outline: none;
-  font-size: 1rem;
-  letter-spacing: 0.1rem;
-  user-select: none;
-  transition: all 0.1s ease-in;
-
-  ::-moz-focus-inner {
-    border: 0;
-  }
-
-  @media only screen and (max-width: 768px) {
-  }
-  cursor-events: ${(props) => (props.noHover ? "none" : "default")};
-
-  ${(props) =>
-    !props.noHover &&
-    `&:hover {
-    transform: translateY(-3px);
-    background-color: 
-      ${
-        props.transparent
-          ? "transparent"
-          : `hsla(${props.background[0]}, ${props.background[1]}%, ${
-              parseInt(props.background[2]) + 10
-            }%, 1)!important`
-      };
-  }`}
-`;
-
-
-export interface buttonProps {
-  // Required properties
-  children: string;
-  onClick?: any;
-  width?: string;
-  color?: string;
-  primary?: boolean;
-  secondary?: boolean;
-  backgroundColor?: string;
-  border?: boolean;
-  className?: string;
-  inverse?: boolean;
-  margin?: string;
-  posClassName?: string;
-  borderRadius?: boolean;
-  style?: { [key: string]: string };
-  fontSize?: string;
-  padding?: string;
-  transparent?: boolean;
-  noHover?: boolean;
-}
-const Button: React.FC<buttonProps> = ({
-  children, onClick, width, color, primary, secondary, backgroundColor, border, className, inverse, margin, posClassName, borderRadius, style, fontSize, padding, transparent, noHover
-  }) => {
-  const theme = useTheme();
-  const [light, setLight] = useState(0);
-
-  const getC = () => {
-    if (inverse) {
-      if (primary) {
-        return theme.primary;
-      } else if (secondary) {
-        return theme.secondary;
-      } else if (color !== undefined) {
-        return color;
-      } else {
-        return theme.primary;
-      }
-    } else if (color) {
-      return color;
-    } else {
-      return theme.white;
-    }
-  };
-
-  var backgroundColorF = () => {
-    if (inverse) {
-      return theme.white;
-    } else if (primary) {
-      return theme.primary;
-    } else if (secondary) {
-      return theme.secondary;
-    } else if (backgroundColor !== undefined) {
-      return backgroundColor;
-    } else {
-      if (theme.primary !== undefined) {
-        return theme.primary;
-      } else {
-        return "#666";
-      }
-    }
-  };
-
-  var BC: string = backgroundColorF();
-  let c = logic.getTextColorFromBackground(BC)
-
-  let BCList = BC.slice(5, BC.length - 1).split(",");
-  const BC1 = BCList[0];
-  const BC2 = BCList[1].replace(/[^\w\s]/gi, "");
-  const BC3 = BCList[2].replace(/[^\w\s]/gi, "");
-  BC = `hsla(${BC1}, ${BC2}%, ${BC3}%, 1)`;
-
-  return (
-    <div
-      style={{ padding: margin ? margin : " 0", maxWidth: "100%" }}
-      className={posClassName}
-    >
-      <Btn
-        noHover={noHover}
-        transparent={transparent}
-        background={[BC1, BC2, BC3]}
-        className={className}
-        onClick={onClick}
-        style={{
-          ...style,
-          width: width ? width : "100%",
-          backgroundColor: transparent ? "transparent" : BC,
-          color: c,
-          padding: padding ? padding : ".6rem 1.5rem",
-          fontSize: fontSize ? fontSize : "1rem",
-          borderRadius: borderRadius ? ".3rem" : "0",
-          textAlign: "center",
-          border: border ? "solid" : theme.border,
-        }}
-      >
-        {children}
-      </Btn>
-    </div>
-  );
+	// Renders the ButtonWrapper component with the appropriate props
+	return (
+		<ButtonWrapper
+			logic={logic}
+			backgroundColor={color}
+			theme={theme}
+			rounded={rounded}
+			className={className}
+			onClick={onClick}
+			aria-label={props["aria-label"]}
+			role={props.role}
+			tabIndex={props.tabIndex}>
+			{children}
+		</ButtonWrapper>
+	);
 };
 
 export { Button };
+
+interface ButtonWrapperProps extends ThemeProps<Theme> {
+	backgroundColor: string;
+	rounded: boolean;
+	logic: Logic | UndefinedLogic;
+}
+
+const ButtonWrapper = styled.button<ButtonWrapperProps>`
+	width: 100%;
+	background-color: ${(props) =>
+		props.theme[
+			props.backgroundColor
+		]}; // Sets the background color to the passed color or default primary color
+	color: white;
+	border-radius: ${(props) =>
+		props.rounded
+			? `${props.theme.borderRadius}px`
+			: "0"}; // Sets the border radius to the default radius in the theme or 0 if not rounded
+	border: ${(props) =>
+		props.theme
+			.border}; // Sets the border style to the default border style in the theme
+	padding: 0.75rem 1.5rem; // Sets the padding of the button
+	transition: background-color 0.2s, transform 0.2s; // Adds a transition effect to the background color and transform
+
+	// Hover state
+	&:hover {
+		background-color: ${(props) =>
+			props.logic.color.lighten(
+				props.theme[props.backgroundColor]
+			)}; // Lightens the background color of the button
+		transform: translateY(-3px); // Moves the button up by 3px
+		cursor: pointer; // Sets the cursor to a pointer
+	}
+
+	// Active state
+	&:active {
+		background-color: ${(props) =>
+			props.logic.color.darken(
+				props.theme[props.backgroundColor]
+			)}; // Darkens the background color of the button
+		transform: translateY(0); // Resets the button to its original position
+	}
+`;
