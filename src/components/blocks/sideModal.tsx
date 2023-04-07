@@ -4,6 +4,7 @@ import { useEloise } from '../../App';
 import { CSSTransition } from 'react-transition-group';
 import { useLocation,  useNavigate,  useNavigation,  useParams } from 'react-router';
 import { EloisePage, Login, SiteConfig } from '../../';
+import SignUp from '../pages/signup';
 /**
  * Renders content for the SideModal based on the current `sideWidget` prop.
  * @param {string} sideWidget - The name of the current side widget.
@@ -20,7 +21,7 @@ const renderModalContent = (sideWidget: string): React.ReactNode => {
             return <Login/>
         }
         else if(sideWidget === 'SignUp'){
-            return <Login />
+            return <SignUp/>
         }
     else{
               return null;
@@ -133,7 +134,7 @@ const Row = styled.div`
 const ModalContent = styled.div`
   border-radius: 10px;
   width: 35%;
-  margin-left: 50%;
+  margin-left: 60%;
 
   @media (max-width: 1000px) and (min-width: 750px) {
     margin: auto;

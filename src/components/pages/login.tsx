@@ -54,7 +54,7 @@ const Login = (props: {}) => {
       />
       <Row className='mt-5'>
         <Col lg={7} className="mx-auto text-center" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Icon color="#6f73d2" size='10vw' path={mdiAccountCircleOutline} />
+          <Icon color={theme.primary} size='10vw' path={mdiAccountCircleOutline} />
         </Col>
       </Row>
 

@@ -108,7 +108,7 @@ const ButtonWrapper = styled.button<ButtonWrapperProps>`
 	color: white;
 	border-radius: ${(props) =>
 		props.rounded
-			? `${props.theme.borderRadius}px`
+			? `3px`
 			: "0"}; // Sets the border radius to the default radius in the theme or 0 if not rounded
 	border: ${(props) =>
 		props.theme

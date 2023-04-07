@@ -7,14 +7,14 @@ import { useLocation } from "react-router"
 const color = "103, 90, 128"
 
 const Header: React.FC = () => {
-  const { siteConfig } = useEloise()
+  const { siteConfig, theme } = useEloise()
 
   const location = useLocation()
 
-  const sideWidget = useLocation().state?.sideWidget;
-  if (sideWidget) {
-    return null;
-    }
+  // const sideWidget = useLocation().state?.sideWidget;
+  // if (sideWidget) {
+  //   return null;
+  //   }
 
   const renderNavItems = (pages: EloisePage[]) => {
     return pages.map(page => {
@@ -29,7 +29,7 @@ const Header: React.FC = () => {
         // Otherwise, render a Nav.Link component
         return (
           <Nav.Link href={page.name} style={{
-            borderBottom: `3px solid ${location.pathname === `/${page.name}` ? `#fff` : `#6f73d2`}`
+            borderBottom: `3px solid ${location.pathname === `/${page.name}` ? `#fff` : theme.primary}`
           }}>
             {page.name}
           </Nav.Link>
