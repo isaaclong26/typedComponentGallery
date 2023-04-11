@@ -87,7 +87,7 @@ export {
     }
       
       export interface FirebaseConfig {
-        apiKey: string;
+        config:{apiKey: string;
         authDomain: string;
         databaseURL: string;
         projectId: string;
@@ -95,6 +95,8 @@ export {
         messagingSenderId: string;
         appId: string;
         measurementId?: string;
+        };
+        storageDir: string
       }
       
      

@@ -1,8 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { doc, getFirestore, setDoc } from 'firebase/firestore';
-import { getStorage } from "firebase/storage";
-import { ref, getDatabase } from 'firebase/database';
+import { StorageReference, getStorage, ref  } from "firebase/storage";
+import {  getDatabase } from 'firebase/database';
 import { collection, getDocs, getDoc } from "firebase/firestore"
 import { throttle } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -14,8 +14,8 @@ class FB {
     storage: any;
     database: any;
 
-    constructor(config: any) {
-        this.app = initializeApp(config);
+    constructor (config: any) {
+        this.app = initializeApp(config.config);
         this.db = getFirestore(this.app);
         this.auth = getAuth(this.app);
         this.storage = getStorage(this.app);

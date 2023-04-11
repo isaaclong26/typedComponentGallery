@@ -46,13 +46,15 @@ interface EloiseContext {
 
  const ThemeContext = createContext<EloiseContext>({
   fireBaseConfig:{
+    config:{
     apiKey: '',
     authDomain: '',
     databaseURL: '',
     projectId: '',
     storageBucket: '',
     messagingSenderId: '',
-    appId: ''
+    appId: ''},
+    storageDir:""
   },
   siteConfig:{
     name: '',
