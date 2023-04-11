@@ -36,6 +36,7 @@ const Input: React.FC<InputProps> = ({
   setState,
   placeholder = "",
   type,
+  onEnter
 }) => {
   const hasValue = Boolean(state);
 

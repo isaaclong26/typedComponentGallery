@@ -48,49 +48,39 @@ class Generic {
  * console.log(apiResponse); // { status: "success", data: { userId: 123, name: "John", age: 30 } }
  */
 
-  apiCall:Function = async ( route: string, body?: any): Promise<any> => {
-
+   apiCall: Function = async (route: string, body?: any, url?: string): Promise<any> => {
     let user = await this.fb.auth.currentUser?.getIdToken();
-   
-    axios.defaults.headers.common = { Authorization: `Bearer ${user}` };
-    
-      return new Promise(async (resolve, reject) => {
-    
-        if(body){
-        await axios
-          .post(`${this.api}/${route}`, body)
-          .then((response) => {
-            resolve(response.data);
-          })
-          .catch((error) => {
-            if (error.status === 403) {
-              reject("auth");
-            } else if (error.status === 402) {
-              reject("perms");
-            } else {
-              reject(error.message);
-            }
-          });
-        }
-        else{
-          await axios
-          .get(`${this.api}/${route}`)
-          .then((response) => {
-            resolve(response.data);
-          })
-          .catch((error) => {
-            if (error.status === 403) {
-              reject("auth");
-            } else if (error.status === 402) {
-              reject("perms");
-            } else {
-              reject(error.message);
-            }
-          });
-        }
-      });
+
+    const headers = {
+      Authorization: `Bearer ${user}`,
+    };
+
+    const options: RequestInit = {
+      method: body ? 'POST' : 'GET',
+      headers: headers,
+      body: body ? JSON.stringify(body) : undefined
+    };
+
+    const apiUrl = url ?? this.api;
+
+    try {
+      const response = await fetch(`${apiUrl}/${route}`, options);
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else if (response.status === 403) {
+        throw new Error("auth");
+      } else if (response.status === 402) {
+        throw new Error("perms");
+      } else {
+        throw new Error(response.statusText);
+      }
+    } catch (error:any) {
+      throw new Error(error.message);
     }
-    
+};
+
+  
     
    /**
  * Capitalizes the first letter of a word and lowercases the rest.
@@ -148,6 +138,7 @@ getRandom(arr: string | any[]): any {
   let ots = arr[Math.floor(Math.random() * arr.length)];
   return ots;
 }
+
 
 /**
  * Retrieves a list of permissions from the server.

@@ -69,13 +69,21 @@ export {
       name: string;
       component: React.FC;
     }
+
+    export interface EloiseConfig {
+        endPoint: string;
+        chatLog: string;
+        initMessage: string;
+
+    }
     
     export interface SiteConfig {
       name: string;
       pages: EloisePage[];
       logo: string;
       inverseLogo:string;
-      sideWidget: SideWidget[]
+      sideWidget: SideWidget[];
+      eloiseConfig:EloiseConfig 
     }
       
       export interface FirebaseConfig {
@@ -240,6 +248,7 @@ export {
       
       export interface InputProps {
         label: string;
+        onEnter?: () => void;
         extLabel?: boolean;
         border?: boolean;
         state: string | undefined;
@@ -268,3 +277,49 @@ export {
       }
       
       export type LTProps = RegularLTProps | FirebaseLTProps;
+
+
+
+      /**
+ * CustomChatType is a React component type that accepts a single prop called 'data' of any type.
+ * @typedef {React.ComponentType<{ data: any }>} CustomChatType
+ */
+   type CustomChatType = React.ComponentType<{ data: any }>;
+/**
+ * TextMessage is an object representing a text message in the chat.
+ * @typedef {Object} TextMessage
+ * @property {string} text - The text content of the message.
+ * @property {"user"|"ai"} sender - The sender of the message: 'user' or 'ai'.
+ * @property {"Text"} type - The type of the message, in this case, 'Text'.
+ */
+export type TextMessage = {
+        text: string;
+        sender: "user" | "ai";
+        type: "Text";
+    };
+/**
+ * CustomMessage is an object representing a custom message in the chat with a custom React component.
+ * @typedef {Object} CustomMessage
+ * @property {string} text - The text content of the message.
+ * @property {"user"|"ai"} sender - The sender of the message: 'user' or 'ai'.
+ * @property {"Custom"} type - The type of the message, in this case, 'Custom'.
+ * @property {CustomChatType} component - A React component to render for the custom message.
+ * @property {any} data - The data to be passed to the custom React component as a prop.
+ */
+ export type CustomMessage = {
+        text: string;
+        sender: "user" | "ai";
+        type: "Custom";
+        component: CustomChatType;
+        data:any;
+    };
+/**
+ * MessageType is a union type representing either a TextMessage or CustomMessage.
+ * @typedef {TextMessage | CustomMessage} MessageType
+ */
+    export  type MessageType = TextMessage | CustomMessage;
+
+    
+    
+   
+    

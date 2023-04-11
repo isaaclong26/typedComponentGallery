@@ -3,8 +3,9 @@ import styled, { css, keyframes } from 'styled-components';
 import { useEloise } from '../../App';
 import { CSSTransition } from 'react-transition-group';
 import { useLocation,  useNavigate,  useNavigation,  useParams } from 'react-router';
-import { EloisePage, Login, SiteConfig } from '../../';
+import { Eloise, EloisePage, Login, SiteConfig } from '../../';
 import SignUp from '../pages/signup';
+import EloiseChat from '../widgets/eloise';
 /**
  * Renders content for the SideModal based on the current `sideWidget` prop.
  * @param {string} sideWidget - The name of the current side widget.
@@ -22,6 +23,9 @@ const renderModalContent = (sideWidget: string): React.ReactNode => {
         }
         else if(sideWidget === 'SignUp'){
             return <SignUp/>
+        }
+        else if(sideWidget === "Eloise"){
+          return <EloiseChat/>
         }
     else{
               return null;

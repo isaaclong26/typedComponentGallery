@@ -60,6 +60,11 @@ interface EloiseContext {
     logo: '',
     inverseLogo: "",
     sideWidget: [],
+    eloiseConfig:{
+      endPoint: "",
+      chatLog: "",
+      initMessage: "Hi This is elosie",
+    }
 
   },
   theme:{
