@@ -56,7 +56,7 @@ const Header: React.FC = () => {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
               <Nav.Link href="Account" style={{
-                borderBottom: `3px solid ${location.pathname === `/Account` ? `#fff` : `#6f73d2`}`
+                borderBottom: `3px solid ${location.pathname === `/Account` ? `#fff` : theme.primary}`
               }}>Account</Nav.Link>
               {renderNavItems(siteConfig.pages.slice(1))}
             </Nav>
