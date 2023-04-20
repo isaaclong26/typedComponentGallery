@@ -6,20 +6,26 @@ import {  getDatabase } from 'firebase/database';
 import { collection, getDocs, getDoc } from "firebase/firestore"
 import { throttle } from 'lodash';
 import { useEffect, useState } from 'react';
-
+import {useCollection} from "react-firebase-hooks/firestore"
+import { SiteConfig } from '..';
+/**
+ * The FB class provides methods for interacting with Firebase services.
+ */
 class FB {
     app: any;
     db: any;
     auth: any;
     storage: any;
     database: any;
+    siteConfig:SiteConfig;
 
-    constructor (config: any) {
+    constructor (config: any, siteConfig:SiteConfig) {
         this.app = initializeApp(config.config);
         this.db = getFirestore(this.app);
         this.auth = getAuth(this.app);
         this.storage = getStorage(this.app);
         this.database = getDatabase(this.app);
+        this.siteConfig = siteConfig
     }
 
     getAuthenticatedUserUid(): string | null {
@@ -32,28 +38,28 @@ class FB {
     }
 
     async getUserCollection(path: string) {
-        const test = this.getAuthenticatedUserUid();
-        if (!test) {
-            return false;
-        } else {
-            const ots: any = await getDocs(collection(this.db, "users/" + test + "/" + path));
-            return ots.docs.map((doc: any) => {
-                const temp = doc.data();
-                const ots = {
-                    id: doc.id,
-                    data: temp.data
-                };
-                return ots;
-            });
-        }
-    }
+      const test = this.getAuthenticatedUserUid();
+      if (!test) {
+          return false;
+      } else {
+          const ots: any = await getDocs(collection(this.db, "users/" + test + "/"+ this.siteConfig.id + "/Main/"  + path));
+          return ots.docs.map((doc: any) => {
+              const temp = doc.data();
+              const ots = {
+                  id: doc.id,
+                  data: doc.data()
+              };
+              return ots;
+          });
+      }
+  }
 
     async getUserDoc(path: string) {
         const test = this.getAuthenticatedUserUid();
         if (!test) {
             return false;
         } else {
-            const ots: any = await getDoc(doc(this.db, "users/" + test + "/" + path));
+            const ots: any = await getDoc(doc(this.db, "users/" + test + "/"+ this.siteConfig.id + "/Main/"  + path));
             return {
                 data: ots.data(),
                 id: ots.id
@@ -66,7 +72,7 @@ class FB {
         if (!test) {
             return false;
         } else {
-            const ots: any = await setDoc(doc(this.db, "users/" + test + "/" + path), data);
+            const ots: any = await setDoc(doc(this.db, "users/" + test + "/" + this.siteConfig.id + "/Main/"  +path), data);
             if(ots){
                 return true
             }

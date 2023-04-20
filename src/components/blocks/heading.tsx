@@ -38,7 +38,7 @@ const Head =
   border: ${(props)=> !props.$border? "none" : props.$mode=== "chalk"? "4px solid rgba(255,255,255,.8)" : "4px solid black" };
   border-radius: 10px;
   font-size: ${(props) => props.size};
-  color: ${(props) => props.$inverse? props.$mode == "chalk"?  "black" : "white" : props.$mode == "chalk"?  "white" : "black" };
+  color: ${(props) => props.color};
   font-weight: 700;
   ${(props)=> props.$handWritten?" font-family: 'Caveat', cursive  ;" : ""}
   )
@@ -53,7 +53,7 @@ const Heading = (props: HeadingProps) => {
 
   var backgroundColorF = () => {
     if (props.white) {
-      return theme.white;
+      return "white";
     }
     if (props.primary) {
       return theme.primary;

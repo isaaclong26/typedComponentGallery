@@ -14,7 +14,7 @@ import EloiseChat from '../widgets/eloise';
 const renderModalContent = (sideWidget: string): React.ReactNode => {
     const { siteConfig } = useEloise();
     // Look up the page object in `siteConfig` with a name matching the `sideWidget` prop.
-    const page = siteConfig.sideWidget.find((p:EloisePage) => p.name === sideWidget);
+    const page = siteConfig.sideWidget.find((p:any) => p.name === sideWidget);
   
     // If no page is found with the matching name, return null.
     if (!page) {
@@ -70,7 +70,7 @@ const renderModalContent = (sideWidget: string): React.ReactNode => {
                     color: 'black',
                     borderRadius: '10px',
                     padding: '20px',
-                    height: '80vh'
+                    height: '70vh'
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >

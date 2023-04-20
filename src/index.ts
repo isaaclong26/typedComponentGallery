@@ -1,5 +1,12 @@
 import Eloise,{useEloise} from "./App"
 import { Logic } from './functions';
+import { ViewCol, View } from "./components/blocks/View";
+import { DBItem, DBList, DBListProps } from "./components/widgets/dbList";
+import {DBTable, DBTableProps } from "./components/widgets/DBTable";
+import {DBCards, CardListProps } from "./components/widgets/DBCards";
+import { FileUpload, FileUploadProps } from "./components/widgets/fileUpload";
+import {CollectionRender} from "./components/widgets/CollectionRender";
+import LargeTextInput from "./components/blocks/largeText";
 
 import {
     // pages
@@ -10,7 +17,7 @@ import {
     // widgets
     Header,
     //todo Footer
-
+    Checkbox,
 
     //blocks
 
@@ -35,7 +42,12 @@ export {
     Eloise,
     useEloise,
     // Logic 
+    DBTable, DBTableProps,
+    DBCards, CardListProps,
     Logic,
+    DBItem, DBList, DBListProps,
+    FileUpload, FileUploadProps,
+    CollectionRender,
     //components
         // pages
         Home,
@@ -46,7 +58,7 @@ export {
         Header,
         //todo Footer
 
-    
+        Checkbox,
         //blocks
         ChildrenModal,
         ConfirmationModal,
@@ -58,12 +70,16 @@ export {
         AppIcon,
         DropDown,
         Life,
+        View,
+        ViewCol,
+        LargeTextInput
     }
 
     export interface EloisePage {
       name: string;
-      component?: React.FC;
+      component?: ReactNode;
       pages?: EloisePage[];
+      hidden?: boolean
     }
     export interface SideWidget {
       name: string;
@@ -78,14 +94,17 @@ export {
     }
     
     export interface SiteConfig {
+      api:string;
       name: string;
+      id: string;
       pages: EloisePage[];
       logo: string;
       inverseLogo:string;
       sideWidget: SideWidget[];
-      eloiseConfig:EloiseConfig 
+      eloiseConfig:EloiseConfig;
+      headerTrans: boolean;
     }
-      
+
       export interface FirebaseConfig {
         config:{apiKey: string;
         authDomain: string;
@@ -101,7 +120,29 @@ export {
       
      
       
-      
+      export interface CheckboxProps {
+        label: string;
+        state: boolean;
+        setState: (value: boolean) => void;
+      }
+      /**
+       * A styled checkbox component that can be used for various purposes.
+       *
+       * @component
+       * @example
+       * ```jsx
+       * <Checkbox
+       *   label="Agree to Terms and Conditions"
+       *   state={agreeTerms}
+       *   setState={setAgreeTerms}
+       * />
+       * ```
+       * @param {Object} props - The props object for the component.
+       * @param {string} props.label - The label to display next to the checkbox.
+       * @param {boolean} props.state - The state value for the checkbox.
+       * @param {function} props.setState - The function to set the state value for the checkbox.
+       * @returns {JSX.Element} A styled checkbox component.
+       **/
       // Style Types
       
       /**
@@ -200,13 +241,13 @@ export {
       //component props 
       
       //button 
-      import React from "react";
+      import React, { ReactNode } from "react";
       /**
        * BaseButtonProps is an interface that extends React.ButtonHTMLAttributes<HTMLButtonElement>.
        * It contains additional properties to customize the button component.
        */
       export interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-        color?: "primary" | "secondary" | "accent" | HSLAColor; // Defines the color of the button
+        color?: "primary" | "secondary" | "accent" | "clear" | HSLAColor; // Defines the color of the button
         rounded?: boolean; // Determines if the button should have rounded corners
         className?: string; // Allows for custom styling via class names
         children?: React.ReactNode; // The content of the button
@@ -321,7 +362,72 @@ export type TextMessage = {
  */
     export  type MessageType = TextMessage | CustomMessage;
 
+
+   export interface BaseEloiseUser {
+      preName?: string;
+      eduLevel?: string;
+      firstName?: string;
+      lastName?: string;
+      username?: string;
+      phoneNumber?: string;
+      country?: string;
+      email: string;
+      perms?: string;
+      createdAt?: string;
+      curieUsage?: number;
+      davinciUsage?: number;
+      userId?: string;
+      year?: string;
+      school?: string;
+    }
+
+    export interface HistoryItem {
+      createdAt?: string;
+      lastAccess?:string;
+      data: any;
+    }
     
     
+    
+ /**
+ * An object representing the Eloise user.
+ * @typedef {Object} EloiseUserObject
+ * @property {function(): Promise<HistoryItem[]|boolean>} getHistory - Returns the history items for the current user or false if an error occurs.
+ * @property {function(): Promise<BaseEloiseUser|boolean>} getUser - Returns the user data for the current user or false if an error occurs.
+ */
+
+/**
+ * Represents a history item.
+ * @typedef {Object} HistoryItem
+ * @property {string} id - The ID of the history item.
+ * @property {string} timestamp - The timestamp of the history item.
+ * @property {string} action - The action associated with the history item.
+ */
+
+/**
+ * Represents a base Eloise user.
+ * @typedef {Object} BaseEloiseUser
+ * @property {string} preName - The prename of the Eloise user.
+ * @property {string} eduLevel - The educational level of the Eloise user.
+ * @property {string} firstName - The first name of the Eloise user.
+ * @property {string} lastName - The last name of the Eloise user.
+ * @property {string} username - The username of the Eloise user.
+ * @property {string} phoneNumber - The phone number of the Eloise user.
+ * @property {string} country - The country of the Eloise user.
+ * @property {string} email - The email of the Eloise user.
+ * @property {string} perms - The permissions of the Eloise user.
+ * @property {string} createdAt - The creation date of the Eloise user.
+ * @property {number} curieUsage - The Curie usage of the Eloise user.
+ * @property {number} davinciUsage - The Davinci usage of the Eloise user.
+ * @property {string} userId - The user ID of the Eloise user.
+ * @property {string} year - The year of the Eloise user.
+ * @property {string} school - The school of the Eloise user.
+ */
+
+/**
+ * An object representing the Eloise user.
+ * @type {EloiseUserObject}
+ */
+
    
     

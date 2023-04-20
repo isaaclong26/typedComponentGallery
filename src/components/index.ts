@@ -1,6 +1,7 @@
 import { Home, Login } from "./pages";
 import { Header } from "./widgets";
 import {
+    Checkbox,
     ChildrenModal,
     ConfirmationModal,
     Button,
@@ -18,6 +19,7 @@ import {
 export {
     // pages
     Home,
+    Checkbox,
     Login,
     //todo Account
 

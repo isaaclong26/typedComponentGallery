@@ -9,7 +9,7 @@ import { Logic } from './functions';
 import { EloisePage, FirebaseConfig, SiteConfig, Theme } from './';
 import SideModal from './components/blocks/sideModal';
 import Footer from './components/widgets/footer';
-
+import { Hooks } from './functions/hooks';
 export class UndefinedLogic {
   fb: {[key:string]:Function};
   perms: undefined;
@@ -18,7 +18,10 @@ export class UndefinedLogic {
   color: {[key:string]:Function};
   generic:  {[key:string]:Function};
   api: undefined;
+  apiCall: Function = ()=>{}
+  zillowParse: Function = ()=>{}
 
+  hooks:{[key:string]:Function} = {};
   constructor() {
     this.fb = {};
     this.perms = undefined;
@@ -57,6 +60,8 @@ interface EloiseContext {
     storageDir:""
   },
   siteConfig:{
+    api:" ",
+    id:"",
     name: '',
     pages: [],
     logo: '',
@@ -66,7 +71,8 @@ interface EloiseContext {
       endPoint: "",
       chatLog: "",
       initMessage: "Hi This is elosie",
-    }
+    },
+    headerTrans: true,
 
   },
   theme:{
@@ -93,7 +99,7 @@ export const useEloise = (): {theme:Theme, siteConfig: SiteConfig, fireBaseConfi
 
 function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
 
-  const logic = new Logic(fireBaseConfig);
+  const logic = new Logic(fireBaseConfig, siteConfig);
 
   const [user, userLoading, userError] = useAuthState(logic.fb.auth);
   const [mode, setMode] = useState('white');
@@ -109,15 +115,15 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
 
           {user ? (
             <Routes>
-              <Route path="/" Component={siteConfig.pages[0].component}/>
+              <Route path="/" element={siteConfig.pages[0].component}/>
               {siteConfig.pages.slice(1).map((page:EloisePage) => (
-                <Route path={`/${page.name}`} Component={page.component} />
+                <Route  key={page.name} path={`/${page.name}`} element={page.component} />
               ))}
               <Route path="/login" element={<Login />} />
             </Routes>
           ) : (
             <Routes>
-              <Route path="/" Component={siteConfig.pages[0].component}/>
+              <Route path="/" element={siteConfig.pages[0].component}/>
 
               <Route path="/login" element={<Login />} />
             </Routes>

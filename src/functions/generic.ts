@@ -9,77 +9,13 @@ import { FB } from "./firebase";
  * @class
  */
 
-class Generic {
-  fb:FB;
-  perms:Function
-  auth:Function
-  other:Function
-  api:string
+const Generic: {[key: string]:any} = {
 
-  /**
-   * Creates an instance of the `Generic` class.
-   * @constructor
-   * @param {Function} perms - A function that returns an array of user permissions.
-   * @param {FB} fb - An instance of the `FB` class for interacting with Firebase.
-   * @param {Function} auth - A function that returns the current user's authentication status.
-   * @param {Function} other - A function that provides access to additional functionality.
-   * @param {string} api - The base URL for the API.
-   */
 
-  constructor(perms:Function, fb:FB,auth:Function, other:Function, api:string){
-    this.api = api
-    this.perms = perms;
-    this.auth = auth;
-    this.other = other;
-    this.fb = fb
+  
 
-  }
-  /**
- * Makes an API call to the specified route with optional body data.
- * 
- * @param {string} route - The API endpoint route.
- * @param {*} [body] - Optional body data to send with the API call.
- * 
- * @returns {Promise} - A Promise that resolves with the API response data, or rejects with an error message.
- * 
- * @example
- * 
- * const apiResponse = await apiCall("users", { name: "John", age: 30 });
- * console.log(apiResponse); // { status: "success", data: { userId: 123, name: "John", age: 30 } }
- */
-
-   apiCall: Function = async (route: string, body?: any, url?: string): Promise<any> => {
-    let user = await this.fb.auth.currentUser?.getIdToken();
-
-    const headers = {
-      Authorization: `Bearer ${user}`,
-    };
-
-    const options: RequestInit = {
-      method: body ? 'POST' : 'GET',
-      headers: headers,
-      body: body ? JSON.stringify(body) : undefined
-    };
-
-    const apiUrl = url ?? this.api;
-
-    try {
-      const response = await fetch(`${apiUrl}/${route}`, options);
-      if (response.ok) {
-        const data = await response.json();
-        return data;
-      } else if (response.status === 403) {
-        throw new Error("auth");
-      } else if (response.status === 402) {
-        throw new Error("perms");
-      } else {
-        throw new Error(response.statusText);
-      }
-    } catch (error:any) {
-      throw new Error(error.message);
-    }
-};
-
+ 
+ 
   
     
    /**
@@ -93,7 +29,7 @@ class Generic {
   capitalize(word: string ): string {
     if (!word) return word;
     return word[0].toUpperCase() + word.substr(1).toLowerCase();
-  }
+  },
 
 /**
  * Converts a string from snake_case to camelCase.
@@ -108,7 +44,7 @@ camelize(str: string): string {
     if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
     return index === 0 ? match.toLowerCase() : match.toUpperCase();
   });
-}
+},
 
 /**
  * Updates a state variable with the value of an input event.
@@ -123,7 +59,7 @@ camelize(str: string): string {
 inputHandler(event: { target: { value: any; }; }, setter: (arg0: any) => void) {
   const enteredName = event.target.value;
   setter(enteredName);
-}
+},
 
 /**
  * Returns a random element from an array.
@@ -137,14 +73,14 @@ inputHandler(event: { target: { value: any; }; }, setter: (arg0: any) => void) {
 getRandom(arr: string | any[]): any {
   let ots = arr[Math.floor(Math.random() * arr.length)];
   return ots;
-}
+},
  shuffleArray<T>(array: T[]): T[] {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
-}
+},
 
 /**
  * Retrieves a list of permissions from the server.
@@ -155,7 +91,7 @@ getRandom(arr: string | any[]): any {
  */
 async getPerms(): Promise<string[]> {
   return await this.apiCall("perms");
-}
+},
 
 /**
  * Sends a password reset request to the server.
@@ -166,7 +102,7 @@ async getPerms(): Promise<string[]> {
  */
 async resetPassword(): Promise<boolean> {
   return await this.apiCall("resetPassword");
-}
+},
 
 /**
  * Updates the current user's profile with the given data.
@@ -179,60 +115,8 @@ async resetPassword(): Promise<boolean> {
  */
 async updateUser(update: any): Promise<boolean> {
   return await this.apiCall("user", update);
-}
+},
 
-  
-  getHistory: Function = async () => {
-    let x:any = await this.apiCall("history")
-   
-    return x
- }
-  getUser: Function = async () => {
-    
-    return await this.apiCall("user")
- }
-
-  useFocus:Function =() => {
-    const domRef = useRef<HTMLElement | null>(null);
-
-    useEffect(() => {
-      domRef.current?.focus();
-   },[domRef]);
-
-    return {
-      domRef,
-    };
- }
-
-/**
- * A custom hook that handles asynchronous operations inside a useEffect loop.
- * It ensures that the async function is only called when the specified dependencies change,
- * and it properly handles cleanup when the component is unmounted.
- *
- * @param {Function} asyncFunction - The asynchronous function to be called inside useEffect.
- * @param {Array} dependencies - An array of dependencies for the useEffect hook.
- */
- useAsyncEffect:Function = (asyncFunction: () => any, dependencies: DependencyList | undefined)=> {
-  useEffect(() => {
-    let isMounted = true;
-
-    const wrappedAsyncFunction = async () => {
-      try {
-        await asyncFunction();
-      } catch (error) {
-        if (isMounted) {
-          console.error('An error occurred in useAsyncEffect:', error);
-        }
-      }
-    };
-
-    wrappedAsyncFunction();
-
-    return () => {
-      isMounted = false;
-    };
-  }, dependencies);
-}
 /**
  * Takes a lower camel case string and returns a formatted string with spaces between words.
  * 
@@ -248,7 +132,7 @@ formatCamelCaseString(str: string): string {
   return str.replace(/([a-z])([A-Z])/g, '$1 $2')
             .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
             .replace(/^./, function(s) { return s.toUpperCase(); });
-}
+},
 
 
 

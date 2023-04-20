@@ -40,7 +40,7 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <Navbar sticky="top"  expand="lg" >
+      <Navbar sticky="top"  expand="lg" bg={siteConfig.headerTrans? "" : "white"}>
         <Container className="mx-1">
           <Navbar.Brand href="#home">
             <img
@@ -58,7 +58,7 @@ const Header: React.FC = () => {
               <Nav.Link href="Account" style={{
                 borderBottom: `3px solid ${location.pathname === `/Account` ? `#fff` : theme.primary}`
               }}>Account</Nav.Link>
-              {renderNavItems(siteConfig.pages.slice(1))}
+              {renderNavItems(siteConfig.pages.slice(1).filter((page:EloisePage)=> !page.hidden))}
             </Nav>
           </Navbar.Collapse>
         </Container>

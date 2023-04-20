@@ -119,6 +119,7 @@ const ButtonWrapper = styled.button<ButtonWrapperProps>`
 	// Hover state
 	&:hover {
 		background-color: ${(props) =>
+			props.backgroundColor=== "clear"? "transparent" :
 			props.logic.color.lighten(
 				props.theme[props.backgroundColor]
 			)}; // Lightens the background color of the button
@@ -129,6 +130,8 @@ const ButtonWrapper = styled.button<ButtonWrapperProps>`
 	// Active state
 	&:active {
 		background-color: ${(props) =>
+			props.backgroundColor=== "clear"? "transparent" :
+
 			props.logic.color.darken(
 				props.theme[props.backgroundColor]
 			)}; // Darkens the background color of the button

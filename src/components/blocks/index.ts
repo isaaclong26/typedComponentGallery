@@ -10,10 +10,10 @@ import Life from "./life";
 
 import ConfirmationModal from "./conf";
 import ChildrenModal from './modal';
-
+import { Checkbox} from './Checkbox';
 
 export {
-
+     Checkbox,
      ChildrenModal,
      ConfirmationModal,
      Button,

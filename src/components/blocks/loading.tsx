@@ -104,7 +104,7 @@ const {theme} = useEloise()
     return(
     
     <div className="text-center">
-    <img src={theme.mode=="dark"? loadingWhite:loadingBlack}></img>
+    <img src={loadingBlack}></img>
     </div>)
 }
 
