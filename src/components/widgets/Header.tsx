@@ -28,7 +28,7 @@ const Header: React.FC = () => {
       } else {
         // Otherwise, render a Nav.Link component
         return (
-          <Nav.Link href={page.name} style={{
+          <Nav.Link href={"/"+page.name} style={{
             borderBottom: `3px solid ${location.pathname === `/${page.name}` ? `#fff` : theme.primary}`
           }}>
             {page.name}

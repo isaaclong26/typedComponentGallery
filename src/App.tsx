@@ -117,7 +117,7 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
             <Routes>
               <Route path="/" element={siteConfig.pages[0].component}/>
               {siteConfig.pages.slice(1).map((page:EloisePage) => (
-                <Route  key={page.name} path={`/${page.name}`} element={page.component} />
+                <Route  key={page.name} path={page.url?? `/${page.name}`} element={page.component} />
               ))}
               <Route path="/login" element={<Login />} />
             </Routes>

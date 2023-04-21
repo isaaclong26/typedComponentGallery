@@ -80,6 +80,7 @@ export {
       component?: ReactNode;
       pages?: EloisePage[];
       hidden?: boolean
+      url?: string
     }
     export interface SideWidget {
       name: string;
