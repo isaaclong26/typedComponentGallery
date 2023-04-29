@@ -3,6 +3,7 @@ import { Nav, Navbar, NavDropdown, Container } from 'react-bootstrap'
 import { useEloise } from "../../App"
 import { EloisePage } from "../.."
 import { useLocation } from "react-router"
+import {v4 as uuidv4} from "uuid"
 
 const color = "103, 90, 128"
 
@@ -21,14 +22,14 @@ const Header: React.FC = () => {
       if (page.pages) {
         // If the page has nested pages, render a NavDropdown component
         return (
-          <NavDropdown title={page.name} id={page.name}>
+          <NavDropdown key={uuidv4()} title={page.name} id={page.name}>
             {renderNavItems(page.pages)}
           </NavDropdown>
         )
       } else {
         // Otherwise, render a Nav.Link component
         return (
-          <Nav.Link href={"/"+page.name} style={{
+          <Nav.Link  key={uuidv4()} href={"/"+page.name} style={{
             borderBottom: `3px solid ${location.pathname === `/${page.name}` ? `#fff` : theme.primary}`
           }}>
             {page.name}

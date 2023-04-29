@@ -7,6 +7,7 @@ import {DBCards, CardListProps } from "./components/widgets/DBCards";
 import { FileUpload, FileUploadProps } from "./components/widgets/fileUpload";
 import {CollectionRender} from "./components/widgets/CollectionRender";
 import LargeTextInput from "./components/blocks/largeText";
+import { EloiseWidget } from "./components/widgets/EloiseWidget";
 
 import {
     // pages
@@ -41,6 +42,7 @@ export {
     //Setup 
     Eloise,
     useEloise,
+    EloiseWidget,
     // Logic 
     DBTable, DBTableProps,
     DBCards, CardListProps,
@@ -259,6 +261,7 @@ export {
         ariaControls?: string; // Sets the aria-controls attribute of the button
         ariaDescribedBy?: string; // Sets the aria-describedby attribute of the button
         tabIndex?: number; // Sets the tab index of the button
+        purpose?: string; // Tells Eloise the Purpose of the Button;
       }
       
       /**

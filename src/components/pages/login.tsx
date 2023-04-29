@@ -43,7 +43,7 @@ const Login = (props: {}) => {
   };
 
   return (
-    <Container className='fluid' style={{ position: "relative", paddingTop: '90px' }}>
+    <Container  style={{ position: "relative", paddingTop: '90px' }}>
       <Heading primary size={4} style={{ fontStyle: 'italic', position: 'absolute', top: '20px', left: '20px' }}>Login</Heading>
       <img
         src={siteConfig.logo}
@@ -52,27 +52,27 @@ const Login = (props: {}) => {
         className="d-inline-block align-top"
         alt="React Bootstrap logo"
       />
-      <Row className='mt-5'>
+      <Row className=''>
         <Col lg={7} className="mx-auto text-center" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Icon color={theme.primary} size='10vw' path={mdiAccountCircleOutline} />
+          <Icon color={theme.primary} size='8vw' path={mdiAccountCircleOutline} />
         </Col>
       </Row>
 
       {user ?
         <>
-          <Row className="mt-2">
+          <Row className="mt-1">
 
             <Col lg={9} className="mx-auto text-center">
               <Row className="mt-2">
 
                 <Heading size={3}>{`Logged in as ${logic.fb.auth.currentUser.email}`}</Heading>
               </Row>
-              <Row className="mt-2">
+              <Row className="mt-1">
 
                 <Button rounded onClick={() => navigate("/account")}>Manage Account</Button>
               </Row>
 
-              <Row className="mt-2">
+              <Row className="mt-1">
 
                 <Button rounded onClick={() => signOut(logic.fb.auth)}>Log Out</Button>
               </Row>

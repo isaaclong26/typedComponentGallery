@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   height: 100%;
 `;
 
@@ -13,6 +14,7 @@ export const MessagesContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
+  marginTop:20px;
 `;
 
 export const MessageWrapper = styled.div`
@@ -28,5 +30,7 @@ export const MessageSender = styled.span`
 export const MessageContent = styled.span``;
 
 export const InputContainer = styled.div`
+postiton:absolute;
+bottom: 10px;
   padding: 10px;
 `;

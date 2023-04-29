@@ -43,9 +43,18 @@ interface EloiseContext {
   theme: Theme;
   siteConfig: SiteConfig;
   fireBaseConfig: FirebaseConfig;
-  logic: Logic | UndefinedLogic; // optional `logic` field
-
+  logic: Logic | UndefinedLogic;
+  eloiseContent: EloiseIntel[], // Add this line
+  setEloiseContent: (content:  EloiseIntel[]) => void; // Add this line
 }
+
+export interface EloiseIntel {
+  title: string
+  desc:string
+  text?:string
+  id?:string
+}
+
 
  const ThemeContext = createContext<EloiseContext>({
   fireBaseConfig:{
@@ -88,18 +97,29 @@ interface EloiseContext {
   mode: 'light'
 },
 logic: new UndefinedLogic(),
+eloiseContent: [], // Add this line
+setEloiseContent: () => {}, // Add this line
 
 
 });
 
 
-export const useEloise = (): {theme:Theme, siteConfig: SiteConfig, fireBaseConfig: FirebaseConfig, logic: Logic | UndefinedLogic} => useContext(ThemeContext);
+export const useEloise = (): {
+  theme: Theme;
+  siteConfig: SiteConfig;
+  fireBaseConfig: FirebaseConfig;
+  logic: Logic | UndefinedLogic;
+  eloiseContent: EloiseIntel[]; // Add this line
+  setEloiseContent:Function // Add this line
+} => useContext(ThemeContext);
 
 
 
 function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
 
   const logic = new Logic(fireBaseConfig, siteConfig);
+ 
+  const [eloiseContent, setEloiseContent] = useState<EloiseIntel[]>([]);
 
   const [user, userLoading, userError] = useAuthState(logic.fb.auth);
   const [mode, setMode] = useState('white');
@@ -107,7 +127,15 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
 
 
   return (
-    <ThemeContext.Provider value={{ theme, siteConfig, fireBaseConfig, logic }}>
+    <ThemeContext.Provider 
+    value={{
+       theme, 
+       siteConfig,
+        fireBaseConfig, 
+        logic,
+        eloiseContent, // Add this line
+        setEloiseContent, // Add this line
+         }}>
       <div className="App">
         <BrowserRouter>
           <Header />

@@ -10,6 +10,8 @@ import {
   InputContainer,
 } from "../styles/chatStyles"
 import { useEloise } from "../..";
+import Icon from "@mdi/react";
+import { mdiArrowLeft } from "@mdi/js";
 
 type Message = {
     id: string;
@@ -21,33 +23,30 @@ type Message = {
 export interface Convo{
     id:string,
     connectedTo: string;
+    connectedName: string;
 
 }
 
-const Chat: React.FC<{convo: Convo}> = ({convo}) => {
+const Chat: React.FC<{convo: Convo, back:Function}> = ({convo, back}) => {
   
-  const {logic, siteConfig} = useEloise()
+  const {logic, siteConfig, theme, eloiseContent} = useEloise()
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+ 
 
-  useEffect(() => {
-    const test = logic.fb.getAuthenticatedUserUid();
+  logic.hooks.useAsyncEffect(async()=>{
+    let test2 = await logic.fb.getUserCollection("convos/"+ convo.id+"/messages")
+    let ots = test2.map((message:any)=> message.data)
+    setMessages(ots)
 
-    const unsubscribe = logic.fb.db
-      .collection("users/" + test + "/"+ siteConfig.id + "/Main/convos/"+convo.id + "/messages")
-      .orderBy("timestamp", "asc")
-      .onSnapshot((snapshot:any) => {
-        const newMessages: Message[] = snapshot.docs.map((doc:any) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Message[];
-        setMessages(newMessages);
-      });
+  },[])
+  
 
-    return () => unsubscribe();
-  }, []);
-
+     useEffect(()=>{
+          console.log(eloiseContent)
+              
+      },[eloiseContent])
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -61,34 +60,43 @@ const Chat: React.FC<{convo: Convo}> = ({convo}) => {
     if (input.trim() === "") return;
   
     // Replace with the current user's ID
-    const senderId = "currentUserId";
     const test = logic.fb.getAuthenticatedUserUid();
 
-    logic.fb.db.collection("users/" + test + "/"+ siteConfig.id + "/Main/convos/"+convo.id + "/messages").add({
+    logic.fb.setUserDoc("convos/"+convo.id + "/messages", {
       content: input,
-      senderId,
+      senderId:test,
       timestamp: logic.fb.db.FieldValue.serverTimestamp(), // Change this line
     });
 
-    logic.fb.db.collection("users/" + convo.connectedTo + "/"+ siteConfig.id + "/Main/convos/"+convo.id + "/messages").add({
+    logic.fb.setOtherUserDoc("convos/"+convo.id + "/messages", {
         content: input,
-        senderId,
+        senderId:test,
         timestamp: logic.fb.db.FieldValue.serverTimestamp(), // Change this line
-      });
+      }, convo.connectedTo);
   
     setInput("");
   };
   return (
     <ChatContainer>
+      <div style={{
+        position: "absolute",
+        top: '10px',
+        left: '10px',
+      }}
+      onClick={()=>back()}
+      >
+      <Icon path={mdiArrowLeft} size={1} color={theme.primary} />
+      </div>
+      {messages &&
       <MessagesContainer>
         {messages.map((message) => (
           <MessageWrapper key={message.id}>
-            <MessageSender>{message.senderId}: </MessageSender>
             <MessageContent>{message.content}</MessageContent>
           </MessageWrapper>
         ))}
         <div ref={messagesEndRef} />
       </MessagesContainer>
+    }
       <InputContainer>
         <Form onSubmit={handleSendMessage}>
           <Form.Group className="d-flex">

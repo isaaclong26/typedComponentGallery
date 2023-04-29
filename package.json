@@ -1,8 +1,7 @@
 {
   "name": "typed-component-gallery",
-  "version": "1.1.7",
+  "version": "1.6.2",
   "main": "dist/index.js",
-
   "types": "dist/index.d.ts",
   "dependencies": {
     "@mdi/font": "^7.1.96",
@@ -46,6 +45,7 @@
     "react-scripts": "5.0.1",
     "react-slider": "^2.0.4",
     "react-syntax-highlighter": "^15.5.0",
+    "react-transition-group": "^4.4.5",
     "styled-components": "^5.3.6",
     "types": "file:../../../../../styled-components",
     "typescript": "^4.9.5",

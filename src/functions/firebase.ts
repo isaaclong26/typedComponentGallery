@@ -19,13 +19,15 @@ class FB {
     database: any;
     siteConfig:SiteConfig;
 
-    constructor (config: any, siteConfig:SiteConfig) {
+   
+   constructor (config: any, siteConfig:SiteConfig) {
         this.app = initializeApp(config.config);
         this.db = getFirestore(this.app);
         this.auth = getAuth(this.app);
         this.storage = getStorage(this.app);
         this.database = getDatabase(this.app);
         this.siteConfig = siteConfig
+        
     }
 
     getAuthenticatedUserUid(): string | null {
@@ -79,6 +81,17 @@ class FB {
             return false;
         }
     }
+    async setOtherUserDoc(path: string, data:any, otherUser: string) {
+      if (!test) {
+          return false;
+      } else {
+          const ots: any = await setDoc(doc(this.db, "users/" + otherUser + "/" + this.siteConfig.id + "/Main/"  +path), data);
+          if(ots){
+              return true
+          }
+          return false;
+      }
+  }
 /** 
     * A custom hook for throttling state updates to Firebase.
     *

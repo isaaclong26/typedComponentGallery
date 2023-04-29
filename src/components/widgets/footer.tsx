@@ -4,10 +4,13 @@ import { Icon } from "@mdi/react";
 import { mdiCogOutline, mdiChat } from "@mdi/js";
 import { useLocation, useNavigate } from "react-router";
 import { useEloise } from "../../App";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 
 const Footer: React.FC = () => {
     
+  const {logic} = useEloise()
+  const [user, loading, error] = useAuthState(logic.fb.auth)
     const pathName = useLocation().pathname
 
     const navigate = useNavigate()
@@ -20,7 +23,13 @@ const Footer: React.FC = () => {
   };
 
   const handleChatClick = () => {
-    navigate(pathName, {state:{sideWidget:"Eloise"}})    
+    if(user){
+    navigate(pathName, {state:{sideWidget:"Eloise"}}) 
+    }
+    else{
+      navigate(pathName, {state:{sideWidget:"Login"}})    
+    }
+
     
     // Your chat onClick logic here
   };

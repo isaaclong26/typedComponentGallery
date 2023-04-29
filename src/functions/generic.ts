@@ -45,6 +45,30 @@ camelize(str: string): string {
     return index === 0 ? match.toLowerCase() : match.toUpperCase();
   });
 },
+extractTextFromComponent(component:any):string  {
+  if (typeof component === 'string' || typeof component === 'number') {
+    return component.toString();
+  }
+
+  if (!component || !component.props) {
+    return '';
+  }
+
+  if (component.props.children) {
+    if (Array.isArray(component.props.children)) {
+      return component.props.children
+        .map((child:any) => this.extractTextFromComponent(child))
+        .join(' ');
+    }
+
+    return this.extractTextFromComponent(component.props.children);
+  }
+
+  return '';
+},
+
+
+
 
 /**
  * Updates a state variable with the value of an input event.
