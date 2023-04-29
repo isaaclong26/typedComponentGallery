@@ -6,53 +6,72 @@ import { useLocation,  useNavigate,  useNavigation,  useParams } from 'react-rou
 import { Eloise, EloisePage, Login, SiteConfig } from '../../';
 import SignUp from '../pages/signup';
 import EloiseChat from '../widgets/eloise';
+import { StyledHole } from '../styles/chatStyles';
 /**
  * Renders content for the SideModal based on the current `sideWidget` prop.
  * @param {string} sideWidget - The name of the current side widget.
  * @returns {React.ReactNode} The component to render.
  */
-const renderModalContent = (sideWidget: string): React.ReactNode => {
-    const { siteConfig } = useEloise();
-    // Look up the page object in `siteConfig` with a name matching the `sideWidget` prop.
-    const page = siteConfig.sideWidget.find((p:any) => p.name === sideWidget);
-  
-    // If no page is found with the matching name, return null.
-    if (!page) {
-        if(sideWidget === 'Login'){
-            return <Login/>
-        }
-        else if(sideWidget === 'SignUp'){
-            return <SignUp/>
-        }
-        else if(sideWidget === "Eloise"){
-          return <EloiseChat/>
-        }
-    else{
-              return null;
+ const renderModalContent = (sideWidget: string, holeCoords: HoleCoords, setHoleCoords: (coords: HoleCoords) => void): React.ReactNode => {
+      
+        const { siteConfig } = useEloise();
+        // Look up the page object in `siteConfig` with a name matching the `sideWidget` prop.
+        const page = siteConfig.sideWidget.find((p:any) => p.name === sideWidget);
+      
+        // If no page is found with the matching name, return null.
+        if(sideWidget !== "Eloise" && !checkNone(holeCoords)){
+          setHoleCoords({top:0, right:0, left:0, bottom: 0})
 
-    }
-    }
-    
+        }
+        if (!page) {
+            if(sideWidget === 'Login'){
+                return <Login/>
+            }
+            else if(sideWidget === 'SignUp'){
+                return <SignUp/>
+            }
+            else if(sideWidget === "Eloise"){
+              return <EloiseChat holeCoords={holeCoords} setHoleCoords={setHoleCoords} />
+            }
+        else{
+                  return null;
 
-        return <page.component />;
+        }
+        }
+        
 
-  };
+            return <page.component />;
+
+      };
   
   /**
    * A side modal that slides in from the side of the screen and displays content.
    */
+
+   interface HoleCoords {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  }
+  const checkNone = (holeCoords: HoleCoords): boolean => {
+    const { top, right, bottom, left } = holeCoords;
+    return (top + right + bottom + left) === 0
+  };
   const SideModal: React.FC = ({ }) => {
 
     const navigate = useNavigate()
 
     const { theme, logic, siteConfig } = useEloise();
     const themeC = theme;
-  
+    const [holeCoords, setHoleCoords] = useState<HoleCoords>({top:0, right:0 , bottom:0, left:0});
+
+
     // Get the `sideWidget` prop from the current location state.
    // Get the `sideWidget` prop from the current location state.
     const sideWidget = useLocation().state?.sideWidget;
     const pathName = useLocation().pathname
-
+  
     // If `sideWidget` is not present in the location state, don't render the modal.
     if (!sideWidget) {
     return null;
@@ -60,7 +79,10 @@ const renderModalContent = (sideWidget: string): React.ReactNode => {
   
     return (
       <>
-          <ModalOverlay onClick={() => navigate(pathName, {state:{}})}>
+          <ModalOverlay onClick={() => navigate(pathName, {state:{}})}>    
+
+           {!checkNone(holeCoords) && <StyledHole targetTop={holeCoords.top} targetBottom={window.innerHeight - holeCoords.bottom} />}
+
               <Row>
 
                 <ModalContent
@@ -75,7 +97,7 @@ const renderModalContent = (sideWidget: string): React.ReactNode => {
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* Render the appropriate content based on the `sideWidget` prop. */}
-                  {renderModalContent(sideWidget)}
+                  {renderModalContent(sideWidget, holeCoords, setHoleCoords)}
                 </ModalContent>
               </Row>
           </ModalOverlay>

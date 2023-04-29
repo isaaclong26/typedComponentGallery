@@ -2,17 +2,19 @@ import React, { useState } from "react";
 import { CardListProps, DBCards } from "./DBCards";
 import {DBTable, DBTableProps} from "./DBTable";
 import { Col, Row } from "react-bootstrap";
-import { Heading, useEloise, Button } from "../..";
+import { Heading, useEloise, Button, EloiseWidget } from "../..";
 import Icon from "@mdi/react";
 import { mdiCards, mdiTable } from "@mdi/js";
+import { EloiseIntel } from "../../App";
 
 
 
 export const CollectionRender:React.FC<{
     path:string,
     tableProps?: DBTableProps
-    cardProps?: CardListProps
-}> = ({path, tableProps, cardProps})=>{
+    cardProps?: CardListProps,
+    intel?: EloiseIntel,
+}> = ({path, tableProps, cardProps, intel})=>{
     const {theme} = useEloise()
     const [mode, setMode] = useState<"table"|"cards">("table")
     const {logic} = useEloise()
@@ -27,7 +29,8 @@ export const CollectionRender:React.FC<{
     }
 
     return(
-        <>
+        <EloiseWidget eloiseIntel={{...intel}}>
+            <>
          <Row className="my-3">
         <Col lg={2}>
             <Heading  align="left" size={3}>{logic.generic.capitalize(path)}</Heading>
@@ -48,7 +51,7 @@ export const CollectionRender:React.FC<{
         </Row>
         
         {cts()}
-
-        </>
+            </>
+        </EloiseWidget>
     )
 }

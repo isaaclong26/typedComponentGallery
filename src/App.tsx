@@ -6,10 +6,15 @@ import { Header,  Loading, Login, Home} from './components';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { Logic } from './functions';
-import { EloisePage, FirebaseConfig, SiteConfig, Theme } from './';
+import { EloisePage, EloiseWidget, FirebaseConfig, SiteConfig, Theme } from './';
 import SideModal from './components/blocks/sideModal';
 import Footer from './components/widgets/footer';
 import { Hooks } from './functions/hooks';
+
+
+
+
+
 export class UndefinedLogic {
   fb: {[key:string]:Function};
   perms: undefined;
@@ -49,10 +54,12 @@ interface EloiseContext {
 }
 
 export interface EloiseIntel {
-  title: string
-  desc:string
+  title?: string
+  desc?:string
   text?:string
   id?:string
+  purpose?:string
+  position?: any
 }
 
 
@@ -125,6 +132,9 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
   const [mode, setMode] = useState('white');
 
 
+  useEffect(()=>{
+    console.log(eloiseContent)
+  },[eloiseContent])
 
   return (
     <ThemeContext.Provider 
@@ -145,13 +155,13 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
             <Routes>
               <Route path="/" element={siteConfig.pages[0].component}/>
               {siteConfig.pages.slice(1).map((page:EloisePage) => (
-                <Route  key={page.name} path={page.url?? `/${page.name}`} element={page.component} />
+                <Route  key={page.name} path={page.url?? `/${page.name}`} element={ <EloiseWidget eloiseIntel={{...page.intel}}>{page.component}</EloiseWidget> }/>
               ))}
               <Route path="/login" element={<Login />} />
             </Routes>
           ) : (
             <Routes>
-              <Route path="/" element={siteConfig.pages[0].component}/>
+              <Route path="/" element={ <EloiseWidget eloiseIntel={{...siteConfig.pages[0].intel}}>{siteConfig.pages[0].component}</EloiseWidget>}/>
 
               <Route path="/login" element={<Login />} />
             </Routes>

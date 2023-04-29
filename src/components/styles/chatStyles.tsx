@@ -5,6 +5,7 @@ export const ChatContainer = styled.div`
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  position: relative;
 `;
 
 export const MessagesContainer = styled.div`
@@ -33,4 +34,39 @@ export const InputContainer = styled.div`
 postiton:absolute;
 bottom: 10px;
   padding: 10px;
+`;
+interface StyledHoleProps {
+  targetTop: number;
+  targetBottom: number;
+}
+
+
+export const StyledHole = styled.div<StyledHoleProps>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    background-color: white;
+    mix-blend-mode: exclusion;
+  }
+
+  &::before {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: ${props => props.targetTop}px;
+  }
+
+  &::after {
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: ${props => props.targetBottom}px;
+  }
 `;

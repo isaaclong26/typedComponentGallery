@@ -1,0 +1,31 @@
+.hole {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  
+  .hole::before,
+  .hole::after {
+    content: "";
+    position: absolute;
+    background-color: white;
+    mix-blend-mode: exclusion; /* This property will create the "cutout" effect */
+  }
+  
+  .hole::before {
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Use the targetCoords prop to set the height */
+    height: calc(/* top coordinate value */);
+  }
+  
+  .hole::after {
+    left: 0;
+    bottom: 0;
+    right: 0;
+    /* Use the targetCoords prop to set the height */
+    height: calc(/* bottom coordinate value */);
+  }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { Nav, Navbar, NavDropdown, Container } from 'react-bootstrap'
 import { useEloise } from "../../App"
-import { EloisePage } from "../.."
+import { EloisePage, EloiseWidget } from "../.."
 import { useLocation } from "react-router"
 import {v4 as uuidv4} from "uuid"
 
@@ -22,25 +22,29 @@ const Header: React.FC = () => {
       if (page.pages) {
         // If the page has nested pages, render a NavDropdown component
         return (
+          <EloiseWidget eloiseIntel={{title: "Header Dropdown", desc: "DropDown of Nav Options"}}>
           <NavDropdown key={uuidv4()} title={page.name} id={page.name}>
             {renderNavItems(page.pages)}
           </NavDropdown>
+          </EloiseWidget>
         )
       } else {
         // Otherwise, render a Nav.Link component
         return (
+          <EloiseWidget eloiseIntel={{title: "Nav Link", desc: "Navigation Option", purpose: "navigate to "+ "/"+page.name }}>
           <Nav.Link  key={uuidv4()} href={"/"+page.name} style={{
             borderBottom: `3px solid ${location.pathname === `/${page.name}` ? `#fff` : theme.primary}`
           }}>
             {page.name}
           </Nav.Link>
+          </EloiseWidget>
         )
       }
     })
   }
 
   return (
-    <>
+    <EloiseWidget eloiseIntel={{title: "Header", desc: "Navigation for Application"}}>
       <Navbar sticky="top"  expand="lg" bg={siteConfig.headerTrans? "" : "white"}>
         <Container className="mx-1">
           <Navbar.Brand href="#home">
@@ -64,7 +68,8 @@ const Header: React.FC = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-    </>
+
+    </EloiseWidget>
   )
 }
 

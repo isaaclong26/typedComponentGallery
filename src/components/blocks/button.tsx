@@ -3,12 +3,58 @@ import { UndefinedLogic, useEloise } from "../../App";
 import styled, { ThemeProps } from "styled-components";
 import { Logic } from "../../functions";
 import {
-	ButtonProps,
-	FirebaseButtonProps,
-	RegularButtonProps,
+	EloiseWidget,
+	HSLAColor,
 	Theme,
 } from "../../";
 
+ //button 
+ /**
+  * BaseButtonProps is an interface that extends React.ButtonHTMLAttributes<HTMLButtonElement>.
+  * It contains additional properties to customize the button component.
+  */
+ export interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+   color?: "primary" | "secondary" | "accent" | "clear" | HSLAColor; // Defines the color of the button
+   rounded?: boolean; // Determines if the button should have rounded corners
+   className?: string; // Allows for custom styling via class names
+   children?: React.ReactNode; // The content of the button
+   role?: string; // Sets the role attribute of the button
+   ariaLabel?: string; // Sets the aria-label attribute of the button
+   ariaPressed?: boolean; // Sets the aria-pressed attribute of the button
+   ariaExpanded?: boolean; // Sets the aria-expanded attribute of the button
+   ariaControls?: string; // Sets the aria-controls attribute of the button
+   ariaDescribedBy?: string; // Sets the aria-describedby attribute of the button
+   tabIndex?: number; // Sets the tab index of the button
+   purpose?: string; // Tells Eloise the Purpose of the Button;
+ }
+ 
+ /**
+  * RegularButtonProps is an interface that extends BaseButtonProps and adds the onClick event handler.
+  * It is used for regular buttons that do not interact with Firebase.
+  */
+ export interface RegularButtonProps extends BaseButtonProps {
+   firebase?: false; // Indicates that this is not a Firebase button
+   onClick?: () => void; // The onClick event handler for the button
+ }
+ 
+ /**
+  * FirebaseButtonProps is an interface that extends BaseButtonProps and adds additional properties required for Firebase buttons.
+  * It is used for buttons that interact with Firebase.
+  */
+ export interface FirebaseButtonProps extends BaseButtonProps {
+   firebase: true; // Indicates that this is a Firebase button
+   data: any; // The data to be stored in Firebase
+   path: string; // The path in Firebase where the data should be stored
+   next: Function; // A function to be called after the data has been successfully stored in Firebase
+ }
+ 
+ /**
+  * ButtonProps is a union type that can either be RegularButtonProps or FirebaseButtonProps.
+  * It is used to define the props of the Button component.
+  */
+ export type ButtonProps = RegularButtonProps | FirebaseButtonProps;
+ 
+ 
 /**
  * A customizable button component that can be used for various purposes.
  * Supports regular buttons and buttons that interact with Firebase.
@@ -39,6 +85,7 @@ const Button: React.FC<ButtonProps> = ({
 	className,
 	children,
 	firebase = false,
+	purpose,
 	...props
 }) => {
 	const { theme, logic } = useEloise(); // Accesses the theme and logic from the app context using the useEloise hook
@@ -76,6 +123,7 @@ const Button: React.FC<ButtonProps> = ({
 
 	// Renders the ButtonWrapper component with the appropriate props
 	return (
+		<EloiseWidget eloiseIntel={{purpose}}>
 		<ButtonWrapper
 			logic={logic}
 			backgroundColor={color}
@@ -88,6 +136,7 @@ const Button: React.FC<ButtonProps> = ({
 			tabIndex={props.tabIndex}>
 			{children}
 		</ButtonWrapper>
+		</EloiseWidget>
 	);
 };
 

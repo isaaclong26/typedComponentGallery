@@ -3,8 +3,9 @@ import { Icon } from '@mdi/react';
 import { mdiUpload, mdiCheck } from '@mdi/js';
 import styled from 'styled-components';
 import { useUploadFile } from 'react-firebase-hooks/storage';
-import { Loading, useEloise } from '../..';
+import { EloiseWidget, Loading, useEloise } from '../..';
 import { ref } from "firebase/storage"
+import { EloiseIntel } from '../../App';
 
 export interface FileUploadProps {
   onFileUpload?: Function;
@@ -12,6 +13,8 @@ export interface FileUploadProps {
   accept?: string[];
   multiple?: boolean;
   customIcon?: React.ReactNode;
+  intel?: EloiseIntel,
+
 }
 
 
@@ -37,6 +40,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   accept = ['.json'],
   multiple = false,
   customIcon,
+  intel
 }) => {
 
   const { logic, fireBaseConfig } = useEloise()
@@ -111,6 +115,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
 
   return (
+    <EloiseWidget eloiseIntel={{...intel}}>
+
     <FileUploadContainer
       isDragging={isDragging}
       onDragEnter={handleDragEnter}
@@ -160,5 +166,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         multiple={multiple}
       />
     </FileUploadContainer>
+    </EloiseWidget>
   );
 };

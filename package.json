@@ -1,6 +1,6 @@
 {
   "name": "typed-component-gallery",
-  "version": "1.6.2",
+  "version": "1.7.9",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
@@ -53,6 +53,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "update": "node publish.js && npm run build && npm publish",
     "start": "react-scripts start",
     "build": "tsc",
     "test": "react-scripts test",

@@ -45,7 +45,7 @@ camelize(str: string): string {
     return index === 0 ? match.toLowerCase() : match.toUpperCase();
   });
 },
-extractTextFromComponent(component:any):string  {
+extractTextFromComponent(component: any): string {
   if (typeof component === 'string' || typeof component === 'number') {
     return component.toString();
   }
@@ -54,10 +54,15 @@ extractTextFromComponent(component:any):string  {
     return '';
   }
 
+  // Check if the component is an EloiseWidget and skip if it is
+  if (component.type && component.type.name === 'EloiseWidget') {
+    return '';
+  }
+
   if (component.props.children) {
     if (Array.isArray(component.props.children)) {
       return component.props.children
-        .map((child:any) => this.extractTextFromComponent(child))
+        .map((child: any) => this.extractTextFromComponent(child))
         .join(' ');
     }
 

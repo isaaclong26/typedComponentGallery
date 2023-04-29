@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import Chat, { Convo } from "./chat";
 import { ConvoList } from "./convoList";
 
-const EloiseChat: React.FC<{}> = ({}) => {
+const EloiseChat: React.FC<{ holeCoords: { top: number; right: number; bottom: number; left: number }; setHoleCoords: (coords: { top: number; right: number; bottom: number; left: number }) => void }> = ({ holeCoords, setHoleCoords }) => {
   const { logic, theme, siteConfig } = useEloise();
 
   const [selectedConvo, setSelectedConvo]= useState<Convo>()
@@ -19,11 +19,8 @@ const EloiseChat: React.FC<{}> = ({}) => {
   ]);
 
 
-
-
- 
  if(selectedConvo){
-  return <Chat convo={selectedConvo} back={()=>setSelectedConvo(undefined)}/>
+  return <Chat convo={selectedConvo}  holeCoords={holeCoords } setHoleCoords={setHoleCoords} back={()=>setSelectedConvo(undefined)}/>
  }
  else{
   return <ConvoList select={setSelectedConvo}/>
