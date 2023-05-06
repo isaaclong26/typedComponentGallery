@@ -68,7 +68,9 @@ export class Logic {
       } else if (response.status === 402) {
         this.perms()
       } else {
-        this.other()
+        // this.other()     
+           console.log(response)
+
       }
     } catch (error: any) {
       throw new Error(error.message);

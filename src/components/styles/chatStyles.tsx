@@ -70,3 +70,21 @@ export const StyledHole = styled.div<StyledHoleProps>`
     height: ${props => props.targetBottom}px;
   }
 `;
+
+export const userMessageStyle: React.CSSProperties = {
+  backgroundColor: "#007bff",
+  color: "#ffffff",
+  alignSelf: "flex-end",
+  borderRadius: "10px 0px 10px 10px",
+  padding: "10px",
+  marginBottom: "8px",
+};
+
+export const otherMessageStyle: React.CSSProperties = {
+  backgroundColor: "#e6e6e6",
+  color: "#000000",
+  alignSelf: "flex-start",
+  borderRadius: "0px 10px 10px 10px",
+  padding: "10px",
+  marginBottom: "8px",
+};

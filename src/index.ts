@@ -9,7 +9,7 @@ import {CollectionRender} from "./components/widgets/CollectionRender";
 import LargeTextInput from "./components/blocks/largeText";
 import { EloiseWidget } from "./components/widgets/EloiseWidget";
 import React, { ReactNode } from "react";
-
+import CalendarComponent from "./components/widgets/calendar";
 
 import {
     // pages
@@ -27,7 +27,6 @@ import {
     ChildrenModal,
     ConfirmationModal,
     Button,
-  
     Loading,
     Canvas,
     Heading,
@@ -58,6 +57,8 @@ export {
         Login,
         //todo Account
     
+        CalendarComponent,
+
         // widgets
         Header,
         //todo Footer
@@ -108,7 +109,8 @@ export {
       inverseLogo:string;
       sideWidget: SideWidget[];
       eloiseConfig:EloiseConfig;
-      headerTrans: boolean;
+      headerTrans : boolean;
+      bugReporting?: boolean;
     }
 
       export interface FirebaseConfig {
@@ -260,11 +262,22 @@ export {
         type?: string
       }
       
-      
+      type CSSHeight =
+  | `${number}px`
+  | `${number}%`
+  | `${number}vh`
+  | `${number}vw`
+  | `${number}vmin`
+  | `${number}vmax`
+  | 'auto';
+
+// Usage examples
+
       //large Text
       
       export interface BaseLTProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
         placeholder?: string;
+        height?: CSSHeight
       }
       
       export interface RegularLTProps extends BaseLTProps {

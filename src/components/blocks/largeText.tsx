@@ -47,6 +47,7 @@ const LargeTextInput: React.FC<LTProps> = ({
           value={value}
           onChange={handleInputChange}
           placeholder={placeholder}
+          style={props.height? {height: props.height} : {}}
         />
       </LargeTextInputWrapper>
     );

@@ -10,6 +10,7 @@ import { EloisePage, EloiseWidget, FirebaseConfig, SiteConfig, Theme } from './'
 import SideModal from './components/blocks/sideModal';
 import Footer from './components/widgets/footer';
 import { Hooks } from './functions/hooks';
+import { Other, ReportBug } from './components/pages';
 
 
 
@@ -110,7 +111,6 @@ setEloiseContent: () => {}, // Add this line
 
 });
 
-
 export const useEloise = (): {
   theme: Theme;
   siteConfig: SiteConfig;
@@ -140,7 +140,18 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
     <ThemeContext.Provider 
     value={{
        theme, 
-       siteConfig,
+       siteConfig: {...siteConfig, pages: [...siteConfig.pages,  {
+        name: "Error Other",
+        component: <Other/>,
+        hidden: true,
+        url:"other"
+      },
+      {
+        name: "Report Bug",
+        component: <ReportBug/>,
+        hidden: true,
+        url:"report-bug"
+      }]},
         fireBaseConfig, 
         logic,
         eloiseContent, // Add this line

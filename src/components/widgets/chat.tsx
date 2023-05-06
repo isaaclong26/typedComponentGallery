@@ -10,6 +10,8 @@ import {
   MessageContent,
   InputContainer,
   StyledHole,
+  userMessageStyle,
+  otherMessageStyle,
 } from "../styles/chatStyles"
 import { useEloise } from "../..";
 import Icon from "@mdi/react";
@@ -20,9 +22,13 @@ type Message = {
     id: string;
     content: string;
     senderId: string;
-    timestamp: Date; // Change this line
   };
   
+type GptMessage ={
+  role:"user"| "system"| "assistant";
+  content: string
+}
+
 export interface Convo{
     id:string,
     connectedTo: string;
@@ -32,10 +38,13 @@ export interface Convo{
 
 const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; right: number; bottom: number; left: number }; setHoleCoords: (coords: { top: number; right: number; bottom: number; left: number }) => void } > = ({convo, back, holeCoords, setHoleCoords}) => {
   
+  const [eloiseTyping, setEloiseTyping] = useState(false);
+
   const {logic, siteConfig, theme, eloiseContent} = useEloise()
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[] | GptMessage[]>([]);
   const [input, setInput] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [uid, setUID] = useState<string>(logic.fb.getAuthenticatedUserUid())
  
   const squareSize = 100;
 
@@ -49,13 +58,18 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
  
 
   logic.hooks.useAsyncEffect(async()=>{
+    if(convo.id === "eloise"){
+      setMessages([{role:"assistant", content: "Hi how can I help?"}])
+    }
+    else{
     let test2 = await logic.fb.getUserCollection("convos/"+ convo.id+"/messages")
     let ots = test2.map((message:any)=> message.data)
     setMessages(ots)
+    }
 
   },[])
   
-  function formatEloiseIntelData(data: EloiseIntel[], message:string): string {
+  function formatEloiseIntelData(data: EloiseIntel[]): string {
     const formattedData = data.map((item) => {
       const { id, position, ...rest } = item;
       const lines = ` \n\n ${Object.entries(rest)
@@ -65,7 +79,7 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
     });
     let semi = formattedData.join('\n\n');
 
-    return `Content on Page: ${semi} \n\n message: ${message}`;
+    return `Content on Page: ${semi}`;
   }
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -76,33 +90,53 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
   }, [messages]);
 
   const handleSendMessage = async(e: React.FormEvent) => {
+    setInput("");
+
     e.preventDefault();
     if (input.trim() === "") return;
 
-
+    let testUid
+        if(!uid){
+        testUid = logic.fb.getAuthenticatedUserUid()
+          setUID(testUid)
+        }
+        else{
+          testUid = uid
+        }
     if(convo.id === "eloise"){
-      let prompt = formatEloiseIntelData(eloiseContent, input)
-      console.log(prompt)
+      setMessages([...messages  as Array<GptMessage>, {role:'user', content:input}])
+      setEloiseTyping(true); // Eloise is typing
 
-      let test = await logic.apiCall(siteConfig.eloiseConfig.endPoint, [{role:"user", content: prompt}])
+      let prompt = formatEloiseIntelData(eloiseContent)
+    
+      let test = await logic.apiCall("siteChat", {
+      convo: [
+        ...messages,
+       { role: "user", content: prompt },
+        { role: "user", content: input }
+      ]  }
+         ,siteConfig.eloiseConfig.endPoint)
 
-      console.log(test)
+      setMessages([...messages as Array<GptMessage>,  {role:'user', content:input}, test])
+      setEloiseTyping(false)
     }
   
     // Replace with the current user's ID
-    const test = logic.fb.getAuthenticatedUserUid();
     let newId = uuidv4()
 
     logic.fb.setUserDoc("convos/"+convo.id + "/messages/"+ newId, {
       content: input,
-      senderId:test,
+      senderId:testUid,
     });
 
     if(convo.id !== "eloise"){
 
+      let newMessage: Message = {content: input, senderId:testUid, id:newId}
+       setMessages([...messages as Message[], newMessage ]);
+
     logic.fb.setOtherUserDoc("convos/"+convo.id + "/messages/"+ newId,  {
         content: input,
-        senderId:test,
+        senderId:testUid,
       }, convo.connectedTo);
     }
   
@@ -122,11 +156,28 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
       </div>
       {messages &&
       <MessagesContainer>
-        {messages.map((message) => (
-          <MessageWrapper key={message.id}>
-            <MessageContent>{message.content}</MessageContent>
-          </MessageWrapper>
-        ))}
+       {messages &&
+  <MessagesContainer>
+    {messages.map((message: GptMessage | Message) => {
+            const isUserMessage =
+            "senderId" in message
+              ? message.senderId === uid
+              : message.role === "user";
+     
+      const messageStyle = isUserMessage ? userMessageStyle : otherMessageStyle;
+
+      return (
+        <MessageWrapper key={uuidv4()} style={messageStyle}>
+          <MessageContent>{message.content}</MessageContent>
+        </MessageWrapper>
+      );
+    })}
+        {eloiseTyping && convo.id === "eloise" && <TypingIndicator />}
+
+    <div ref={messagesEndRef} />
+  </MessagesContainer>
+}
+
         <div ref={messagesEndRef} />
       </MessagesContainer>
     }
@@ -149,3 +200,42 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
 };
 
 export default Chat;
+
+const TypingIndicator: React.FC = () => {
+  const typingDotStyle: React.CSSProperties = {
+    backgroundColor: "#000",
+    borderRadius: "50%",
+    width: "6px",
+    height: "6px",
+    margin: "0 2px",
+    animationName: "typing",
+    animationDuration: "1.2s",
+    animationIterationCount: "infinite",
+    animationFillMode: "both",
+  };
+
+  const typingDot1Style: React.CSSProperties = {
+    ...typingDotStyle,
+    animationDelay: "0s",
+  };
+
+  const typingDot2Style: React.CSSProperties = {
+    ...typingDotStyle,
+    animationDelay: "0.2s",
+  };
+
+  const typingDot3Style: React.CSSProperties = {
+    ...typingDotStyle,
+    animationDelay: "0.4s",
+  };
+
+  return (
+    <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: "8px" }}>
+      <div style={typingDot1Style} />
+      <div style={typingDot2Style} />
+      <div style={typingDot3Style} />
+    </div>
+  );
+};
+
+
