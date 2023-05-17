@@ -1,8 +1,9 @@
 import React from "react";
 
 import dog from "../../assets/dog.png";
+
 import { Row, Col } from "react-bootstrap";
-import { Heading, View, Button, useEloise } from "typed-component-gallery";
+import { Heading, View, Button, useEloise } from "../..";
 import { useNavigate } from "react-router";
 
 export const Other: React.FC = () => {
@@ -40,7 +41,7 @@ export const Other: React.FC = () => {
         style={{ position: "fixed", bottom: "0", width: "100%" }}
       >
         <Col lg={6} className="mx-auto text-center">
-          <img src={dog} height="200" />
+          <img src={String(dog)} height="200" />
         </Col>
       </Row>
     </div>

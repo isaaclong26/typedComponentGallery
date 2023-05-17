@@ -8,6 +8,7 @@ import { throttle } from 'lodash';
 import { useEffect, useState } from 'react';
 import {useCollection} from "react-firebase-hooks/firestore"
 import { SiteConfig } from '..';
+import { useAuthState } from 'react-firebase-hooks/auth';
 /**
  * The FB class provides methods for interacting with Firebase services.
  */
@@ -70,6 +71,7 @@ class FB {
     }
 
     async setUserDoc(path: string, data:any) {
+   
         const test = this.getAuthenticatedUserUid();
         if (!test) {
             return false;
@@ -80,6 +82,7 @@ class FB {
             }
             return false;
         }
+      
     }
     async setOtherUserDoc(path: string, data:any, otherUser: string) {
       if (!test) {
@@ -151,6 +154,66 @@ class FB {
       if (initialDataFetched && data) {
         updateFirestore(data);
       }
+    }, [data, ms, path, initialDataFetched]);
+  
+    return [data, setData];
+  }
+
+  useThrottleField(path: string, field:string, ms: number = 150): Array<any> {
+
+    const [user, loading, error] = useAuthState(this.auth)
+    
+    const [data, setData] = useState("");
+    const [initialDataFetched, setInitialDataFetched] = useState(false);
+  
+    useEffect(() => {
+      if(user){
+      const fetchInitialData = async () => {
+        try {
+          const doc = await this.getUserDoc(path);
+          if(doc){
+            if(doc.data){
+            setData(doc.data[field]);
+            }
+          }
+
+          setInitialDataFetched(true);
+        } catch (error) {
+          console.error("Error fetching initial data:", error);
+        }
+      };
+  
+      if (!initialDataFetched) {
+        fetchInitialData();
+      }
+      }
+    }, [path, initialDataFetched]);
+  
+    useEffect(() => {
+      if(user){
+      const updateFirestore = throttle(async (newValue) => {
+        try {
+
+          let prev:any = await this.getUserDoc(path)
+          if(prev.data){
+            prev = prev.data
+          }
+          else{
+              prev = {}
+          }
+          let ots: {[key:string]:any} = {...prev}
+          ots[field] = newValue
+          const result = await this.setUserDoc(path, ots);
+        
+        } catch (error) {
+          console.error("Error updating value:", error);
+        }
+      }, ms);
+  
+      if (initialDataFetched && data) {
+        updateFirestore(data);
+      }
+    }
     }, [data, ms, path, initialDataFetched]);
   
     return [data, setData];

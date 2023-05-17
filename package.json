@@ -1,6 +1,6 @@
 {
   "name": "typed-component-gallery",
-  "version": "1.7.34",
+  "version": "1.7.78",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
@@ -29,8 +29,10 @@
     "construe": "^0.4.1",
     "cron": "^2.2.0",
     "cron-parser": "^4.7.1",
+    "date-fns": "^2.30.0",
     "firebase": "^9.17.1",
     "firebase-tools": "^11.16.0",
+    "fs-extra": "^11.1.1",
     "fuse.js": "^6.6.2",
     "http-server": "^14.1.1",
     "lodash": "^4.17.21",
@@ -42,6 +44,7 @@
     "react-big-calendar": "^1.6.9",
     "react-bootstrap": "^2.6.0",
     "react-cron-generator": "^2.0.8",
+    "react-datepicker": "^4.11.0",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",
     "react-router": "^6.4.3",
@@ -82,6 +85,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-datepicker": "^4.11.2",
     "buffer": "^5.7.1",
     "process": "^0.11.10"
   }

@@ -1,9 +1,11 @@
-import axios from "axios";
-import { DependencyList, useEffect, useRef, useState } from "react";
-import { FB } from "./firebase";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { collection, getDocs } from "firebase/firestore";
-import { Logic } from ".";
+import axios from 'axios';
+import { DependencyList, useEffect, useRef, useState } from 'react';
+import { FB } from './firebase';
+import { useDocument  } from 'react-firebase-hooks/firestore';
+import { collection, getDocs } from 'firebase/firestore';
+import { Logic } from '.';
+import { Firestore } from 'firebase/firestore';
+import firebase from 'firebase/app';
 
 
 /**
@@ -26,6 +28,11 @@ export const Hooks: {[key: string]:any} = {
       domRef,
     };
  },
+
+
+
+
+
  async useUserCollection (logic:Logic, path:string) {
 
 
@@ -52,6 +59,7 @@ export const Hooks: {[key: string]:any} = {
  * @param {Function} asyncFunction - The asynchronous function to be called inside useEffect.
  * @param {Array} dependencies - An array of dependencies for the useEffect hook.
  */
+
  useAsyncEffect:  (asyncFunction: () => any, dependencies: DependencyList | undefined)=> {
   useEffect(() => {
     let isMounted = true;

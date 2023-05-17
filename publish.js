@@ -1,7 +1,9 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 
 const packageJsonPath = path.resolve(__dirname, 'package.json');
+const srcDir = path.resolve(__dirname, 'src/assets');
+const destDir = path.resolve(__dirname, 'dist/assets');
 
 // Read the package.json file
 fs.readFile(packageJsonPath, 'utf-8', (err, data) => {
@@ -28,5 +30,15 @@ fs.readFile(packageJsonPath, 'utf-8', (err, data) => {
     }
 
     console.log('Version updated to:', newVersion);
+
+    // Copy the assets directory
+    fs.copy(srcDir, destDir, (err) => {
+      if (err) {
+        console.error('Error copying assets:', err);
+        return;
+      }
+
+      console.log('Assets copied successfully');
+    });
   });
 });

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Icon from "@mdi/react";
 import { mdiBugOutline } from "@mdi/js";
 
-import dog from "../../assets/dog.png";
 import { Row, Col } from "react-bootstrap";
 import {
   Heading,
@@ -12,7 +11,7 @@ import {
   EloisePage,
   DropDown,
   LargeTextInput,
-} from "typed-component-gallery";
+} from "../..";
 import { useNavigate } from "react-router";
 
 export const ReportBug: React.FC = () => {

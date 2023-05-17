@@ -124,6 +124,27 @@ export const useEloise = (): {
 
 function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
 
+  useEffect(() => {
+    const currentPage = window.location.pathname;
+
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key) {
+        let split = key.split("_")
+        if(!key.split("").includes("_")) {
+
+        }
+        else{
+        const pageKey = split[0]
+        
+        if (pageKey !== currentPage) {
+          localStorage.removeItem(key);
+        }
+      }
+      }
+    }
+  }, []);
+
   const logic = new Logic(fireBaseConfig, siteConfig);
  
   const [eloiseContent, setEloiseContent] = useState<EloiseIntel[]>([]);
@@ -133,7 +154,6 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
 
 
   useEffect(()=>{
-    console.log(eloiseContent)
   },[eloiseContent])
 
   return (

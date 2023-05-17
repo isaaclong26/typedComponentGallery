@@ -15,6 +15,8 @@ import {
     // pages
     Home,
     Login,
+    Other,
+    ReportBug,
     //todo Account
 
     // widgets
@@ -31,9 +33,12 @@ import {
     Canvas,
     Heading,
     Input,
+    InputProps,
     AppIcon,
     DropDown,
     Life,
+
+    DateSelector
 
 
 }  from "./components"
@@ -51,10 +56,13 @@ export {
     DBItem, DBList, DBListProps,
     FileUpload, FileUploadProps,
     CollectionRender,
+    DateSelector,
     //components
         // pages
         Home,
         Login,
+        Other,
+        ReportBug,
         //todo Account
     
         CalendarComponent,
@@ -72,6 +80,7 @@ export {
         Canvas,
         Heading,
         Input,// Updated
+        InputProps,
         AppIcon,
         DropDown,
         Life,
@@ -111,6 +120,11 @@ export {
       eloiseConfig:EloiseConfig;
       headerTrans : boolean;
       bugReporting?: boolean;
+      userConfig?: UserConfig;
+    }
+
+    export interface UserConfig {
+      customFields: string[]
     }
 
       export interface FirebaseConfig {
@@ -249,18 +263,7 @@ export {
       //component props 
 
       
-      //Input 
-      
-      export interface InputProps {
-        label: string;
-        onEnter?: () => void;
-        extLabel?: boolean;
-        border?: boolean;
-        state: string | undefined;
-        setState: React.Dispatch<React.SetStateAction<any>>;
-        placeholder?: string;
-        type?: string
-      }
+
       
       type CSSHeight =
   | `${number}px`

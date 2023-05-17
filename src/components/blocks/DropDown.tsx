@@ -1,7 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import Dropdown from "react-bootstrap/Dropdown";
 import { useEloise } from "../../App";
+import { Modal } from "react-bootstrap";
+
 
 export interface dropdownProps {
   options: string[];
@@ -23,14 +25,26 @@ export interface dropdownProps {
   state?: any;
   value?: any;
   setState: React.Dispatch<React.SetStateAction<any>>;
+  locked?: boolean;
+  warning?: boolean;
+  warningMessage?: string;
 }
+
 
 const DropDown = (props: dropdownProps) => {
   const { theme, logic } = useEloise();
+  const [showWarningModal, setShowWarningModal] = useState(false);
+
+  const handleCloseModal = () => setShowWarningModal(false);
 
   const handleSelect = (option: string) => {
-    props.setState(option);
+    if (props.warning) {
+      setShowWarningModal(true);
+    } else {
+      props.setState(option);
+    }
   };
+
 
   const getC = () => {
     if (props.inverse) {
@@ -79,8 +93,29 @@ const DropDown = (props: dropdownProps) => {
     }
   }, [props.state, props.options, props.label]);
 
+  const [maxHeight, setMaxHeight] = useState("400px");
+
+  const dropdownRef = useRef<any>();
+
+  useLayoutEffect(() => {
+    const calculateMaxHeight = () => {
+      if (dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const availableSpace = window.innerHeight - rect.top;
+        setMaxHeight(`${availableSpace}px`);
+      }
+    };
+
+    calculateMaxHeight();
+    window.addEventListener("resize", calculateMaxHeight);
+
+    return () => {
+      window.removeEventListener("resize", calculateMaxHeight);
+    };
+  }, []);
 
   return (
+    <>
     <Dropdown
       className={props.posClassName}
       style={{ padding: props.margin ? props.margin : " 0" }}
@@ -99,8 +134,9 @@ const DropDown = (props: dropdownProps) => {
         {displayText}
       </Dropdown.Toggle>
 
-      <Dropdown.Menu>
-        {props.options.map((option) => (
+      <Dropdown.Menu style={{ maxHeight: maxHeight, overflowY: "scroll" }}>
+
+      {props.options.map((option) => (
           <Dropdown.Item
             active={props.value == option ? true : false}
             key={option}
@@ -112,7 +148,20 @@ const DropDown = (props: dropdownProps) => {
           </Dropdown.Item>
         ))}
       </Dropdown.Menu>
-    </Dropdown>
+      </Dropdown>
+        {/* Warning Modal */}
+      <Modal show={showWarningModal} onHide={handleCloseModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Warning</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{props.warningMessage}</Modal.Body>
+        <Modal.Footer>
+          <button className="btn btn-primary" onClick={handleCloseModal}>
+            Close
+          </button>
+        </Modal.Footer>
+      </Modal>
+      </>
   );
 };
 

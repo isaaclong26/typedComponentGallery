@@ -1,4 +1,5 @@
-import { Home, Login } from "./pages";
+import { Home, Login ,Other,
+    ReportBug, } from "./pages";
 import { Header } from "./widgets";
 import {
     Checkbox,
@@ -10,9 +11,11 @@ import {
     Canvas,
     Heading,
     Input,
+    InputProps,
     AppIcon,
     DropDown,
     Life,
+    DateSelector,
 } from "./blocks"
 
 
@@ -22,10 +25,12 @@ export {
     Checkbox,
     Login,
     //todo Account
-
+    Other,
+    ReportBug,
     // widgets
     Header,
     //todo Footer
+    DateSelector,
 
 
     //blocks
@@ -38,6 +43,7 @@ export {
     Canvas,
     Heading,
     Input,
+    InputProps,
     AppIcon,
     DropDown,
     Life,
