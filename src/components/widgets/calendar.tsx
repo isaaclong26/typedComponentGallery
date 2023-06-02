@@ -9,10 +9,12 @@ import {useNavigate} from "react-router"
 
 // Define type for events data
 type Event = {
-  title: string;
+  title?: string;
   start: Date;
   end: Date;
   id?:string
+  notes?:string
+  type?:string
 };
 
 // Create a styled component for the calendar container

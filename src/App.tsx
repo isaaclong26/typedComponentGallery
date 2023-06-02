@@ -193,7 +193,9 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
           ) : (
             <Routes>
               <Route path="/" element={ <EloiseWidget eloiseIntel={{...siteConfig.pages[0].intel}}>{siteConfig.pages[0].component}</EloiseWidget>}/>
-
+              {siteConfig.pages.slice(1).filter((page:EloisePage)=> page.noAuth).map((page:EloisePage) => (
+                <Route  key={page.name} path={page.url?? `/${page.name}`} element={ <EloiseWidget eloiseIntel={{...page.intel}}>{page.component}</EloiseWidget> }/>
+              ))}
               <Route path="/login" element={<Login />} />
             </Routes>
           )}

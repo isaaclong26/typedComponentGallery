@@ -14,7 +14,7 @@ import {
   * It contains additional properties to customize the button component.
   */
  export interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-   color?: "primary" | "secondary" | "accent" | "clear" | HSLAColor; // Defines the color of the button
+   color?: "primary" | "secondary" | "accent" | "clear" |"grey"| HSLAColor; // Defines the color of the button
    rounded?: boolean; // Determines if the button should have rounded corners
    className?: string; // Allows for custom styling via class names
    children?: React.ReactNode; // The content of the button
@@ -133,7 +133,8 @@ const Button: React.FC<ButtonProps> = ({
 			onClick={onClick}
 			aria-label={props["aria-label"]}
 			role={props.role}
-			tabIndex={props.tabIndex}>
+			tabIndex={props.tabIndex}
+			style={props.style}>
 			{children}
 		</ButtonWrapper>
 		</EloiseWidget>

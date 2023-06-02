@@ -92,7 +92,8 @@ import { StyledHole } from '../styles/chatStyles';
                     color: 'black',
                     borderRadius: '10px',
                     padding: '20px',
-                    height: '70vh'
+                    height: '70vh',
+                    overflow:'scroll'
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -161,6 +162,7 @@ const ModalContent = styled.div`
   border-radius: 10px;
   width: 35%;
   margin-left: 60%;
+  overflow-y: 'scroll';
 
   @media (max-width: 1000px) and (min-width: 750px) {
     margin: auto;

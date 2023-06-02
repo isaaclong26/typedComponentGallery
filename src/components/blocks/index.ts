@@ -9,7 +9,7 @@ import Loading from "./loading"
 import Life from "./life";
 
 import ConfirmationModal from "./conf";
-import ChildrenModal from './modal';
+import {ChildrenModal} from './modal';
 import { Checkbox} from './Checkbox';
 import DateSelector from "./dateSelect"
 

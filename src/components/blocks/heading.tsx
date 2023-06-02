@@ -39,7 +39,7 @@ const Head =
   border-radius: 10px;
   font-size: ${(props) => props.size};
   color: ${(props) => props.color};
-  font-weight: 700;
+  font-weight: 400;
   ${(props)=> props.$handWritten?" font-family: 'Caveat', cursive  ;" : ""}
   )
 `;

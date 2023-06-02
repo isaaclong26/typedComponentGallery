@@ -43,7 +43,7 @@ const Login = (props: {}) => {
   };
 
   return (
-    <Container  style={{ position: "relative", paddingTop: '90px' }}>
+    <Container  style={{ position: "relative", paddingTop: '90px' , maxHeight: '60vh', overflowY: 'scroll'}}>
       <Heading primary size={4} style={{ fontStyle: 'italic', position: 'absolute', top: '20px', left: '20px' }}>Login</Heading>
       <img
         src={siteConfig.logo}

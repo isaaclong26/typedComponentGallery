@@ -1,4 +1,5 @@
 import { HSLAColor, ColorMethods } from "../";
+import chroma from "chroma-js";
 
 /**
  * A collection of color utility methods.
@@ -92,7 +93,57 @@ export const color:ColorMethods={
         const textColor = opacityAdjustedL > 0.5 ? 'hsla(0, 0%, 0%, 1)' : 'hsla(0, 0%, 100%, 1)';
       
         return textColor;
+      },
+
+    getPerceivedColor(hsla: HSLAColor): string {
+        let color = chroma(hsla);
+        let hue = color.get("hsl.h");
+        let lightness = color.get("hsl.l");
+      
+        let dominantColor = "";
+        if (hue <= 30 || hue > 330) {
+          dominantColor = "red";
+        } else if (hue > 30 && hue <= 90) {
+          dominantColor = "yellow";
+        } else if (hue > 90 && hue <= 150) {
+          dominantColor = "green";
+        } else if (hue > 150 && hue <= 210) {
+          dominantColor = "cyan";
+        } else if (hue > 210 && hue <= 270) {
+          dominantColor = "blue";
+        } else if (hue > 270 && hue <= 330) {
+          dominantColor = "magenta";
+        }
+      
+        let perceivedBrightness = lightness < 0.5 ? "dark" : "light";
+      
+        return `${perceivedBrightness} ${dominantColor}`;
+      },
+
+      hslaToHex(hsla: HSLAColor): string {
+        // Parse the HSLA color
+        const matches = hsla.match(/hsla\((\d+), (\d+)%?, (\d+)%?, (\d+(\.\d+)?)\)/);
+        if (!matches) {
+          throw new Error("Invalid HSLA color");
+        }
+      
+        const h = Number(matches[1]);
+        const s = Number(matches[2]);
+        let l = Number(matches[3]);
+      
+        // Convert HSL to HEX ignoring alpha
+        l /= 100;
+        const a = (s * Math.min(l, 1 - l)) / 100;
+        const f = (n: number) => {
+          const k = (n + h / 30) % 12;
+          const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+          return Math.round(255 * color)
+            .toString(16)
+            .padStart(2, "0");
+        };
+        return `#${f(0)}${f(8)}${f(4)}`;
       }
+      
       
     
       

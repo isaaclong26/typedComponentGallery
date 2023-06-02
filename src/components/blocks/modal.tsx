@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
-import { CSSTransition } from 'react-transition-group';
 
 interface Props {
   open: boolean;
@@ -9,7 +8,7 @@ interface Props {
   style?: any;
 }
 
-const ChildrenModal: React.FC<Props> = ({ open, onClose, children, style }) => {
+export const ChildrenModal: React.FC<Props> = ({ open, onClose, children, style }) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -27,7 +26,6 @@ const ChildrenModal: React.FC<Props> = ({ open, onClose, children, style }) => {
     <>
       {open && (
         <ModalOverlay onClick={handleClose}>
-          <CSSTransition in={show} timeout={500} classNames="modal-transition">
             <ModalContent
               style={{
                 backgroundColor: 'white',
@@ -46,7 +44,6 @@ const ChildrenModal: React.FC<Props> = ({ open, onClose, children, style }) => {
             >
               {children}
             </ModalContent>
-          </CSSTransition>
         </ModalOverlay>
       )}
     </>
@@ -70,4 +67,3 @@ const ModalContent = styled.div`
   border-radius: 10px;
 `;
 
-export default ChildrenModal;

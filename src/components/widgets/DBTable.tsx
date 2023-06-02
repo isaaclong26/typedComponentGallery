@@ -42,15 +42,15 @@ type BulkAction = {
   function: (docs: any[]) => void;
 };
 
-export type DBTableProps = { path: string; bulkActions?: BulkAction[] } & (ExpandProps | OpenProps | DefaultProps);
+export type DBTableProps1 = { path: string; bulkActions?: BulkAction[] } & (ExpandProps | OpenProps | DefaultProps);
 export type FieldSelection = 'manual' | string[];
 
-type DBTablePropsWithFieldSelection = {
+export type DBTableProps = {
   fields?: FieldSelection;
   manualDefault?: string[]
-} & DBTableProps;
+} & DBTableProps1;
 
-export const DBTable: React.FC<DBTablePropsWithFieldSelection> = ({
+export const DBTable: React.FC<DBTableProps> = ({
   fields,
   manualDefault,
   path,
@@ -62,7 +62,7 @@ export const DBTable: React.FC<DBTablePropsWithFieldSelection> = ({
 }) => {
   const { logic, theme } = useEloise();
   const navigate = useNavigate();
-  const [docs, setDocs] = useState<any[] | null>(null);
+  const [docs, setDocs] = useState<any[] >([]);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRowIndex, setExpandedRowIndex] = useState<number | null>(null);
@@ -77,6 +77,8 @@ export const DBTable: React.FC<DBTablePropsWithFieldSelection> = ({
   },[])
 logic.hooks.useAsyncEffect(async () => {
   const data = await logic.fb.getUserCollection(path);
+  if(data){
+  console.log(data)
   setDocs(data);
   if(manualDefault){
       setSelectedFields(new Set(manualDefault))
@@ -85,6 +87,9 @@ logic.hooks.useAsyncEffect(async () => {
   let fieldsTemp = Object.keys(data[0].data)
   setSelectedFields(new Set(fieldsTemp))
   }
+  }
+ 
+
 }, []);
 
 
@@ -124,7 +129,6 @@ const sortDocs = () => {
 };
 
 const getColumnOrder = () => {
-  console.log(selectedFields)
   if (!docs || docs.length === 0) return [];
 
   const keys = Object.keys(docs[0].data);
@@ -187,7 +191,7 @@ const renderFieldSelectionButton = () => {
   return (
     <DropdownButton id="field-selection-dropdown" title="Select Fields" variant="secondary" size="sm">
       <Dropdown.Menu style={{ maxHeight: '200px', overflowY: 'scroll' }}>
-        {docs && Object.keys(docs[0].data).map((field, index) => (
+        {docs && docs[0] && Object.keys(docs[0].data).map((field, index) => (
           <Dropdown.Item key={index} onClick={() => toggleFieldSelection(field)}>
             {selectedFields.has(field) ? '✓ ' : '   '}
             {formatKey(field)}
@@ -206,7 +210,7 @@ const handleRowClick = (index: number, data: any) => {
       setExpandedRowIndex(index);
     }
   } else if (open && link) {
-    navigate(link, { state: { data } });
+    navigate(link+data);
   }
 };
 const handleRowSelect = (index: number) => {
@@ -256,7 +260,7 @@ const renderTableBody = () => {
             {cells.map((cell, cellIndex) => (
               <td
                 key={`${index}-${cellIndex}`}
-                onClick={() => handleRowClick(index, doc.data)}
+                onClick={() => handleRowClick(index, doc.id)}
               >
                 {cell}
               </td>

@@ -11,6 +11,8 @@ import { EloiseWidget } from "./components/widgets/EloiseWidget";
 import React, { ReactNode } from "react";
 import CalendarComponent from "./components/widgets/calendar";
 
+import {Map, MapProps} from "./components/widgets/map";
+
 import {
     // pages
     Home,
@@ -46,6 +48,8 @@ import {
 
 export {
     //Setup 
+    Map, 
+    MapProps,
     Eloise,
     useEloise,
     EloiseWidget,
@@ -95,7 +99,8 @@ export {
       pages?: EloisePage[];
       hidden?: boolean
       url?: string
-      intel?: EloiseIntel
+      intel?: EloiseIntel,
+      noAuth?: boolean
     }
     export interface SideWidget {
       name: string;
@@ -140,6 +145,13 @@ export {
         storageDir: string
       }
       
+      export interface Addy{
+        street: string;
+        city: string;
+        state: string;
+        lat: number; 
+        lng: number
+      }
      
       
       export interface CheckboxProps {
@@ -241,6 +253,10 @@ export {
          * @returns The HSLA color value of the text color that has the best contrast against the given background color.
          */
         getTextColorFromBackground: (backgroundColor: HSLAColor) => HSLAColor;
+
+        getPerceivedColor:(hsla: HSLAColor)=> string;
+
+        hslaToHex: (hsla: HSLAColor) => string;
       }
       
       
