@@ -1,18 +1,18 @@
 import {
-  ColorMethods,
   FirebaseConfig,
-  HSLAColor,
   BaseEloiseUser,
   SiteConfig,
   HistoryItem,
 } from "../";
-import { FB } from "./firebase";
+
+import { FB, FBInterface } from "./firebase";
 import { Generic } from "./generic";
-import { color } from "./color";
+import { color,HSLAColor, ColorMethods , getColor} from "./color";
 import { GptText, gptText } from "./gptText";
 import { Hooks } from "./hooks";
 
-export class Logic {
+
+ class Logic {
   /**
    * The prefix for all API calls made by the application.
    * This URL can be replaced with a local address for development purposes.
@@ -83,7 +83,7 @@ export class Logic {
 
   }
 
-  fb: FB;
+  fb: FBInterface;
   /**
    * Chat Gpt Text Functions
    */
@@ -123,7 +123,7 @@ export class Logic {
      * @returns {Promise<HistoryItem[]|boolean>} The history items for the current user or false if an error occurs.
      */
     getHistory: async (): Promise<HistoryItem[] | boolean> => {
-      let req = await this.fb.getUserDoc(`/${this.siteConfig.id}/history`);
+      let req = await this.fb.docs.getUserDoc(`/${this.siteConfig.id}/history`);
       if (req) {
         return req.data as HistoryItem[];
       } else {
@@ -138,7 +138,7 @@ export class Logic {
      * @returns {Promise<BaseEloiseUser|boolean>} The user data for the current user or false if an error occurs.
      */
     getUser: async (): Promise<BaseEloiseUser | boolean> => {
-      let req = await this.fb.getUserDoc("");
+      let req = await this.fb.docs.getUserDoc("");
       if (req) {
         return req.data as BaseEloiseUser;
       } else {
@@ -152,4 +152,11 @@ export class Logic {
     this.siteConfig = siteConfig;
     this.api = siteConfig.api
   }
+}
+
+export {
+Logic,
+ColorMethods,
+HSLAColor,
+
 }

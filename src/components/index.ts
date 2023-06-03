@@ -1,6 +1,27 @@
 import { Home, Login ,Other,
     ReportBug, } from "./pages";
-import { Header } from "./widgets";
+
+import { 
+    Header,
+    FileTable,
+    DBTable,
+    DBTableProps,
+    DBCards,
+    CardListProps,
+    FileUploadProps,
+    FileUpload,
+    CollectionRender,
+    EloiseChat,
+    Footer,
+    CalendarComponent,
+    ConvoList,
+    Chat,
+    Map, MapProps,
+    DBItem, DBList, DBListProps,
+    EloiseWidget,
+
+  } from  './widgets'
+
 import {
     Checkbox,
     ChildrenModal,
@@ -16,6 +37,8 @@ import {
     DropDown,
     Life,
     DateSelector,
+    ViewCol, View,
+    LargeTextInput
 } from "./blocks"
 
 
@@ -29,11 +52,25 @@ export {
     ReportBug,
     // widgets
     Header,
-    //todo Footer
-    DateSelector,
+    FileTable,
+    DBTable,
+    DBTableProps,
+    DBCards,
+    CardListProps,
+    FileUploadProps,
+    FileUpload,
+    CollectionRender,
+    EloiseChat,
+    Footer,
+    CalendarComponent,
+    ConvoList,
+    Chat,
+    DBItem, DBList, DBListProps,
+    EloiseWidget,
 
 
     //blocks
+    DateSelector,
 
     ChildrenModal,
     ConfirmationModal,
@@ -47,6 +84,10 @@ export {
     AppIcon,
     DropDown,
     Life,
+    Map, MapProps,
+    ViewCol, View,
+    LargeTextInput
+
 
 
 } 

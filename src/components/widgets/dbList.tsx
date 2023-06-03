@@ -22,12 +22,12 @@ export const DBItem:React.FC<DBListItemProps> = ({path, Component})=>{
     const [value, setValue] = useState()
 
     logic.hooks.useAsyncEffect(async()=>{
-        let test = await logic.fb.getUserDoc(path)
+        let test = await logic.fb.docs.getUserDoc(path)
         setValue(test)
     },[])
     const update = async (data:any) : Promise<any | false>=>{
 
-        let test = await logic.fb.setUserDoc(path, data)
+        let test = await logic.fb.docs.setUserDoc(path, data)
         if(test){
             return data
         }
@@ -53,7 +53,7 @@ export const DBList: React.FC<DBListProps> = ({path, Component})=>{
     logic.hooks.useAsyncEffect(async()=>{
 
 
-        let test = await logic.fb.getUserCollection(path)
+        let test = await logic.fb.docs.getUserCollection(path)
         setDocs(test)
 
 

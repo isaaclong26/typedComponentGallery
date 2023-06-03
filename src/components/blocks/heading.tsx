@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
 import styled from "styled-components";
 import { useEloise} from "../../App";
+import { getColor, ThemeColor } from "../../functions/color";
+import { FontSize } from "../..";
+import { useNavigate } from "react-router";
 
 export interface HeadingProps {
   children: string;
-  size?: 1 | 2 | 3 | 4 | 5 | 6;
+  size?: 1 | 2 | 3 | 4 | 5 | 6 | FontSize;
   primary?: boolean;
   secondary?: boolean;
-  color?: string;
+  color?: ThemeColor;
   className?: string;
-  white?: boolean;
   margin?: string;
   inverse?: boolean;
   posClassName?: string;
@@ -19,6 +21,8 @@ export interface HeadingProps {
   border?: boolean;
   key?: string;
   handWritten?: boolean;
+  link?: string;
+
 }
 
 interface headProps {
@@ -28,6 +32,22 @@ interface headProps {
   $mode?:string;
   $handWritten? :boolean;
   $inverse?: boolean;
+}
+export interface DefaultHeadingProps {
+  size?: 1 | 2 | 3 | 4 | 5 | 6;
+  primary?: boolean;
+  secondary?: boolean;
+  color?: ThemeColor;
+  className?: string;
+  margin?: string;
+  inverse?: boolean;
+  posClassName?: string;
+  align?: "center" | "left" | "right";
+  style?: any;
+  parentStyle?: any;
+  border?: boolean;
+  key?: string;
+  handWritten?: boolean;
 }
 
 const Head =
@@ -45,35 +65,26 @@ const Head =
 `;
 
 const Heading = (props: HeadingProps) => {
+  const { theme, logic } = useEloise();
+  const navigate = useNavigate();
 
+  // Use the heading properties from the theme if they are not provided in props
+  const { color, size, border, handWritten, inverse } = { ...theme.heading, ...props };
   
-  const {theme,logic} = useEloise()
+  var BC = color ? getColor(color, theme) : 'black';
 
-
-
-  var backgroundColorF = () => {
-    if (props.white) {
-      return "white";
+  const handleClick = () => {
+    if (props.link) {
+      navigate(props.link);
     }
-    if (props.primary) {
-      return theme.primary;
-    } else if (props.secondary) {
-      return theme.secondary;
-    } else if (props.color !== undefined) {
-      return props.color;
-    } else {
-      if (theme.primary !== undefined) {
-        return theme.primary;
-      } else {
-        return "#000";
-      }
-    }
-  };
-  var BC = backgroundColorF();
-
+  }
   var fontSize: string;
 
-  switch (props.size) {
+  if(size && typeof size !== 'number'){
+    fontSize = size
+  }
+  else{
+  switch (size) {
     case 2:
       fontSize = "1.3rem";
       break;
@@ -86,37 +97,39 @@ const Heading = (props: HeadingProps) => {
     case 5:
       fontSize = "2.5rem";
       break;
-      case 6:
-        fontSize = "4.5rem";
-        break;
+    case 6:
+      fontSize = "4.5rem";
+      break;
     default:
       fontSize = "1rem";
 
       break;
   }
-
+  }
+  
   return (
     <div  
-
       style={{...props.parentStyle,
         padding: props.margin ? props.margin : " 0",
         textAlign: props.align ? props.align : "center",
       }}
       className={props.posClassName}
+      onClick={props.link? handleClick : ()=>{}}
     >
       <Head
-      $border={props.border ? props.border : false}
+        $border={border ? border : false}
         style={props.style}
         className={props.className}
         color={BC}
         size={fontSize}
-        $handWritten={props.handWritten ? props.handWritten : false}
-        $inverse={props.inverse}
+        $handWritten={handWritten ? handWritten : false}
+        $inverse={inverse}
       >
         {props.children}
       </Head>
     </div>
   );
 };
+
 
 export { Heading };

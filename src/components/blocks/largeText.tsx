@@ -35,7 +35,7 @@ const LargeTextInput: React.FC<LTProps> = ({
 
   if (firebase) {
     const { path, throttle } = props as FirebaseLTProps;
-    const [value, setValue] = logic.fb.useThrottleChange(path);
+    const [value, setValue] = logic.fb.hooks.useThrottleChange(path);
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setValue(e.target.value);
     };

@@ -30,7 +30,7 @@ export const CollectionRender:React.FC<{
         }
         else{
 
-            let test = await logic.fb.getUserCollection(path)
+            let test = await logic.fb.docs.getUserCollection(path)
             if(test){
                 let dtu = test[0]
                 setVtu(determineDisplayType(dtu))

@@ -76,9 +76,8 @@ export const DBTable: React.FC<DBTableProps> = ({
       }
   },[])
 logic.hooks.useAsyncEffect(async () => {
-  const data = await logic.fb.getUserCollection(path);
+  const data = await logic.fb.docs.getUserCollection(path);
   if(data){
-  console.log(data)
   setDocs(data);
   if(manualDefault){
       setSelectedFields(new Set(manualDefault))

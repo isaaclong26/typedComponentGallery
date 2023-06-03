@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
 
 import styled from "styled-components";
@@ -11,7 +11,29 @@ const MapWrapper = styled.div`
   height: 400px; // Adjust the height as needed
 `;
 
+function hslaToHex(hsla: HSLAColor): string {
+  // Parse the HSLA color
+  const matches = hsla.match(/hsla\((\d+), (\d+)%?, (\d+)%?, (\d+(\.\d+)?)\)/);
+  if (!matches) {
+    throw new Error("Invalid HSLA color");
+  }
 
+  const h = Number(matches[1]);
+  const s = Number(matches[2]);
+  let l = Number(matches[3]);
+
+  // Convert HSL to HEX ignoring alpha
+  l /= 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
 
 function getPerceivedColor(hsla: HSLAColor): string {
   let color = chroma(hsla);
@@ -125,12 +147,14 @@ export type MapProps =
 export const Map:React.FC<MapProps> = ({path, manual, clickable = false, Expand}) => {
   const { logic, theme } = useEloise();
   const [locations, setLocations] = useState<any[]>([]);
+  const [center, setCenter] = useState<{lat: number, lng: number}>({ lat: 40.712776, lng: -74.005974 });
+  const [zoom, setZoom] = useState<number>(10);
+  const mapRef = useRef<any>(null);
 
   useEffect(() => {
     (async () => {
-
         if(path){
-      const listings = await logic.fb.getUserCollection(path);
+      const listings = await logic.fb.docs.getUserCollection(path);
       setLocations(listings.map((listing: any) => listing.data));
         }
         else if(manual){
@@ -138,6 +162,26 @@ export const Map:React.FC<MapProps> = ({path, manual, clickable = false, Expand}
         }
     })();
   }, [logic]);
+
+ 
+  const onMapLoad = React.useCallback((map: any) => {
+    mapRef.current = map;
+  }, []);
+
+  useEffect(() => {
+    if (locations.length > 0 && mapRef.current) {
+      const bounds = new window.google.maps.LatLngBounds();
+      locations.forEach((location) => {
+        if (location.addy) {
+          bounds.extend({ lat: location.addy.lat, lng: location.addy.lng });
+        }
+      });
+      mapRef.current.fitBounds(bounds);
+    }
+  }, [locations]);
+
+  
+
 
   const adjustedColors = assignThemeColors(theme);
 
@@ -178,20 +222,17 @@ export const Map:React.FC<MapProps> = ({path, manual, clickable = false, Expand}
   },[locations])
 
   return (
-    <div>
-      <Row>
-        <Col lg={8} className="mx-auto">
+    <div className="p-3">
           <MapWrapper>
               <GoogleMap
+                  onLoad={onMapLoad}
+
                 mapContainerStyle={{
                   width: "100%",
                   height: "100%",
                 }}
-                center={{
-                  lat: 40.712776,
-                  lng: -74.005974, // Initial map center coordinates, replace with yours
-                }}
-                zoom={10}
+                center={center} // Use the center state variable here
+                zoom={zoom} 
                 options={{
                   styles: mapStyles,
                   mapTypeControl: false,
@@ -201,7 +242,6 @@ export const Map:React.FC<MapProps> = ({path, manual, clickable = false, Expand}
                 {locations.map((location, index) => (
                     location.addy?
                     <Marker 
-                    icon={"./home.svg"}
                     key={index} 
                     position={{ 
                         lat: location.addy.lat, 
@@ -232,8 +272,7 @@ export const Map:React.FC<MapProps> = ({path, manual, clickable = false, Expand}
 
               </GoogleMap>
           </MapWrapper>
-        </Col>
-      </Row>
+       
     </div>
   );
 };

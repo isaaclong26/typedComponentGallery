@@ -58,11 +58,12 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
  
 
   logic.hooks.useAsyncEffect(async()=>{
+   
     if(convo.id === "eloise"){
       setMessages([{role:"assistant", content: "Hi how can I help?"}])
     }
     else{
-    let test2 = await logic.fb.getUserCollection("convos/"+ convo.id+"/messages")
+    let test2 = await logic.fb.docs.getUserCollection("convos/"+ convo.id+"/messages")
     let ots = test2.map((message:any)=> message.data)
     setMessages(ots)
     }
@@ -95,14 +96,8 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
     e.preventDefault();
     if (input.trim() === "") return;
 
-    let testUid
-        if(!uid){
-        testUid = logic.fb.getAuthenticatedUserUid()
-          setUID(testUid)
-        }
-        else{
-          testUid = uid
-        }
+  
+  
     if(convo.id === "eloise"){
       setMessages([...messages  as Array<GptMessage>, {role:'user', content:input}])
       setEloiseTyping(true); // Eloise is typing
@@ -124,19 +119,19 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
     // Replace with the current user's ID
     let newId = uuidv4()
 
-    logic.fb.setUserDoc("convos/"+convo.id + "/messages/"+ newId, {
+    logic.fb.docs.setUserDoc("convos/"+convo.id + "/messages/"+ newId, {
       content: input,
-      senderId:testUid,
+      senderId: uid,
     });
 
     if(convo.id !== "eloise"){
 
-      let newMessage: Message = {content: input, senderId:testUid, id:newId}
+      let newMessage: Message = {content: input, senderId:uid, id:newId}
        setMessages([...messages as Message[], newMessage ]);
 
-    logic.fb.setOtherUserDoc("convos/"+convo.id + "/messages/"+ newId,  {
+    logic.fb.docs.setOtherUserDoc("convos/"+convo.id + "/messages/"+ newId,  {
         content: input,
-        senderId:testUid,
+        senderId:uid,
       }, convo.connectedTo);
     }
   

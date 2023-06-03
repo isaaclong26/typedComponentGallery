@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import {Addy } from "../../";
+import {Addy, useEloise } from "../../";
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import Modal from "react-bootstrap/Modal";
 
@@ -36,9 +36,7 @@ export const StyledInput = styled.input<{ border?: boolean }>`
   color: ${(props) => props.theme.color};
   background-color: ${(props) => props.theme.white};
   border: ${(props) => (props.border ? props.theme.border : "none")};
-  border-radius: ${(props) => props.theme.borderRadius};
   transition: border 0.2s;
-
   &:focus {
     outline: none;
     border: ${(props) => (props.border ? props.theme.borderFocused : "none")};
@@ -84,23 +82,27 @@ export const StyledLabel = styled.label<{ hasValue: boolean }>`
  * @property {boolean} [warning=false] - Whether to display a warning modal when the user attempts to change the input field value.
  * @property {string} [warningMessage] - The warning message to display in the modal.
  */
-export interface InputProps {
-  label: string;
+
+export interface DefaultInputProps {
   onEnter?: () => void;
   extLabel?: boolean;
   border?: boolean;
-  state: any | undefined;
-  setState: React.Dispatch<React.SetStateAction<any>>;
   placeholder?: string;
   type?: string;
+  style?: React.CSSProperties;
+  rounded?: boolean;
+  
+}
+export interface InputProps extends DefaultInputProps {
+  label: string;
+  state: any | undefined;
+  setState: React.Dispatch<React.SetStateAction<any>>;
+  cacheKey?: string;
   locked?: boolean;
   warning?: boolean;
-  warningMessage?: string;
-  style?: React.CSSProperties;
-  rounded?:boolean;
+  warningMessage?: string;  
   addy?: boolean;
-  cache?: boolean;
-  cacheKey?: string;
+
 }
 
 /**
@@ -124,24 +126,28 @@ export interface InputProps {
  * @returns {JSX.Element} A styled input component.
  */
 
-const Input: React.FC<InputProps> = ({
-  label,
-  extLabel = false,
-  border = true,
-  state,
-  setState,
-  placeholder = "",
-  type,
-  onEnter,
-  locked = false,
-  warning = false,
-  warningMessage = "",
-  style,
-  rounded = false,
-  addy = false,
-  cache = false,
-  cacheKey = "",
-}) => {
+const Input: React.FC<InputProps> = (props:InputProps) => {
+
+  const {theme} = useEloise()
+
+  const {
+    label,
+    extLabel,
+    border,
+    state,
+    setState,
+    placeholder,
+    type,
+    onEnter,
+    locked,
+    warning,
+    warningMessage,
+    style,
+    rounded,
+    addy,
+    cacheKey,
+  } = { ...theme.input, ...props };
+
     const [hasValue, setHasValue] = useState<boolean>(false)
   
     const [showWarningModal, setShowWarningModal] = useState(false);
@@ -242,25 +248,25 @@ const Input: React.FC<InputProps> = ({
     }, [state]);
   
     useEffect(() => {
-      if (cache && cacheKey !== "") {
+      if (cacheKey !== undefined) {
         const cachedValue = localStorage.getItem(cacheKey);
         if (cachedValue !== null) {
           setState(cachedValue);
         }
       }
-    }, [cache, cacheKey]);
+    }, [ cacheKey]);
   
     useEffect(() => {
-      if (cache && cacheKey !== "") {
+      if (cacheKey !== undefined) {
         localStorage.setItem(cacheKey, state);
       }
   
       return () => {
-        if (cache && cacheKey !== "") {
+        if (cacheKey !== undefined) {
           localStorage.removeItem(cacheKey);
         }
       };
-    }, [cache, cacheKey, state]);
+    }, [ cacheKey, state]);
 
     return (
       <>

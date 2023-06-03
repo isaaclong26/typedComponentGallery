@@ -28,9 +28,9 @@ const Convo: React.FC<{select?:Function, path:string}> = ({select, path})=>{
 
     logic.hooks.useAsyncEffect(async()=>{
 
-        let test = await logic.fb.getUserDoc(path)
+        let test = await logic.fb.docs.getUserDoc(path)
         setValue(test)
-        let test2 = await logic.fb.getUserCollection(path+"/messages")
+        let test2 = await logic.fb.docs.getUserCollection(path+"/messages")
         setFirst(test2[0].data.content)
     },[])
 
@@ -74,7 +74,7 @@ export const ConvoList:React.FC<{select:Function}> = ({select})=>{
   logic.hooks.useAsyncEffect(async()=>{
 
 
-        let test = await logic.fb.getUserCollection("convos")
+        let test = await logic.fb.docs.getUserCollection("convos")
         setDocs(test)
 
 

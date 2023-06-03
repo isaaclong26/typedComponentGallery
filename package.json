@@ -1,6 +1,6 @@
 {
   "name": "typed-component-gallery",
-  "version": "1.7.129",
+  "version": "1.7.142",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {

@@ -2,8 +2,10 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import {
   DocumentData,
+  addDoc,
   arrayRemove,
   arrayUnion,
+  deleteDoc,
   doc,
   getFirestore,
   query,
@@ -24,15 +26,14 @@ import { getDatabase } from "firebase/database";
 import { collection, getDocs, getDoc } from "firebase/firestore";
 import { throttle } from "lodash";
 import { useEffect, useState } from "react";
-import { useCollection } from "react-firebase-hooks/firestore";
 import { FirebaseConfig, SiteConfig } from "..";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { HooksMethods, DocsMethods, StorageMethods, ContactsMethods } from "./firebasetypes";
+import { HooksMethods, DocsMethods, StorageMethods, ContactsMethods , Contact, User} from "./firebasetypes";
 
 /**
  * The FB class provides methods for interacting with Firebase services.
  */
-interface FBInterface {
+export interface FBInterface {
   /**
    * The Firestore app instance.
    *
@@ -81,31 +82,38 @@ interface FBInterface {
    * @param {any} config The configuration object.
    * @param {SiteConfig} siteConfig The site configuration.
    */
+  contacts: ContactsMethods,
+  docs: DocsMethods,
+  hooks: HooksMethods,
+  storageMethods: StorageMethods
+  getAuthenticatedUserUid(): string  ;
 }
 
 class FB implements FBInterface {
-  app: any;
-  db: any;
-  auth: any;
-  storage: any;
-  database: any;
+  app: any = '';
+  db: any = '';
+  auth: any = '';
+  storage: any = '';
+  database: any = '';
   siteConfig: SiteConfig;
 
   constructor(config: any, siteConfig: SiteConfig) {
+    if(config.config){
     this.app = initializeApp(config.config);
     this.db = getFirestore(this.app);
     this.auth = getAuth(this.app);
     this.storage = getStorage(this.app);
     this.database = getDatabase(this.app);
+    }
     this.siteConfig = siteConfig;
   }
 
-  getAuthenticatedUserUid(): string | null {
+  getAuthenticatedUserUid= ()=> {
     const user = this.auth.currentUser;
     if (user) {
       return user.uid;
     } else {
-      return null;
+      return 'not logged in';
     }
   }
 
@@ -265,75 +273,144 @@ class FB implements FBInterface {
         }
       }
     },
+    uploadFileNoAuth:async(path: string, file: File)=> {
+      const storageRef = ref(this.storage, path + "/" + file.name);
+  
+      try {
+        const uploadTask = uploadBytesResumable(storageRef, file);
+  
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            // You can use this function to observe state change events such as progress, pause, and resume
+            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("Upload is " + progress + "% done");
+          },
+          (error) => {
+            // Handle unsuccessful uploads
+            console.error(error);
+          },
+          () => {
+            // Handle successful uploads on complete
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              console.log("File available at", downloadURL);
+              return downloadURL; // you can return the URL of the uploaded file here
+            });
+          }
+        );
+      } catch (error) {
+        console.error("Error uploading file:", error);
+      }
+    },
+   deleteFile:async(path: string)=> {
+      const storageRef = ref(this.storage, path);
+  
+      try {
+        await deleteObject(storageRef);
+        console.log("File deleted successfully");
+      } catch (error) {
+        console.error("Error deleting file:", error);
+      }
+    },
   };
 
   contacts: ContactsMethods = {
     getUserContacts: async () => {
       const uid = this.getAuthenticatedUserUid();
-
-      const userDocRef = doc(
+    
+      const userContactsCollectionRef = collection(
         this.db,
-        "users/" + uid + "/" + this.siteConfig.id + "/Main"
+        "users/" + uid + "/" + this.siteConfig.id + "/Main/contacts"
       );
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists() || !userDoc.data().contacts) {
-        console.warn("User document or contacts field not found");
-        return [];
-      }
-
-      let contactObjects = [];
-      const contactIds = userDoc.data().contacts;
-
-      for (let contactId of contactIds) {
-        const contactDocRef = doc(this.db, "users/" + contactId);
-        const contactDoc = await getDoc(contactDocRef);
-
-        if (!contactDoc.exists()) {
-          console.warn("Contact document not found");
-          continue;
-        }
-
+      const contactsQuerySnapshot = await getDocs(userContactsCollectionRef);
+    
+      let contactObjects: Array<Contact> = [];
+      contactsQuerySnapshot.forEach((contactDoc) => {
         const contactData = contactDoc.data();
-
+    
         contactObjects.push({
-          id: contactId,
-          first: contactData.first,
-          last: contactData.last,
+          user: contactData.user,
+          type: contactData.type,
+          initials: contactData.initials,
           email: contactData.email,
         });
-      }
-
+      });
+    
       return contactObjects;
     },
-
-    addUserToContacts: async (userIdToAdd: string) => {
+    
+    addExistingUserToContacts: async (userId: string, type: string) => {
       const uid = this.getAuthenticatedUserUid();
-
-      const userDocRef = doc(
+    
+      const contactUserDocRef = doc(this.db, "users/" + userId);
+      const contactUserDoc = await getDoc(contactUserDocRef);
+    
+      if (!contactUserDoc.exists()) {
+        console.warn("User document not found");
+        return;
+      }
+    
+      const contactUserData = contactUserDoc.data();
+    
+      const newContact: Contact = {
+        user: userId,
+        type: type,
+        initials: contactUserData.first[0] + contactUserData.last[0],
+        email: contactUserData.email,
+      };
+    
+      const userContactsCollectionRef = collection(
         this.db,
-        "users/" + uid + "/" + this.siteConfig.id + "/Main"
+        "users/" + uid + "/" + this.siteConfig.id + "/Contacts"
       );
-
-      // Using Firestore's arrayUnion to add the userIdToAdd to the contacts field
-      await updateDoc(userDocRef, {
-        contacts: arrayUnion(userIdToAdd),
-      });
+    
+      await addDoc(userContactsCollectionRef, newContact);
     },
-
-    removeUserFromContacts: async (userIdToRemove: string) => {
+    
+    addNewUserToContacts: async (user: User, type: string) => {
       const uid = this.getAuthenticatedUserUid();
-
-      const userDocRef = doc(
+    
+      // Create the new user document
+      const newUserDocRef = doc(this.db, "users");
+      const newUser = {
+        ...user,
+        account: false,
+      };
+    
+      await setDoc(newUserDocRef, newUser);
+    
+      const newUserId = newUserDocRef.id;
+    
+      const newContact: Contact = {
+        user: newUserId,
+        type: type,
+        initials: user.first[0] + user.last[0],
+        email: user.email,
+      };
+    
+      const userContactsCollectionRef = collection(
         this.db,
-        "users/" + uid + "/" + this.siteConfig.id + "/Main"
+        "users/" + uid + "/" + this.siteConfig.id + "/Contacts"
       );
-
-      // Using Firestore's arrayRemove to remove the userIdToRemove from the contacts field
-      await updateDoc(userDocRef, {
-        contacts: arrayRemove(userIdToRemove),
-      });
+    
+      await addDoc(userContactsCollectionRef, newContact);
     },
+    
+    
+    removeUserFromContacts: async (contactIdToRemove: string) => {
+      const uid = this.getAuthenticatedUserUid();
+    
+      const contactDocRef = doc(
+        this.db,
+        "users/" + uid + "/" + this.siteConfig.id + "/Main/contacts/" + contactIdToRemove
+      );
+    
+      // Deleting the document in the contacts collection
+      await deleteDoc(contactDocRef);
+    },
+    
     searchAllUsers: async(email: string) =>{
       let ots;
       try {
@@ -352,8 +429,9 @@ class FB implements FBInterface {
         console.log("Error getting documents: ", error);
       }
   
-      return ots ? ots : "no user found";
-    }
+      return ots ? ots : null;
+    },
+    
   };
 
   docs: DocsMethods = {
@@ -436,47 +514,7 @@ class FB implements FBInterface {
 
   // Make sure to define getAuthenticatedUserUid() and this.siteConfig.id properties in the class
 
-   uploadFileNoAuth:async(path: string, file: File)=> {
-    const storageRef = ref(this.storage, path + "/" + file.name);
-
-    try {
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          // You can use this function to observe state change events such as progress, pause, and resume
-          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
-        },
-        (error) => {
-          // Handle unsuccessful uploads
-          console.error(error);
-        },
-        () => {
-          // Handle successful uploads on complete
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log("File available at", downloadURL);
-            return downloadURL; // you can return the URL of the uploaded file here
-          });
-        }
-      );
-    } catch (error) {
-      console.error("Error uploading file:", error);
-    }
-  },
- deleteFile:async(path: string)=> {
-    const storageRef = ref(this.storage, path);
-
-    try {
-      await deleteObject(storageRef);
-      console.log("File deleted successfully");
-    } catch (error) {
-      console.error("Error deleting file:", error);
-    }
-  },
+ 
  getUserDoc: async(path: string) =>{
     const test = this.getAuthenticatedUserUid();
     if (!test) {

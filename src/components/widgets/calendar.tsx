@@ -51,7 +51,7 @@ const CalendarComponent:React.FC<CalendarProps> = ({Events, path, onSelect, onNe
       setEvents(Events)
     }
     if(path){
-      let ats = logic.fb.getUserCollection(path)
+      let ats = await logic.fb.docs.getUserCollection(path)
       if(ats){
         setEvents(ats.map((x:any)=>{return{title:x.data.title, start: x.data.date, end: x.data.date, id:x.id}}))
       }

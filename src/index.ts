@@ -1,325 +1,295 @@
-import Eloise,{EloiseIntel, useEloise} from "./App"
-import { Logic } from './functions';
-import { ViewCol, View } from "./components/blocks/View";
-import { DBItem, DBList, DBListProps } from "./components/widgets/dbList";
-import {DBTable, DBTableProps } from "./components/widgets/DBTable";
-import {DBCards, CardListProps } from "./components/widgets/DBCards";
-import { FileUpload, FileUploadProps } from "./components/widgets/fileUpload";
-import {CollectionRender} from "./components/widgets/CollectionRender";
-import LargeTextInput from "./components/blocks/largeText";
-import { EloiseWidget } from "./components/widgets/EloiseWidget";
 import React, { ReactNode } from "react";
-import CalendarComponent from "./components/widgets/calendar";
-
-import {Map, MapProps} from "./components/widgets/map";
+import Eloise, { EloiseIntel, useEloise } from "./App";
+import { Logic, ColorMethods, HSLAColor} from "./functions";
 
 import {
-    // pages
-    Home,
-    Login,
-    Other,
-    ReportBug,
-    //todo Account
+  // pages
+  Home,
+  Checkbox,
+  Login,
+  //todo Account
+  Other,
+  ReportBug,
+  // widgets
+  Header,
+  FileTable,
+  DBTable,
+  DBTableProps,
+  DBCards,
+  CardListProps,
+  FileUploadProps,
+  FileUpload,
+  CollectionRender,
+  EloiseChat,
+  Footer,
+  CalendarComponent,
+  ConvoList,
+  Chat,
+  Map,
+  MapProps,
+  DBItem,
+  DBList,
+  DBListProps,
+  EloiseWidget,
 
-    // widgets
-    Header,
-    //todo Footer
-    Checkbox,
-
-    //blocks
-
-    ChildrenModal,
-    ConfirmationModal,
-    Button,
-    Loading,
-    Canvas,
-    Heading,
-    Input,
-    InputProps,
-    AppIcon,
-    DropDown,
-    Life,
-
-    DateSelector
-
-
-}  from "./components"
-
+  //blocks
+  DateSelector,
+  ChildrenModal,
+  ConfirmationModal,
+  Button,
+  Loading,
+  TypeWriter,
+  Canvas,
+  Heading,
+  Input,
+  InputProps,
+  AppIcon,
+  DropDown,
+  Life,
+  ViewCol,
+  View,
+  LargeTextInput,
+} from "./components";
+import { DefaultHeadingProps, HeadingProps } from "./components/blocks/heading";
+import { DefaultInputProps } from "./components/blocks/input";
 
 export {
-    //Setup 
-    Map, 
-    MapProps,
-    Eloise,
-    useEloise,
-    EloiseWidget,
-    // Logic 
-    DBTable, DBTableProps,
-    DBCards, CardListProps,
-    Logic,
-    DBItem, DBList, DBListProps,
-    FileUpload, FileUploadProps,
-    CollectionRender,
-    DateSelector,
-    //components
-        // pages
-        Home,
-        Login,
-        Other,
-        ReportBug,
-        //todo Account
-    
-        CalendarComponent,
+  //Setup
+  Map,
+  MapProps,
+  Eloise,
+  useEloise,
+  EloiseWidget,
+  // Logic
+  DBTable,
+  DBTableProps,
+  DBCards,
+  CardListProps,
+  Logic,
+  DBItem,
+  DBList,
+  DBListProps,
+  FileUpload,
+  FileUploadProps,
+  CollectionRender,
+  DateSelector,
+  //components
+  // pages
+  Home,
+  Login,
+  Other,
+  ReportBug,
+  //todo Account
+  CalendarComponent,
 
-        // widgets
-        Header,
-        //todo Footer
+  // widgets
+  Header,
+  FileTable,
+  //todo Footer
+  Checkbox,
+  //blocks
+  ChildrenModal,
+  ConfirmationModal,
+  Button, // Updated
+  Loading,
+  Canvas,
+  Heading,
+  Input, // Updated
+  InputProps,
+  AppIcon,
+  DropDown,
+  Life,
+  View,
+  ViewCol,
+  LargeTextInput,
+  HSLAColor
+};
 
-        Checkbox,
-        //blocks
-        ChildrenModal,
-        ConfirmationModal,
-        Button,// Updated
-        Loading,
-        Canvas,
-        Heading,
-        Input,// Updated
-        InputProps,
-        AppIcon,
-        DropDown,
-        Life,
-        View,
-        ViewCol,
-        LargeTextInput
-    }
+export interface EloisePage {
+  name: string;
+  component?: ReactNode;
+  pages?: EloisePage[];
+  hidden?: boolean;
+  url?: string;
+  intel?: EloiseIntel;
+  noAuth?: boolean;
+}
+export interface SideWidget {
+  name: string;
+  component: React.FC;
+}
 
-    export interface EloisePage {
-      name: string;
-      component?: ReactNode;
-      pages?: EloisePage[];
-      hidden?: boolean
-      url?: string
-      intel?: EloiseIntel,
-      noAuth?: boolean
-    }
-    export interface SideWidget {
-      name: string;
-      component: React.FC;
-    }
+export interface EloiseConfig {
+  endPoint: string;
+  chatLog: string;
+  initMessage: string;
+}
 
-    export interface EloiseConfig {
-        endPoint: string;
-        chatLog: string;
-        initMessage: string;
+export interface SiteConfig {
+  api: string;
+  name: string;
+  id: string;
+  pages: EloisePage[];
+  logo: string;
+  inverseLogo: string;
+  sideWidget: SideWidget[];
+  eloiseConfig: EloiseConfig;
+  headerTrans: boolean;
+  bugReporting?: boolean;
+  userConfig?: UserConfig;
+}
 
-    }
-    
-    export interface SiteConfig {
-      api:string;
-      name: string;
-      id: string;
-      pages: EloisePage[];
-      logo: string;
-      inverseLogo:string;
-      sideWidget: SideWidget[];
-      eloiseConfig:EloiseConfig;
-      headerTrans : boolean;
-      bugReporting?: boolean;
-      userConfig?: UserConfig;
-    }
+export interface UserConfig {
+  customFields: string[];
+}
 
-    export interface UserConfig {
-      customFields: string[]
-    }
+export interface FirebaseConfig {
+  config: {
+    apiKey: string;
+    authDomain: string;
+    databaseURL: string;
+    projectId: string;
+    storageBucket: string;
+    messagingSenderId: string;
+    appId: string;
+    measurementId?: string;
+  };
+  storageDir: string;
+}
 
-      export interface FirebaseConfig {
-        config:{apiKey: string;
-        authDomain: string;
-        databaseURL: string;
-        projectId: string;
-        storageBucket: string;
-        messagingSenderId: string;
-        appId: string;
-        measurementId?: string;
-        };
-        storageDir: string
-      }
-      
-      export interface Addy{
-        street: string;
-        city: string;
-        state: string;
-        lat: number; 
-        lng: number
-      }
-     
-      
-      export interface CheckboxProps {
-        label: string;
-        state: boolean;
-        setState: (value: boolean) => void;
-      }
-      /**
-       * A styled checkbox component that can be used for various purposes.
-       *
-       * @component
-       * @example
-       * ```jsx
-       * <Checkbox
-       *   label="Agree to Terms and Conditions"
-       *   state={agreeTerms}
-       *   setState={setAgreeTerms}
-       * />
-       * ```
-       * @param {Object} props - The props object for the component.
-       * @param {string} props.label - The label to display next to the checkbox.
-       * @param {boolean} props.state - The state value for the checkbox.
-       * @param {function} props.setState - The function to set the state value for the checkbox.
-       * @returns {JSX.Element} A styled checkbox component.
-       **/
-      // Style Types
-      
-      /**
-       * Defines an HSLA color type, formatted as a string
-       * @example
-       * ```
-       * hsla(23, 34%, 54% 100)
-       * ```
-       */
-      
-      export type HSLAColor = `hsla(${number}, ${number}%, ${number}%, ${number})`;
-      /**
-       * Defines a font size type, with accepted values as strings. 
-       * Valid values are:
-       * - Predefined font sizes: 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'smaller', and 'larger'
-       * - Sizes specified in pixels: e.g. '14px', '20px'
-       * - Sizes specified in ems: e.g. '1.2em', '2em'
-       * - Sizes specified in percentage: e.g. '50%', '100%'
-       */
-      export type FontSize =
-        | "xx-small"
-        | "x-small"
-        | "small"
-        | "medium"
-        | "large"
-        | "x-large"
-        | "xx-large"
-        | "smaller"
-        | "larger"
-        | `${number}px`
-        | `${number}em`
-        | `${number}%`;
-      
-      /**
-       * Defines a border radius type, with accepted values as strings.
-       * Valid values are:
-       * - Sizes specified in pixels: e.g. '4px', '10px'
-       * - Sizes specified in percentage: e.g. '50%', '100%'
-       * - 'none' to remove border radius
-       * - 'initial' to set the border radius to its initial value
-       * - 'inherit' to inherit the border radius from the parent element
-       */
-      export type BorderRadius =
-        | `${number}px`
-        | `${number}%`
-        | "none"
-        | "initial"
-        | "inherit";
-      
-      /**
-       * An interface for color methods that includes functions to lighten, darken, and get text color from a background color.
-       */
-      export interface ColorMethods {
-        /**
-         * A function that lightens an HSLA color value by a specified amount.
-         * 
-         * @param hslaColor - The HSLA color value to be lightened.
-         * @returns The new HSLA color value that has been lightened.
-         */
-        lighten: (hslaColor: HSLAColor) => HSLAColor;
-        
-        /**
-         * A function that darkens an HSLA color value by a specified amount.
-         * 
-         * @param hslaColor - The HSLA color value to be darkened.
-         * @returns The new HSLA color value that has been darkened.
-         */
-        darken: (hslaColor: HSLAColor) => HSLAColor;
-        
-        /**
-         * A function that returns the text color that provides the best contrast against a given HSLA background color.
-         * 
-         * @param backgroundColor - The HSLA color value of the background color.
-         * @returns The HSLA color value of the text color that has the best contrast against the given background color.
-         */
-        getTextColorFromBackground: (backgroundColor: HSLAColor) => HSLAColor;
+export interface Addy {
+  street: string;
+  city: string;
+  state: string;
+  lat: number;
+  lng: number;
+}
 
-        getPerceivedColor:(hsla: HSLAColor)=> string;
+export interface CheckboxProps {
+  label: string;
+  state: boolean;
+  setState: (value: boolean) => void;
+}
+/**
+ * A styled checkbox component that can be used for various purposes.
+ *
+ * @component
+ * @example
+ * ```jsx
+ * <Checkbox
+ *   label="Agree to Terms and Conditions"
+ *   state={agreeTerms}
+ *   setState={setAgreeTerms}
+ * />
+ * ```
+ * @param {Object} props - The props object for the component.
+ * @param {string} props.label - The label to display next to the checkbox.
+ * @param {boolean} props.state - The state value for the checkbox.
+ * @param {function} props.setState - The function to set the state value for the checkbox.
+ * @returns {JSX.Element} A styled checkbox component.
+ **/
+// Style Types
 
-        hslaToHex: (hsla: HSLAColor) => string;
-      }
-      
-      
-      // Defines an interface for theme colors
-      export interface Theme {
-        primary: HSLAColor;
-        secondary: HSLAColor;
-        white: HSLAColor;
-        font: string;
-        fontSize: FontSize;
-        borderRadius: BorderRadius;
-        border: string;
-        accent: HSLAColor;
-        grey: HSLAColor;
-        mode: 'light' | 'dark' | 'auto';
-      }
-      
-      
-      
-      //component props 
+/**
+ * Defines a font size type, with accepted values as strings.
+ * Valid values are:
+ * - Predefined font sizes: 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'smaller', and 'larger'
+ * - Sizes specified in pixels: e.g. '14px', '20px'
+ * - Sizes specified in ems: e.g. '1.2em', '2em'
+ * - Sizes specified in percentage: e.g. '50%', '100%'
+ */
+export type FontSize =
+  | "xx-small"
+  | "x-small"
+  | "small"
+  | "medium"
+  | "large"
+  | "x-large"
+  | "xx-large"
+  | "smaller"
+  | "larger"
+  | `${number}px`
+  | `${number}em`
+  | `${number}%`;
 
-      
+/**
+ * Defines a border radius type, with accepted values as strings.
+ * Valid values are:
+ * - Sizes specified in pixels: e.g. '4px', '10px'
+ * - Sizes specified in percentage: e.g. '50%', '100%'
+ * - 'none' to remove border radius
+ * - 'initial' to set the border radius to its initial value
+ * - 'inherit' to inherit the border radius from the parent element
+ */
+export type BorderRadius =
+  | `${number}px`
+  | `${number}%`
+  | "none"
+  | "initial"
+  | "inherit";
 
-      
-      type CSSHeight =
+/**
+ * An interface for color methods that includes functions to lighten, darken, and get text color from a background color.
+ */
+
+
+// Defines an interface for theme colors
+export interface Theme {
+  primary: HSLAColor;
+  secondary: HSLAColor;
+  white: HSLAColor;
+  font: string;
+  fontSize: FontSize;
+  borderRadius: BorderRadius;
+  border: string;
+  accent: HSLAColor;
+  grey: HSLAColor;
+  mode: "light" | "dark" | "auto";
+  heading?: DefaultHeadingProps;
+  input?: DefaultInputProps;
+
+}
+
+//component props
+
+type CSSHeight =
   | `${number}px`
   | `${number}%`
   | `${number}vh`
   | `${number}vw`
   | `${number}vmin`
   | `${number}vmax`
-  | 'auto';
+  | "auto";
 
 // Usage examples
 
-      //large Text
-      
-      export interface BaseLTProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-        placeholder?: string;
-        height?: CSSHeight
-      }
-      
-      export interface RegularLTProps extends BaseLTProps {
-        firebase?: false; // Indicates that this is not a Firebase button
-        state: string;
-        setState: React.Dispatch<React.SetStateAction<string>>;
-      }
-      
-      export interface FirebaseLTProps extends BaseLTProps {
-        firebase: true; // Indicates that this is a Firebase button
-        path: string; // The path in Firebase where the data should be stored
-        throttle?: number | false; // The number of milliseconds
-      }
-      
-      export type LTProps = RegularLTProps | FirebaseLTProps;
+//large Text
 
+export interface BaseLTProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  placeholder?: string;
+  height?: CSSHeight;
+}
 
+export interface RegularLTProps extends BaseLTProps {
+  firebase?: false; // Indicates that this is not a Firebase button
+  state: string;
+  setState: React.Dispatch<React.SetStateAction<string>>;
+}
 
-      /**
+export interface FirebaseLTProps extends BaseLTProps {
+  firebase: true; // Indicates that this is a Firebase button
+  path: string; // The path in Firebase where the data should be stored
+  throttle?: number | false; // The number of milliseconds
+}
+
+export type LTProps = RegularLTProps | FirebaseLTProps;
+
+/**
  * CustomChatType is a React component type that accepts a single prop called 'data' of any type.
  * @typedef {React.ComponentType<{ data: any }>} CustomChatType
  */
-   type CustomChatType = React.ComponentType<{ data: any }>;
+type CustomChatType = React.ComponentType<{ data: any }>;
 /**
  * TextMessage is an object representing a text message in the chat.
  * @typedef {Object} TextMessage
@@ -328,10 +298,10 @@ export {
  * @property {"Text"} type - The type of the message, in this case, 'Text'.
  */
 export type TextMessage = {
-        text: string;
-        sender: "user" | "ai";
-        type: "Text";
-    };
+  text: string;
+  sender: "user" | "ai";
+  type: "Text";
+};
 /**
  * CustomMessage is an object representing a custom message in the chat with a custom React component.
  * @typedef {Object} CustomMessage
@@ -341,47 +311,44 @@ export type TextMessage = {
  * @property {CustomChatType} component - A React component to render for the custom message.
  * @property {any} data - The data to be passed to the custom React component as a prop.
  */
- export type CustomMessage = {
-        text: string;
-        sender: "user" | "ai";
-        type: "Custom";
-        component: CustomChatType;
-        data:any;
-    };
+export type CustomMessage = {
+  text: string;
+  sender: "user" | "ai";
+  type: "Custom";
+  component: CustomChatType;
+  data: any;
+};
 /**
  * MessageType is a union type representing either a TextMessage or CustomMessage.
  * @typedef {TextMessage | CustomMessage} MessageType
  */
-    export  type MessageType = TextMessage | CustomMessage;
+export type MessageType = TextMessage | CustomMessage;
 
+export interface BaseEloiseUser {
+  preName?: string;
+  eduLevel?: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  phoneNumber?: string;
+  country?: string;
+  email: string;
+  perms?: string;
+  createdAt?: string;
+  curieUsage?: number;
+  davinciUsage?: number;
+  userId?: string;
+  year?: string;
+  school?: string;
+}
 
-   export interface BaseEloiseUser {
-      preName?: string;
-      eduLevel?: string;
-      firstName?: string;
-      lastName?: string;
-      username?: string;
-      phoneNumber?: string;
-      country?: string;
-      email: string;
-      perms?: string;
-      createdAt?: string;
-      curieUsage?: number;
-      davinciUsage?: number;
-      userId?: string;
-      year?: string;
-      school?: string;
-    }
+export interface HistoryItem {
+  createdAt?: string;
+  lastAccess?: string;
+  data: any;
+}
 
-    export interface HistoryItem {
-      createdAt?: string;
-      lastAccess?:string;
-      data: any;
-    }
-    
-    
-    
- /**
+/**
  * An object representing the Eloise user.
  * @typedef {Object} EloiseUserObject
  * @property {function(): Promise<HistoryItem[]|boolean>} getHistory - Returns the history items for the current user or false if an error occurs.
@@ -420,6 +387,3 @@ export type TextMessage = {
  * An object representing the Eloise user.
  * @type {EloiseUserObject}
  */
-
-   
-    

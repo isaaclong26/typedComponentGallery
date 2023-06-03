@@ -1,5 +1,32 @@
-import { HSLAColor, ColorMethods } from "../";
 import chroma from "chroma-js";
+import { Theme } from "..";
+
+
+export type ThemeColor = "primary" | "secondary" | 'accent' | 'grey' | HSLAColor | string
+
+export const getColor = (color: ThemeColor , theme:Theme):ThemeColor=>{
+      switch(color){
+        case "primary":
+          return theme.primary
+        case "secondary":
+          return theme.secondary
+        case "accent":
+          return theme.accent;
+        case 'grey':
+          return theme.grey;
+        default: return color;
+      }
+}
+
+/**
+ * Defines an HSLA color type, formatted as a string
+ * @example
+ * ```
+ * hsla(23, 34%, 54% 100)
+ * ```
+ */
+
+export type HSLAColor = `hsla(${number}, ${number}%, ${number}%, ${number})`;
 
 /**
  * A collection of color utility methods.
@@ -40,7 +67,38 @@ import chroma from "chroma-js";
  * @returns {HSLAColor} The appropriate text color to use with the provided background color.
  * @throws {Error} If the provided color is not a valid HSLA color.
  */
+/**
+ * An interface for color methods that includes functions to lighten, darken, and get text color from a background color.
+ */
+export interface ColorMethods {
+  /**
+   * A function that lightens an HSLA color value by a specified amount.
+   *
+   * @param hslaColor - The HSLA color value to be lightened.
+   * @returns The new HSLA color value that has been lightened.
+   */
+  lighten: (hslaColor: HSLAColor) => HSLAColor;
 
+  /**
+   * A function that darkens an HSLA color value by a specified amount.
+   *
+   * @param hslaColor - The HSLA color value to be darkened.
+   * @returns The new HSLA color value that has been darkened.
+   */
+  darken: (hslaColor: HSLAColor) => HSLAColor;
+
+  /**
+   * A function that returns the text color that provides the best contrast against a given HSLA background color.
+   *
+   * @param backgroundColor - The HSLA color value of the background color.
+   * @returns The HSLA color value of the text color that has the best contrast against the given background color.
+   */
+  getTextColorFromBackground: (backgroundColor: HSLAColor) => HSLAColor;
+
+  getPerceivedColor: (hsla: HSLAColor) => string;
+
+  hslaToHex: (hsla: HSLAColor) => string;
+}
 
 export const color:ColorMethods={
 

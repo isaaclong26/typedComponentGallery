@@ -39,7 +39,7 @@ export const DBCards: React.FC<CardListProps> = (props) => {
   const navigate = useNavigate();
 
   logic.hooks.useAsyncEffect(async () => {
-    const data = await logic.fb.getUserCollection(path);
+    const data = await logic.fb.docs.getUserCollection(path);
     setDocs(data);
   }, []);
 

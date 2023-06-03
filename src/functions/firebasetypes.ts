@@ -1,3 +1,26 @@
+export interface User {
+  first: string;
+  last: string;
+  email: string;
+  account: boolean;
+  phone?: number;
+  apps: Array<string>;
+  usage?: {
+    gpt?: number;
+    api?: number;
+  };
+  username?: string;
+}
+
+export interface Contact {
+  user:string;
+  type: string;
+  initials:string;
+  email:string;
+}
+
+
+
 export interface StorageMethods {
     /**
      * Gets the user's storage folder.
@@ -52,51 +75,77 @@ export interface StorageMethods {
       fullPath: string;
       downloadURL: string;
     }> | boolean;
+
+      // Make sure to define getAuthenticatedUserUid() and this.siteConfig.id properties in the class
+  
+    /**
+     * Uploads a file without authentication.
+     *
+     * @param {string} path The path to the file to upload.
+     * @param {File} file The file to upload.
+     * @returns {Promise<string>} A promise that resolves with the URL of the uploaded file, or null if the file could not be uploaded.
+     */
+    uploadFileNoAuth(path: string, file: File): Promise<any>;
+  
+    /**
+     * Deletes a file.
+     *
+     * @param {string} path The path to the file to delete.
+     * @returns {Promise<void>} A promise that resolves when the file is deleted.
+     */
+    deleteFile(path: string): Promise<void>;
+  
   }
+ 
+  
   export interface ContactsMethods {
     /**
      * Gets the user's contacts.
      *
-     * @returns {Promise<{
-     *   id: string;
-     *   first: string;
-     *   last: string;
-     *   email: string;
-     * }[]>} A promise that resolves with an array of contact objects for the user.
+     * @returns {Promise<Contact[]>} A promise that resolves with an array of contact objects for the user.
      * @throws {Error} If the user is not authenticated.
      */
-    getUserContacts(): Promise<{
-      id: string;
-      first: string;
-      last: string;
-      email: string;
-    }[]>;
+    getUserContacts(): Promise<Contact[]>;
   
+   
+  /**
+   * Adds an existing user to the user's contacts.
+   *
+   * @param {string} userId The ID of the existing user to add to the user's contacts.
+   * @param {string} type The type of the contact.
+   * @returns {Promise<void>} A promise that resolves when the existing user is added to the user's contacts.
+   * @throws {Error} If the user is not authenticated, or if the userId is invalid.
+   */
+  addExistingUserToContacts(userId: string, type: string): Promise<void>;
+
+  /**
+   * Adds a new user to the user's contacts and creates a new user in the database.
+   *
+   * @param {User} user The new user to add to the user's contacts and to the database.
+   * @param {string} type The type of the contact.
+   * @returns {Promise<void>} A promise that resolves when the new user is added to the user's contacts and the database.
+   * @throws {Error} If the user is not authenticated, or if the user data is invalid.
+   */
+  addNewUserToContacts(user: User, type: string): Promise<void>;
+
     /**
-     * Adds a user to the user's contacts.
+     * Removes a contact from the user's contacts.
      *
-     * @param {string} userIdToAdd The ID of the user to add to the user's contacts.
-     * @returns {Promise<void>} A promise that resolves when the user is added to the user's contacts.
-     * @throws {Error} If the user is not authenticated, or if the user ID is invalid.
+     * @param {string} contactIdToRemove The ID of the contact to remove from the user's contacts.
+     * @returns {Promise<void>} A promise that resolves when the contact is removed from the user's contacts.
+     * @throws {Error} If the user is not authenticated, or if the contact ID is invalid.
      */
-    addUserToContacts(userIdToAdd: string): Promise<void>;
+    removeUserFromContacts(contactIdToRemove: string): Promise<void>;
   
-    /**
-     * Removes a user from the user's contacts.
-     *
-     * @param {string} userIdToRemove The ID of the user to remove from the user's contacts.
-     * @returns {Promise<void>} A promise that resolves when the user is removed from the user's contacts.
-     * @throws {Error} If the user is not authenticated, or if the user ID is invalid.
-     */
-    removeUserFromContacts(userIdToRemove: string): Promise<void>;
     /**
      * Searches for all users with the given email address.
      *
      * @param {string} email The email address to search for.
-     * @returns {Promise<{ id: string; data: { email: string; } } | "no user found">} A promise that resolves with a user object if a user with the given email address is found, or "no user found" if no user with the given email address is found.
+     * @returns {Promise<{ id: string; data: Contact } | "no user found">} A promise that resolves with a user object if a user with the given email address is found, or "no user found" if no user with the given email address is found.
      */
-    searchAllUsers(email: string): Promise<{ id: string; data: { email: string; } } | "no user found">;
+    searchAllUsers(email: string): Promise<{ id: string; data: Contact } | null>;
   }
+  
   export interface DocsMethods {
     /**
      * Sets the user's document.
@@ -141,26 +190,8 @@ export interface StorageMethods {
      * @param {string} path The path to the user's collection.
      * @returns {Promise<{ docs: { id: string; data: any; }[] }>} A promise that resolves with an array of objects containing the ID and data for each document in the user's collection, or null if the collection could not be found.
      */
-    getUserCollection(path: string): Promise<{ docs: { id: string; data: any; }[] }>;
+    getUserCollection(path: string): Promise<{ id: string; data: any; }[] >;
   
-    // Make sure to define getAuthenticatedUserUid() and this.siteConfig.id properties in the class
-  
-    /**
-     * Uploads a file without authentication.
-     *
-     * @param {string} path The path to the file to upload.
-     * @param {File} file The file to upload.
-     * @returns {Promise<string>} A promise that resolves with the URL of the uploaded file, or null if the file could not be uploaded.
-     */
-    uploadFileNoAuth(path: string, file: File): Promise<any>;
-  
-    /**
-     * Deletes a file.
-     *
-     * @param {string} path The path to the file to delete.
-     * @returns {Promise<void>} A promise that resolves when the file is deleted.
-     */
-    deleteFile(path: string): Promise<void>;
   
     /**
      * Gets the user's document.
@@ -178,7 +209,7 @@ export interface StorageMethods {
      * @param {number} ms The number of milliseconds between updates.
      * @returns {Array<any>} An array containing the user's data and a function to set the data.
      */
-    useThrottleChange(path: string, ms: number ): Array<any>;
+    useThrottleChange(path: string, ms?: number ): Array<any>;
   
     /**
      * Gets the user's data for the given field and updates it in Firestore every `ms` milliseconds.
@@ -188,5 +219,5 @@ export interface StorageMethods {
      * @param {number} ms The number of milliseconds between updates.
      * @returns {Array<any>} An array containing the user's data for the given field and a function to set the data.
      */
-    useThrottleField(path: string, field: string, ms: number ): Array<any>;
+    useThrottleField(path: string, field: string, ms?: number ): Array<any>;
   }

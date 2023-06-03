@@ -96,7 +96,7 @@ const Button: React.FC<ButtonProps> = ({
 		// Perform any required action with data and path
 
 		const submit = async () => {
-			let post = await logic.fb.setUserDoc(path, data); // Sends the data to Firebase to be stored
+			let post = await logic.fb.docs.setUserDoc(path, data); // Sends the data to Firebase to be stored
 			if (post) {
 				next(); // Runs the next function if post is successful
 			}

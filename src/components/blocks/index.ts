@@ -7,11 +7,13 @@ import { TypeWriter } from './typewriter';
 import Canvas from './canvas';
 import Loading from "./loading"
 import Life from "./life";
+import LargeTextInput from "./largeText";
 
 import ConfirmationModal from "./conf";
 import {ChildrenModal} from './modal';
 import { Checkbox} from './Checkbox';
 import DateSelector from "./dateSelect"
+import { ViewCol, View } from "./View";
 
 export {
      Checkbox,
@@ -28,5 +30,7 @@ export {
      AppIcon,
      DropDown,
      Life,
+     ViewCol, View,
+     LargeTextInput,
 
 }

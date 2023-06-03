@@ -11,13 +11,28 @@ import SideModal from './components/blocks/sideModal';
 import Footer from './components/widgets/footer';
 import { Hooks } from './functions/hooks';
 import { Other, ReportBug } from './components/pages';
+import { FB, FBInterface } from './functions/firebase';
 
 
 
-
+const  siteConfigPlace= {
+  api:" ",
+  id:"",
+  name: '',
+  pages: [],
+  logo: '',
+  inverseLogo: "",
+  sideWidget: [],
+  eloiseConfig:{
+    endPoint: "",
+    chatLog: "",
+    initMessage: "Hi This is elosie",
+  },
+  headerTrans:false
+}
 
 export class UndefinedLogic {
-  fb: {[key:string]:Function};
+  fb: FBInterface;
   perms: undefined;
   auth: undefined;
   other: undefined;
@@ -26,10 +41,9 @@ export class UndefinedLogic {
   api: undefined;
   apiCall: Function = ()=>{}
   zillowParse: Function = ()=>{}
-
   hooks:{[key:string]:Function} = {};
   constructor() {
-    this.fb = {};
+    this.fb = new FB({},siteConfigPlace);
     this.perms = undefined;
     this.auth = undefined;
     this.other = undefined;
@@ -64,6 +78,8 @@ export interface EloiseIntel {
 }
 
 
+
+
  const ThemeContext = createContext<EloiseContext>({
   fireBaseConfig:{
     config:{
@@ -76,22 +92,7 @@ export interface EloiseIntel {
     appId: ''},
     storageDir:""
   },
-  siteConfig:{
-    api:" ",
-    id:"",
-    name: '',
-    pages: [],
-    logo: '',
-    inverseLogo: "",
-    sideWidget: [],
-    eloiseConfig:{
-      endPoint: "",
-      chatLog: "",
-      initMessage: "Hi This is elosie",
-    },
-    headerTrans: true,
-
-  },
+  siteConfig:siteConfigPlace,
   theme:{
   primary: `hsla(0, 0%, 0%, 1)`,
   secondary: `hsla(0, 0%, 0%, 1)`,
@@ -123,6 +124,8 @@ export const useEloise = (): {
 
 
 function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
+
+  
 
   useEffect(() => {
     const currentPage = window.location.pathname;
@@ -188,7 +191,6 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
               {siteConfig.pages.slice(1).map((page:EloisePage) => (
                 <Route  key={page.name} path={page.url?? `/${page.name}`} element={ <EloiseWidget eloiseIntel={{...page.intel}}>{page.component}</EloiseWidget> }/>
               ))}
-              <Route path="/login" element={<Login />} />
             </Routes>
           ) : (
             <Routes>
@@ -196,7 +198,6 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
               {siteConfig.pages.slice(1).filter((page:EloisePage)=> page.noAuth).map((page:EloisePage) => (
                 <Route  key={page.name} path={page.url?? `/${page.name}`} element={ <EloiseWidget eloiseIntel={{...page.intel}}>{page.component}</EloiseWidget> }/>
               ))}
-              <Route path="/login" element={<Login />} />
             </Routes>
           )}
           <Footer/>
