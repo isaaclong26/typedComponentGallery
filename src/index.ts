@@ -125,6 +125,29 @@ export interface EloiseConfig {
   initMessage: string;
 }
 
+export interface User {
+  first: string;
+  last: string;
+  email: string;
+  account: boolean;
+  phone?: number;
+  apps: Array<string>;
+  usage?: {
+    gpt?: number;
+    api?: number;
+  };
+  username?: string;
+}
+
+export interface Contact {
+  user:string;
+  type: string;
+  initials:string;
+  email:string;
+  first:string;
+  last:string;
+}
+
 export interface SiteConfig {
   api: string;
   name: string;
@@ -137,6 +160,26 @@ export interface SiteConfig {
   headerTrans: boolean;
   bugReporting?: boolean;
   userConfig?: UserConfig;
+  peopleConfig: Array<PeopleType>;
+}
+
+
+
+export type Event = {
+  id:string;
+  data:{
+      title: string;
+      start: Date;
+      end: Date;
+      readable?: string;
+      notes?: string;
+      type: string
+  }
+};
+
+export type PeopleType = {
+  title: string;
+  icon: string;
 }
 
 export interface UserConfig {
@@ -243,7 +286,8 @@ export interface Theme {
   borderRadius: BorderRadius;
   border: string;
   accent: HSLAColor;
-  grey: HSLAColor;
+  accent2: HSLAColor;
+  accent3: HSLAColor;
   mode: "light" | "dark" | "auto";
   heading?: DefaultHeadingProps;
   input?: DefaultInputProps;

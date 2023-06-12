@@ -26,9 +26,9 @@ import { getDatabase } from "firebase/database";
 import { collection, getDocs, getDoc } from "firebase/firestore";
 import { throttle } from "lodash";
 import { useEffect, useState } from "react";
-import { FirebaseConfig, SiteConfig } from "..";
+import { FirebaseConfig, SiteConfig, Contact, User } from "..";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { HooksMethods, DocsMethods, StorageMethods, ContactsMethods , Contact, User} from "./firebasetypes";
+import { HooksMethods, DocsMethods, StorageMethods, ContactsMethods } from "./firebasetypes";
 
 /**
  * The FB class provides methods for interacting with Firebase services.
@@ -117,6 +117,7 @@ class FB implements FBInterface {
     }
   }
 
+  
 
   storageMethods: StorageMethods = {
     getUserStorageFolder: async (path: string): Promise<any> => {
@@ -335,6 +336,8 @@ class FB implements FBInterface {
           type: contactData.type,
           initials: contactData.initials,
           email: contactData.email,
+          first: contactData.first,
+          last: contactData.last
         });
       });
     
@@ -359,6 +362,8 @@ class FB implements FBInterface {
         type: type,
         initials: contactUserData.first[0] + contactUserData.last[0],
         email: contactUserData.email,
+        first: contactUserData.first,
+        last: contactUserData.last
       };
     
       const userContactsCollectionRef = collection(
@@ -388,6 +393,8 @@ class FB implements FBInterface {
         type: type,
         initials: user.first[0] + user.last[0],
         email: user.email,
+        first: user.first,
+        last: user.last
       };
     
       const userContactsCollectionRef = collection(
@@ -445,12 +452,44 @@ class FB implements FBInterface {
           this.db,
           "users/" + test + "/" + this.siteConfig.id + "/Main/" + path
         ),
-        data
+        data,
+        { merge: true }, // This will merge the fields rather than replacing the document
+
       );
       if (ots) {
         return true;
       }
       return false;
+    }
+  },
+  setUser: async(data: any) => {
+    const test = this.getAuthenticatedUserUid();
+    if (!test) {
+        return false;
+    } else {
+        const ots: any = await setDoc(
+            doc(this.db, "users/" + test),
+            data,
+            { merge: true } // This will merge the fields rather than replacing the document
+        );
+        if (ots) {
+            return true;
+        }
+        return false;
+    }
+},
+  getUser: async() =>{
+    const test = this.getAuthenticatedUserUid();
+    if (!test) {
+      return false;
+    } else {
+      const ots: any = await getDoc(
+        doc(
+          this.db,
+          "users/" + test 
+        )
+      );
+      return ots.data()
     }
   },
   getUploadLink: async (id: string, docId: string)=> {
@@ -650,6 +689,60 @@ class FB implements FBInterface {
         }
       }
     }, [data, ms, path, initialDataFetched]);
+
+    return [data, setData];
+  },
+  useThrottleUserField:(field: string, ms: number = 150): Array<any>=> {
+    const [user, loading, error] = useAuthState(this.auth);
+
+    const [data, setData] = useState("");
+    const [initialDataFetched, setInitialDataFetched] = useState(false);
+
+    useEffect(() => {
+      if (user) {
+        const fetchInitialData = async () => {
+          try {
+            const doc = await this.docs.getUser();
+            if (doc) {
+                setData(doc[field]);
+              
+            }
+
+            setInitialDataFetched(true);
+          } catch (error) {
+            console.error("Error fetching initial data:", error);
+          }
+        };
+
+        if (!initialDataFetched) {
+          fetchInitialData();
+        }
+      }
+    }, [ initialDataFetched]);
+
+    useEffect(() => {
+      if (user) {
+        const updateFirestore = throttle(async (newValue) => {
+          try {
+            let prev: any = await this.docs.getUser();
+            if (prev.data) {
+              prev = prev.data;
+            } else {
+              prev = {};
+            }
+            let ots: { [key: string]: any } = { ...prev };
+            ots[field] = newValue;
+            const result = await this.docs.setUser( ots);
+          } catch (error) {
+            console.error("Error updating value:", error);
+          }
+        }, ms);
+
+        if (initialDataFetched && data) {
+          updateFirestore(data);
+        }
+      }
+    }, [data, ms,  initialDataFetched]);
 
     return [data, setData];
   }

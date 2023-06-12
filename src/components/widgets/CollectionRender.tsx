@@ -16,40 +16,38 @@ export const CollectionRender:React.FC<{
     cardProps?: CardListProps,
     intel?: EloiseIntel,
     views: Array<"table"|"cards"| "calendar"> | "auto",
-
-}> = ({path, tableProps, cardProps, intel, views})=>{
+    Empty?: React.ComponentType // added this line
+}> = ({path, tableProps, cardProps, intel, views, Empty})=>{
     const {theme} = useEloise()
     const [mode, setMode] = useState<"table"|"cards"| "calendar">("table")
     const {logic} = useEloise()
 
     const [vtu, setVtu] = useState<Array<"table"|"cards"| "calendar">>([])
+    const [docs, setDocs] = useState<any>() // added this line
 
     logic.hooks.useAsyncEffect(async()=>{
         if(views !== "auto"){
             setVtu(views)
-        }
-        else{
-
+        } else {
             let test = await logic.fb.docs.getUserCollection(path)
+            setDocs(test) // added this line
             if(test){
                 let dtu = test[0]
                 setVtu(determineDisplayType(dtu))
-
             }
         }
     },[])
 
-
     const cts = ()=>{
-    if(mode === "table"){
-        return <DBTable path={path} { ...tableProps}/>
-    }
-    else if(mode === "calendar"){
-        return <CalendarComponent path={path} onNew={()=>{}} />
-    }
-    else{
-        return <DBCards path={path} {...cardProps} />
-    }
+        if(docs && docs.length === 0 && Empty) { // added this line
+            return <Empty />;
+        } else if(mode === "table"){
+            return <DBTable path={path} { ...tableProps}/>
+        } else if(mode === "calendar"){
+            return <CalendarComponent path={path} onNew={()=>{}} />
+        } else {
+            return <DBCards path={path} {...cardProps} />
+        }
     }
 
     return(

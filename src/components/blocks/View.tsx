@@ -1,6 +1,6 @@
 import React, { ReactNode, forwardRef } from 'react';
+import Col, { ColProps } from 'react-bootstrap/Col';
 import styled from 'styled-components';
-import Col,{ColProps} from 'react-bootstrap/Col';
 
 const CenteredView = styled.div<{ height: string; width: string }>`
   display: flex;
@@ -11,7 +11,7 @@ const CenteredView = styled.div<{ height: string; width: string }>`
 `;
 
 interface ViewProps {
-  children: ReactNode;
+  children?: ReactNode;
   style?: React.CSSProperties;
   height?: string;
   width?: string;
@@ -53,10 +53,10 @@ const ViewCol = forwardRef<HTMLDivElement, ViewColProps>(
         ref={ref}
         {...otherProps}
       >
-        {children}
+        {children && children}
       </CenteredViewCol>
     );
   }
 );
 
-export { ViewCol, View};
+export { View, ViewCol };

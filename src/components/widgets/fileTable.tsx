@@ -33,7 +33,7 @@ interface Action {
 interface FileTableProps {
   folderPath: string;
   actions: Action[];
-  color?: "primary" | "secondary" | "accent" | "grey";
+  color?: "primary" | "secondary" | "accent" | "accent2";
   uploadCallBack?: Function
   noAuth?: boolean
   otherUser?: string;

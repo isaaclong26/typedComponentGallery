@@ -4,10 +4,11 @@ import {useCollection, useCollectionData, useDocumentData} from "react-firebase-
 import {Firestore, collection, doc, getDocs} from "firebase/firestore"
 
 export interface DBListProps{
-path:string
-Component: React.ComponentType<{ data: any, update:(data:any) =>  Promise<any | false>  }>
-
+    path: string
+    Component: React.ComponentType<{ data: any, update:(data:any) => Promise<any | false> }>
+    Empty?: React.ComponentType // added this line
 }
+
 
 interface DBListItemProps {
     path:string
@@ -44,7 +45,7 @@ export const DBItem:React.FC<DBListItemProps> = ({path, Component})=>{
     )
 }
 
-export const DBList: React.FC<DBListProps> = ({path, Component})=>{
+export const DBList: React.FC<DBListProps> = ({path, Component, Empty})=>{
 
     const {theme, logic, siteConfig}  = useEloise()
     
@@ -60,10 +61,13 @@ export const DBList: React.FC<DBListProps> = ({path, Component})=>{
     },[])
 
  
+    if (docs && docs.length === 0 && Empty) {
+        return <Empty />;
+    }
 
     return (
         <>
-        {docs && docs.map((value:any)=><DBItem Component={Component} path={`${path}/${value.id}`} />)}
+        {docs && docs.map((value:any)=><DBItem key={value.id} Component={Component} path={`${path}/${value.id}`} />)}
         </>
     )
 }

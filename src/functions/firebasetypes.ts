@@ -1,23 +1,4 @@
-export interface User {
-  first: string;
-  last: string;
-  email: string;
-  account: boolean;
-  phone?: number;
-  apps: Array<string>;
-  usage?: {
-    gpt?: number;
-    api?: number;
-  };
-  username?: string;
-}
-
-export interface Contact {
-  user:string;
-  type: string;
-  initials:string;
-  email:string;
-}
+import {Contact, User} from "../."
 
 
 
@@ -99,6 +80,8 @@ export interface StorageMethods {
  
   
   export interface ContactsMethods {
+    
+
     /**
      * Gets the user's contacts.
      *
@@ -156,6 +139,14 @@ export interface StorageMethods {
      */
     setUserDoc(path: string, data: any): Promise<boolean>;
   
+      /**
+     * Sets the user's document.
+     *
+     * @param {any} data The data to set for the user's document.
+     * @returns {Promise<boolean>} A promise that resolves with true if the document was successfully set, or false if the document could not be set.
+     */
+      setUser( data: any): Promise<boolean>;
+  
     /**
      * Gets the upload link for the given document ID and doc ID.
      *
@@ -200,6 +191,8 @@ export interface StorageMethods {
      * @returns {Promise<{ data: any; id: string; }>} A promise that resolves with an object containing the data and ID for the user's document, or null if the document could not be found.
      */
     getUserDoc(path: string): Promise<any>;
+    getUser(): Promise<any>;
+
   }
   export interface HooksMethods {
     /**
@@ -220,4 +213,13 @@ export interface StorageMethods {
      * @returns {Array<any>} An array containing the user's data for the given field and a function to set the data.
      */
     useThrottleField(path: string, field: string, ms?: number ): Array<any>;
+     /**
+     * Gets the user's data for the given field and updates it in Firestore every `ms` milliseconds.
+     *
+     * @param {string} path The path to the user's document.
+     * @param {string} field The name of the field to get and update.
+     * @param {number} ms The number of milliseconds between updates.
+     * @returns {Array<any>} An array containing the user's data for the given field and a function to set the data.
+     */
+     useThrottleUserField(   field: string, ms?: number ): Array<any>;
   }

@@ -28,7 +28,8 @@ const  siteConfigPlace= {
     chatLog: "",
     initMessage: "Hi This is elosie",
   },
-  headerTrans:false
+  headerTrans:false,
+  peopleConfig: []
 }
 
 export class UndefinedLogic {
@@ -67,7 +68,17 @@ interface EloiseContext {
   eloiseContent: EloiseIntel[], // Add this line
   setEloiseContent: (content:  EloiseIntel[]) => void; // Add this line
 }
-
+/**
+ * @interface EloiseIntel
+ * @description Represents the structure of an EloiseIntel object.
+ *
+ * @property {string} [title] - Optional. The title associated with the EloiseIntel object.
+ * @property {string} [desc] - Optional. A short description of the EloiseIntel object.
+ * @property {string} [text] - Optional. The textual content associated with the EloiseIntel object.
+ * @property {string} [id] - Optional. A unique identifier for the EloiseIntel object.
+ * @property {string} [purpose] - Optional. The purpose or objective associated with the EloiseIntel object.
+ * @property {any} [position] - Optional. Specifies the position of the EloiseIntel object. The type of this property is not strictly defined, and can be anything.
+ */
 export interface EloiseIntel {
   title?: string
   desc?:string
@@ -102,7 +113,8 @@ export interface EloiseIntel {
   borderRadius: '3px',
   border: '',
   accent: `hsla(0, 0%, 0%, 1)`,
-  grey: `hsla(0, 0%, 0%, 1)`,
+  accent2: `hsla(0, 0%, 0%, 1)`,
+  accent3: `hsla(0, 0%, 0%, 1)`,
   mode: 'light'
 },
 logic: new UndefinedLogic(),

@@ -126,7 +126,7 @@ export interface InputProps extends DefaultInputProps {
  * @returns {JSX.Element} A styled input component.
  */
 
-const Input: React.FC<InputProps> = (props:InputProps) => {
+const AddressInput: React.FC<InputProps> = (props:InputProps) => {
 
   const {theme} = useEloise()
 
@@ -153,18 +153,16 @@ const Input: React.FC<InputProps> = (props:InputProps) => {
     const [showWarningModal, setShowWarningModal] = useState(false);
     const inputRef = useRef<any>();
 
-    const [inputState, setInputState] = useState(addy && typeof state === 'object' && state.street ? state.street : state);
 
-  useEffect(()=>{
-    if(state){
-      if(state.street){
-        setInputState(state.street)
+    const getDisplayValue = () => {
+      if (state && typeof state === 'object' && state.street) {
+        return state.street;
+      } else {
+        return state || ""; // Return an empty string if state is null or undefined
       }
-      else{
-        setInputState(state)
-      }
-    }
-  },[state])
+    };
+
+ 
 
     useEffect(() => {
         if (addy && window.google) {
@@ -179,6 +177,9 @@ const Input: React.FC<InputProps> = (props:InputProps) => {
         }
       }, [addy]);
 
+      useEffect(() => {
+        setHasValue(state !== "");
+      }, [state]);
    
 
     const handleAddySelect = async (address: string) => {
@@ -225,7 +226,6 @@ const Input: React.FC<InputProps> = (props:InputProps) => {
       setState(addy);
     };
     
-  
     const handleCloseModal = () => setShowWarningModal(false);
   
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +237,7 @@ const Input: React.FC<InputProps> = (props:InputProps) => {
     };
   
     const handleInputBlur = async () => {
-      if (addy && state) {
+      if (state) {
         await handleAddySelect(state);
       }
     };
@@ -275,7 +275,7 @@ const Input: React.FC<InputProps> = (props:InputProps) => {
           <StyledInput
             ref={inputRef}
             border={border}
-            value={ inputState}
+             value={getDisplayValue()} // here
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             placeholder={!extLabel ? placeholder : undefined}
@@ -300,5 +300,108 @@ const Input: React.FC<InputProps> = (props:InputProps) => {
       </>
     );
   };
+
+const RegularInput: React.FC<InputProps> = (props:InputProps) => {
+
+    const {theme} = useEloise()
+  
+    const {
+      label,
+      extLabel,
+      border,
+      state,
+      setState,
+      placeholder,
+      type,
+      onEnter,
+      locked,
+      warning,
+      warningMessage,
+      style,
+      rounded,
+      addy,
+      cacheKey,
+    } = { ...theme.input, ...props };
+  
+      const [hasValue, setHasValue] = useState<boolean>(false)
+    
+      const [showWarningModal, setShowWarningModal] = useState(false);
+      const inputRef = useRef<any>();
+
+        useEffect(() => {
+          setHasValue(state !== "");
+        }, [state]);
+     
+      const handleCloseModal = () => setShowWarningModal(false);
+    
+      const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (locked || warning) {
+          setShowWarningModal(true);
+        } else {
+          setState(e.target.value);
+        }
+      };
+      useEffect(() => {
+        if (cacheKey !== undefined) {
+          const cachedValue = localStorage.getItem(cacheKey);
+          if (cachedValue !== null) {
+            setState(cachedValue);
+          }
+        }
+      }, [ cacheKey]);
+    
+      useEffect(() => {
+        if (cacheKey !== undefined) {
+          localStorage.setItem(cacheKey, state);
+        }
+    
+        return () => {
+          if (cacheKey !== undefined) {
+            localStorage.removeItem(cacheKey);
+          }
+        };
+      }, [ cacheKey, state]);
+  
+      return (
+        <>
+          <InputWrapper extLabel={extLabel}>
+            {extLabel && <StyledLabel hasValue={hasValue}>{label}</StyledLabel>}
+            <StyledInput
+              ref={inputRef}
+              border={border}
+              value={ state}
+              onChange={handleInputChange}
+              placeholder={!extLabel ? placeholder : undefined}
+              type={type}
+              readOnly={locked}
+              style={{...style, borderRadius: rounded? "3px": 0}}
+            />
+          </InputWrapper>
+    
+          {/* Warning Modal */}
+          <Modal show={showWarningModal} onHide={handleCloseModal} centered>
+            <Modal.Header closeButton>
+              <Modal.Title>Warning</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{warningMessage}</Modal.Body>
+            <Modal.Footer>
+              <button className="btn btn-primary" onClick={handleCloseModal}>
+                Close
+              </button>
+            </Modal.Footer>
+          </Modal>
+        </>
+      );
+    };
+
+  const Input: React.FC<InputProps> = (props:InputProps) => {
+    const { addy } = props;
+  
+    if (addy) {
+      return <AddressInput {...props} />
+    }
+  
+    return <RegularInput {...props} />
+  }
   
   export default Input;

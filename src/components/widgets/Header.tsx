@@ -22,8 +22,8 @@ const Header: React.FC = () => {
       if (page.pages) {
         // If the page has nested pages, render a NavDropdown component
         return (
-          <EloiseWidget eloiseIntel={{title: "Header Dropdown", desc: "DropDown of Nav Options"}}>
-          <NavDropdown key={uuidv4()} title={page.name} id={page.name}>
+          <EloiseWidget   key={`headerlink${page.name}`} eloiseIntel={{title: "Header Dropdown", desc: "DropDown of Nav Options"}}>
+          <NavDropdown  title={page.name} id={page.name}>
             {renderNavItems(page.pages)}
           </NavDropdown>
           </EloiseWidget>
@@ -31,8 +31,8 @@ const Header: React.FC = () => {
       } else {
         // Otherwise, render a Nav.Link component
         return (
-          <EloiseWidget eloiseIntel={{title: "Nav Link", desc: "Navigation Option", purpose: "navigate to "+ "/"+page.name }}>
-          <Nav.Link  key={uuidv4()} href={"/"+page.name} style={{
+          <EloiseWidget  key={`headerlink${page.name}`} eloiseIntel={{title: "Nav Link", desc: "Navigation Option", purpose: "navigate to "+ "/"+page.name }}>
+          <Nav.Link  href={"/"+page.name} style={{
             borderBottom: `3px solid ${location.pathname === `/${page.name}` ? `#fff` : theme.primary}`
           }}>
             {page.name}
@@ -60,9 +60,7 @@ const Header: React.FC = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link href="Account" style={{
-                borderBottom: `3px solid ${location.pathname === `/Account` ? `#fff` : theme.primary}`
-              }}>Account</Nav.Link>
+           
               {renderNavItems(siteConfig.pages.slice(1).filter((page:EloisePage)=> !page.hidden))}
             </Nav>
           </Navbar.Collapse>

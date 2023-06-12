@@ -6,17 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Container } from 'react-bootstrap';
 import { useEloise } from '../../App';
 import {useNavigate} from "react-router"
-
-// Define type for events data
-type Event = {
-  title?: string;
-  start: Date;
-  end: Date;
-  id?:string
-  notes?:string
-  type?:string
-};
-
+import {Event} from '../../'
 // Create a styled component for the calendar container
 const CalendarContainer = styled(Container)`
   padding: 20px;
@@ -53,7 +43,7 @@ const CalendarComponent:React.FC<CalendarProps> = ({Events, path, onSelect, onNe
     if(path){
       let ats = await logic.fb.docs.getUserCollection(path)
       if(ats){
-        setEvents(ats.map((x:any)=>{return{title:x.data.title, start: x.data.date, end: x.data.date, id:x.id}}))
+        setEvents(ats.map((x:any)=>{return{data:{title:x.data.title, start: x.data.date, type:x.data.type, end: x.data.date}, id:x.id}}))
       }
     }
   })

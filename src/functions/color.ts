@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 import { Theme } from "..";
 
 
-export type ThemeColor = "primary" | "secondary" | 'accent' | 'grey' | HSLAColor | string
+export type ThemeColor = "primary" | "secondary" | 'accent' | 'accent2' | 'accent3' | 'grey' | HSLAColor | string
 
 export const getColor = (color: ThemeColor , theme:Theme):ThemeColor=>{
       switch(color){
@@ -12,8 +12,10 @@ export const getColor = (color: ThemeColor , theme:Theme):ThemeColor=>{
           return theme.secondary
         case "accent":
           return theme.accent;
-        case 'grey':
-          return theme.grey;
+        case 'accent2':
+          return theme.accent2;
+         case 'accent3':
+            return theme.accent3;
         default: return color;
       }
 }
@@ -102,21 +104,27 @@ export interface ColorMethods {
 
 export const color:ColorMethods={
 
-    lighten: (hslaColor: HSLAColor): HSLAColor => {
-        // Convert HSLA color to HSL values
-        const regex = /hsla\((\d+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)/;
-        const matches = hslaColor.match(regex);
-        if (!matches) {
-          throw new Error("Invalid HSLA color");
-        }
-        const h = parseInt(matches[1]);
-        const s = parseFloat(matches[2]) / 100;
-        const l = Math.min(1, parseFloat(matches[3]) / 100 + 0.1);
-        const a = parseFloat(matches[4]);
-      
-        // Return the lightened HSLA color
-        return `hsla(${h}, ${s * 100}%, ${l * 100}%, ${a})`;
-      },
+  lighten: (hslaColor) => {
+    try {
+      // Convert HSLA color to HSL values
+      const regex = /hsla\((\d+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)/;
+      const matches = hslaColor.match(regex);
+      if (!matches) {
+        throw new Error("Invalid HSLA color");
+      }
+      const h = parseInt(matches[1]);
+      const s = parseFloat(matches[2]) / 100;
+      const l = Math.min(1, parseFloat(matches[3]) / 100 + 0.1);
+      const a = parseFloat(matches[4]);
+  
+      // Return the lightened HSLA color
+      return `hsla(${h}, ${s * 100}%, ${l * 100}%, ${a})`;
+  
+    } catch (error) {
+      // Return HSLA code for black if there is an error
+      return 'hsla(0, 0%, 0%, 1)';
+    }
+  },
       darken: (hslaColor: HSLAColor): HSLAColor => {
         // Convert HSLA color to HSL values
         const regex = /hsla\((\d+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)/;
