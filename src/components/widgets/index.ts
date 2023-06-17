@@ -1,36 +1,39 @@
 import Header from "./Header";
 
-import FileTable from "./fileTable";
-import {DBTable, DBTableProps } from "./DBTable";
-import {DBCards, CardListProps } from "./DBCards";
-import { FileUpload, FileUploadProps } from "./fileUpload";
-import {CollectionRender} from "./CollectionRender";
-import EloiseChat from "./eloise";
-import Footer from "./footer";
-import CalendarComponent from "./calendar";
-import { ConvoList } from "./convoList";
-import Chat from "./chat";
-import {Map, MapProps} from "./map";
-import { DBItem, DBList, DBListProps } from "./dbList";
+import { CollectionRender } from "./CollectionRender";
+import { CardListProps, DBCards } from "./DBCards";
+import { DBTable, DBTableProps } from "./DBTable";
 import { EloiseWidget } from "./EloiseWidget";
-
+import CalendarComponent from "./calendar";
+import Chat from "./chat";
+import { ConvoList } from "./convoList";
+import { DBItem, DBList, DBListProps } from "./dbList";
+import EloiseChat from "./eloise";
+import FileTable from "./fileTable";
+import { FileUpload, FileUploadProps } from "./fileUpload";
+import FlatList from "./flatList";
+import Footer from "./footer";
+import { Map, MapProps } from "./map";
 export {
-    Header,
-    FileTable,
-    DBTable,
-    DBTableProps,
-    DBCards,
-    CardListProps,
-    FileUploadProps,
-    FileUpload,
-    CollectionRender,
-    EloiseChat,
-    Footer,
-    CalendarComponent,
-    ConvoList,
-    Chat,
-    Map, MapProps,
-    DBItem, DBList, DBListProps,
-    EloiseWidget
- 
-}
+  CalendarComponent,
+  CardListProps,
+  Chat,
+  CollectionRender,
+  ConvoList,
+  DBCards,
+  DBItem,
+  DBList,
+  DBListProps,
+  DBTable,
+  DBTableProps,
+  EloiseChat,
+  EloiseWidget,
+  FileTable,
+  FileUpload,
+  FileUploadProps,
+  FlatList,
+  Footer,
+  Header,
+  Map,
+  MapProps,
+};

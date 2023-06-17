@@ -1,108 +1,103 @@
 import React, { ReactNode } from "react";
 import Eloise, { EloiseIntel, useEloise } from "./App";
-import { Logic, ColorMethods, HSLAColor} from "./functions";
+import { HSLAColor, Logic } from "./functions";
 
 import {
-  // pages
-  Home,
-  Checkbox,
-  Login,
-  //todo Account
-  Other,
-  ReportBug,
-  // widgets
-  Header,
-  FileTable,
-  DBTable,
-  DBTableProps,
-  DBCards,
-  CardListProps,
-  FileUploadProps,
-  FileUpload,
-  CollectionRender,
-  EloiseChat,
-  Footer,
+  AppIcon,
+  Button,
   CalendarComponent,
-  ConvoList,
-  Chat,
-  Map,
-  MapProps,
+  Canvas,
+  CardListProps,
+  Checkbox,
+  ChildrenModal,
+  CollectionRender,
+  ConfirmationModal,
+  DBCards,
   DBItem,
   DBList,
   DBListProps,
-  EloiseWidget,
-
+  DBTable,
+  DBTableProps,
   //blocks
   DateSelector,
-  ChildrenModal,
-  ConfirmationModal,
-  Button,
-  Loading,
-  TypeWriter,
-  Canvas,
+  DropDown,
+  EloiseWidget,
+  FileTable,
+  FileUpload,
+  FileUploadProps,
+  FlatList,
+  // widgets
+  Header,
   Heading,
+  // pages
+  Home,
   Input,
   InputProps,
-  AppIcon,
-  DropDown,
-  Life,
-  ViewCol,
-  View,
   LargeTextInput,
+  Life,
+  Loading,
+  Login,
+  Map,
+  MapProps,
+  //todo Account
+  Other,
+  ReportBug,
+  View,
+  ViewCol,
 } from "./components";
-import { DefaultHeadingProps, HeadingProps } from "./components/blocks/heading";
+import { DefaultHeadingProps } from "./components/blocks/heading";
 import { DefaultInputProps } from "./components/blocks/input";
 
 export {
-  //Setup
-  Map,
-  MapProps,
-  Eloise,
-  useEloise,
-  EloiseWidget,
-  // Logic
-  DBTable,
-  DBTableProps,
-  DBCards,
-  CardListProps,
-  Logic,
-  DBItem,
-  DBList,
-  DBListProps,
-  FileUpload,
-  FileUploadProps,
-  CollectionRender,
-  DateSelector,
-  //components
-  // pages
-  Home,
-  Login,
-  Other,
-  ReportBug,
+  AppIcon,
+  Button,
   //todo Account
   CalendarComponent,
-
-  // widgets
-  Header,
-  FileTable,
+  Canvas,
+  CardListProps,
   //todo Footer
   Checkbox,
   //blocks
   ChildrenModal,
+  CollectionRender,
   ConfirmationModal,
-  Button, // Updated
-  Loading,
-  Canvas,
-  Heading,
-  Input, // Updated
-  InputProps,
-  AppIcon,
+  DBCards,
+  DBItem,
+  DBList,
+  DBListProps,
+  // Logic
+  DBTable,
+  DBTableProps,
+  DateSelector,
   DropDown,
-  Life,
+  Eloise,
+  EloiseWidget,
+  FileTable,
+  FileUpload,
+  FileUploadProps,
+  FlatList,
+  HSLAColor,
+  // widgets
+  Header,
+  Heading,
+  //components
+  // pages
+  Home,
+  Input,
+  InputProps,
+  LargeTextInput,
+  Life, // Updated
+  Loading,
+  Logic,
+  Login,
+  //Setup
+  Map,
+  MapProps,
+  Other,
+  ReportBug,
   View,
   ViewCol,
-  LargeTextInput,
-  HSLAColor
+  useEloise,
 };
 
 export interface EloisePage {
@@ -140,12 +135,12 @@ export interface User {
 }
 
 export interface Contact {
-  user:string;
+  user: string;
   type: string;
-  initials:string;
-  email:string;
-  first:string;
-  last:string;
+  initials: string;
+  email: string;
+  first: string;
+  last: string;
 }
 
 export interface SiteConfig {
@@ -163,24 +158,22 @@ export interface SiteConfig {
   peopleConfig: Array<PeopleType>;
 }
 
-
-
 export type Event = {
-  id:string;
-  data:{
-      title: string;
-      start: Date;
-      end: Date;
-      readable?: string;
-      notes?: string;
-      type: string
-  }
+  id: string;
+  data: {
+    title: string;
+    start: Date;
+    end: Date;
+    readable?: string;
+    notes?: string;
+    type: string;
+  };
 };
 
 export type PeopleType = {
   title: string;
   icon: string;
-}
+};
 
 export interface UserConfig {
   customFields: string[];
@@ -275,7 +268,6 @@ export type BorderRadius =
  * An interface for color methods that includes functions to lighten, darken, and get text color from a background color.
  */
 
-
 // Defines an interface for theme colors
 export interface Theme {
   primary: HSLAColor;
@@ -291,7 +283,6 @@ export interface Theme {
   mode: "light" | "dark" | "auto";
   heading?: DefaultHeadingProps;
   input?: DefaultInputProps;
-
 }
 
 //component props
