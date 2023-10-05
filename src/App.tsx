@@ -1,54 +1,60 @@
-import React, { createContext, useEffect, useState , useContext} from 'react';
-import { Route, Router, Routes } from 'react-router';
-import { BrowserRouter } from 'react-router-dom';
-import { Header,  Loading, Login, Home} from './components';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Route, Routes } from "react-router";
+import { BrowserRouter } from "react-router-dom";
+import { Header } from "./components";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { Logic } from './functions';
-import { EloisePage, EloiseWidget, FirebaseConfig, SiteConfig, Theme } from './';
-import SideModal from './components/blocks/sideModal';
-import Footer from './components/widgets/footer';
-import { Hooks } from './functions/hooks';
-import { Other, ReportBug } from './components/pages';
-import { FB, FBInterface } from './functions/firebase';
+import "bootstrap/dist/css/bootstrap.min.css";
+import { useAuthState } from "react-firebase-hooks/auth";
+import {
+  EloisePage,
+  EloiseWidget,
+  FirebaseConfig,
+  Loading,
+  PagesType,
+  SiteConfig,
+  Theme,
+} from "./";
+import SideModal from "./components/blocks/sideModal";
+import { Other, ReportBug } from "./components/pages";
+import Footer from "./components/widgets/footer";
+import { Logic } from "./functions";
+import { FB, FBInterface } from "./functions/firebase";
 
-
-
-const  siteConfigPlace= {
-  api:" ",
-  id:"",
-  name: '',
+const siteConfigPlace = {
+  api: " ",
+  id: "",
+  name: "",
   pages: [],
-  logo: '',
+  defaultMode: "Buyer/Seller",
+  logo: "",
   inverseLogo: "",
   sideWidget: [],
-  eloiseConfig:{
+  eloiseConfig: {
     endPoint: "",
     chatLog: "",
     initMessage: "Hi This is elosie",
   },
-  headerTrans:false,
-  peopleConfig: []
-}
+  headerTrans: false,
+  peopleConfig: [],
+};
 
 export class UndefinedLogic {
   fb: FBInterface;
   perms: undefined;
   auth: undefined;
   other: undefined;
-  color: {[key:string]:Function};
-  generic:  {[key:string]:Function};
+  color: { [key: string]: Function };
+  generic: { [key: string]: Function };
   api: undefined;
-  apiCall: Function = ()=>{}
-  zillowParse: Function = ()=>{}
-  hooks:{[key:string]:Function} = {};
+  apiCall: Function = () => {};
+  zillowParse: Function = () => {};
+  hooks: { [key: string]: Function } = {};
   constructor() {
-    this.fb = new FB({},siteConfigPlace);
+    this.fb = new FB({}, siteConfigPlace);
     this.perms = undefined;
     this.auth = undefined;
     this.other = undefined;
-    this.color ={};
+    this.color = {};
     this.generic = {};
     this.api = undefined;
   }
@@ -65,8 +71,8 @@ interface EloiseContext {
   siteConfig: SiteConfig;
   fireBaseConfig: FirebaseConfig;
   logic: Logic | UndefinedLogic;
-  eloiseContent: EloiseIntel[], // Add this line
-  setEloiseContent: (content:  EloiseIntel[]) => void; // Add this line
+  eloiseContent: EloiseIntel[]; // Add this line
+  setEloiseContent: (content: EloiseIntel[]) => void; // Add this line
 }
 /**
  * @interface EloiseIntel
@@ -80,48 +86,41 @@ interface EloiseContext {
  * @property {any} [position] - Optional. Specifies the position of the EloiseIntel object. The type of this property is not strictly defined, and can be anything.
  */
 export interface EloiseIntel {
-  title?: string
-  desc?:string
-  text?:string
-  id?:string
-  purpose?:string
-  position?: any
+  title?: string;
+  desc?: string;
+  text?: string;
+  id?: string;
+  purpose?: string;
+  position?: any;
 }
 
-
-
-
- const ThemeContext = createContext<EloiseContext>({
-  fireBaseConfig:{
-    config:{
-    apiKey: '',
-    authDomain: '',
-    databaseURL: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: ''},
-    storageDir:""
+const ThemeContext = createContext<EloiseContext>({
+  fireBaseConfig: {
+    config: {
+      apiKey: "",
+      authDomain: "",
+      databaseURL: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: "",
+    },
+    storageDir: "",
   },
-  siteConfig:siteConfigPlace,
-  theme:{
-  primary: `hsla(0, 0%, 0%, 1)`,
-  secondary: `hsla(0, 0%, 0%, 1)`,
-  white: `hsla(0, 0%, 100%, 1)`,
-  font: '',
-  fontSize: '3px' ,
-  borderRadius: '3px',
-  border: '',
-  accent: `hsla(0, 0%, 0%, 1)`,
-  accent2: `hsla(0, 0%, 0%, 1)`,
-  accent3: `hsla(0, 0%, 0%, 1)`,
-  mode: 'light'
-},
-logic: new UndefinedLogic(),
-eloiseContent: [], // Add this line
-setEloiseContent: () => {}, // Add this line
+  siteConfig: siteConfigPlace,
+  theme: {
+    colors: [],
+    white: `hsla(0, 0%, 100%, 1)`,
+    font: "",
+    fontSize: "3px",
+    borderRadius: "3px",
+    border: "",
 
-
+    mode: "light",
+  },
+  logic: new UndefinedLogic(),
+  eloiseContent: [], // Add this line
+  setEloiseContent: () => {}, // Add this line
 });
 
 export const useEloise = (): {
@@ -130,94 +129,170 @@ export const useEloise = (): {
   fireBaseConfig: FirebaseConfig;
   logic: Logic | UndefinedLogic;
   eloiseContent: EloiseIntel[]; // Add this line
-  setEloiseContent:Function // Add this line
+  setEloiseContent: Function; // Add this line
 } => useContext(ThemeContext);
 
-
-
 function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
-
-  
-
   useEffect(() => {
     const currentPage = window.location.pathname;
 
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i);
       if (key) {
-        let split = key.split("_")
-        if(!key.split("").includes("_")) {
+        let split = key.split("_");
+        if (!key.split("").includes("_")) {
+        } else {
+          const pageKey = split[0];
 
+          if (pageKey !== currentPage) {
+            localStorage.removeItem(key);
+          }
         }
-        else{
-        const pageKey = split[0]
-        
-        if (pageKey !== currentPage) {
-          localStorage.removeItem(key);
-        }
-      }
       }
     }
   }, []);
 
   const logic = new Logic(fireBaseConfig, siteConfig);
- 
+  const [fetchedTheme, setFetchedTheme] = useState<Theme | null>(null);
+  // Fetch the theme from the database when the component is mounted
+  useEffect(() => {
+    async function fetchTheme() {
+      const themeFromDB = await logic.fb.docs.getTheme();
+      if (themeFromDB && themeFromDB.colors) {
+        setFetchedTheme(themeFromDB);
+      } else {
+        console.log("No Theme in DB Setting to Local Copy");
+        await logic.fb.docs.setTheme(theme);
+      }
+    }
+
+    fetchTheme();
+  }, []);
   const [eloiseContent, setEloiseContent] = useState<EloiseIntel[]>([]);
 
   const [user, userLoading, userError] = useAuthState(logic.fb.auth);
-  const [mode, setMode] = useState('white');
+  const [mode, setMode] = useState("white");
+  const [siteMode, setSiteMode] = useState<string>(siteConfig.defaultMode);
 
+  const [remainingPages, setRemainingPages] = useState<EloisePage[]>([]);
 
-  useEffect(()=>{
-  },[eloiseContent])
+  logic.hooks.useAsyncEffect(async () => {
+    let locTest = localStorage.getItem("siteMode");
+    if (locTest) {
+      setSiteMode(locTest);
+    } else {
+      if (user) {
+        let fbTest = await logic.fb.docs.getUserDoc("");
+        if (fbTest && fbTest.siteMode) {
+          setSiteMode(fbTest.siteMode);
+          localStorage.setItem("siteMode", fbTest.siteMode);
+        }
+      }
+    }
+  }, [user]);
+  // Helper function to get the first page
+  function getFirstPage(pages: PagesType): EloisePage {
+    return Array.isArray(pages) ? pages[0] : pages(siteMode)[0];
+  }
 
-  return (
-    <ThemeContext.Provider 
-    value={{
-       theme, 
-       siteConfig: {...siteConfig, pages: [...siteConfig.pages,  {
-        name: "Error Other",
-        component: <Other/>,
-        hidden: true,
-        url:"other"
-      },
-      {
-        name: "Report Bug",
-        component: <ReportBug/>,
-        hidden: true,
-        url:"report-bug"
-      }]},
-        fireBaseConfig, 
-        logic,
-        eloiseContent, // Add this line
-        setEloiseContent, // Add this line
-         }}>
-      <div className="App">
-        <BrowserRouter>
-          <Header />
-          <SideModal/>
+  // Recursive function to generate routes
+  function generateRoutes(pages: EloisePage[]): any {
+    return pages.map((page: EloisePage) => {
+      // If the page has nested pages, recursively generate routes for them
+      if (page.pages) {
+        return generateRoutes(page.pages);
+      }
 
-          {user ? (
+      // Otherwise, return a route for the current page
+      return (
+        <Route
+          key={page.name}
+          path={page.url ?? `/${page.name}`}
+          element={
+            <EloiseWidget eloiseIntel={{ ...page.intel }}>
+              {page.component}
+            </EloiseWidget>
+          }
+        />
+      );
+    });
+  }
+  useEffect(() => {
+    let all = Array.isArray(siteConfig.pages)
+      ? siteConfig.pages.slice(1)
+      : siteConfig.pages(siteMode).slice(1);
+
+    if (!user) {
+      all.filter((page: EloisePage) => page.noAuth);
+    }
+    setRemainingPages(all);
+  }, [user]);
+
+  useEffect(() => {}, [eloiseContent]);
+
+  if (siteConfig) {
+    return (
+      <ThemeContext.Provider
+        value={{
+          theme,
+          siteConfig: {
+            ...siteConfig,
+            pages:
+              typeof siteConfig.pages === "function"
+                ? siteConfig.pages(siteMode).concat([
+                    {
+                      name: "Error Other",
+                      component: <Other />,
+                      hidden: true,
+                      url: "other",
+                    },
+                    {
+                      name: "Report Bug",
+                      component: <ReportBug />,
+                      hidden: true,
+                      url: "report-bug",
+                    },
+                  ])
+                : [
+                    ...siteConfig.pages,
+                    {
+                      name: "Error Other",
+                      component: <Other />,
+                      hidden: true,
+                      url: "other",
+                    },
+                    {
+                      name: "Report Bug",
+                      component: <ReportBug />,
+                      hidden: true,
+                      url: "report-bug",
+                    },
+                  ],
+          },
+          fireBaseConfig,
+          logic,
+          eloiseContent, // Add this line
+          setEloiseContent, // Add this line
+        }}>
+        <div className="App">
+          <BrowserRouter>
+            <Header />
+            <SideModal />
+
             <Routes>
-              <Route path="/" element={siteConfig.pages[0].component}/>
-              {siteConfig.pages.slice(1).map((page:EloisePage) => (
-                <Route  key={page.name} path={page.url?? `/${page.name}`} element={ <EloiseWidget eloiseIntel={{...page.intel}}>{page.component}</EloiseWidget> }/>
-              ))}
+              <Route
+                path="/"
+                element={getFirstPage(siteConfig.pages).component}
+              />
+              {generateRoutes(remainingPages)}
             </Routes>
-          ) : (
-            <Routes>
-              <Route path="/" element={ <EloiseWidget eloiseIntel={{...siteConfig.pages[0].intel}}>{siteConfig.pages[0].component}</EloiseWidget>}/>
-              {siteConfig.pages.slice(1).filter((page:EloisePage)=> page.noAuth).map((page:EloisePage) => (
-                <Route  key={page.name} path={page.url?? `/${page.name}`} element={ <EloiseWidget eloiseIntel={{...page.intel}}>{page.component}</EloiseWidget> }/>
-              ))}
-            </Routes>
-          )}
-          <Footer/>
-        </BrowserRouter>
-      </div>
-    </ThemeContext.Provider>
-  );
+
+            {siteConfig.noAuth ? <></> : <Footer />}
+          </BrowserRouter>
+        </div>
+      </ThemeContext.Provider>
+    );
+  } else return <Loading />;
 }
 
 export default Eloise;
-

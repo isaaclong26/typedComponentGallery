@@ -1,4 +1,11 @@
-
+declare module "*.svg" {
+  import React = require("react");
+  export const ReactComponent: React.FunctionComponent<
+    React.SVGProps<SVGSVGElement>
+  >;
+  const src: string;
+  export default src;
+}
 
 export interface SiteConfig {
   name: string;
@@ -19,9 +26,8 @@ export interface FirebaseConfig {
 
 export type EloisePage = {
   name: string;
-  component: React.FC
-}
-
+  component: React.FC;
+};
 
 // Style Types
 
@@ -33,7 +39,6 @@ export type EloisePage = {
  * ```
  */
 
-
 export interface LibraryConfig {
   theme: Theme;
   firebaseConfig: FirebaseConfig;
@@ -42,7 +47,7 @@ export interface LibraryConfig {
 
 export type HSLAColor = `hsla(${number}, ${number}%, ${number}%, ${number})`;
 /**
- * Defines a font size type, with accepted values as strings. 
+ * Defines a font size type, with accepted values as strings.
  * Valid values are:
  * - Predefined font sizes: 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'smaller', and 'larger'
  * - Sizes specified in pixels: e.g. '14px', '20px'
@@ -85,29 +90,28 @@ export type BorderRadius =
 export interface ColorMethods {
   /**
    * A function that lightens an HSLA color value by a specified amount.
-   * 
+   *
    * @param hslaColor - The HSLA color value to be lightened.
    * @returns The new HSLA color value that has been lightened.
    */
   lighten: (hslaColor: HSLAColor) => HSLAColor;
-  
+
   /**
    * A function that darkens an HSLA color value by a specified amount.
-   * 
+   *
    * @param hslaColor - The HSLA color value to be darkened.
    * @returns The new HSLA color value that has been darkened.
    */
   darken: (hslaColor: HSLAColor) => HSLAColor;
-  
+
   /**
    * A function that returns the text color that provides the best contrast against a given HSLA background color.
-   * 
+   *
    * @param backgroundColor - The HSLA color value of the background color.
    * @returns The HSLA color value of the text color that has the best contrast against the given background color.
    */
   getTextColorFromBackground: (backgroundColor: HSLAColor) => HSLAColor;
 }
-
 
 // Defines an interface for theme colors
 export interface Theme {
@@ -120,20 +124,19 @@ export interface Theme {
   border: string;
   accent: HSLAColor;
   grey: HSLAColor;
-  mode: 'light' | 'dark' | 'auto';
+  mode: "light" | "dark" | "auto";
 }
 
+//component props
 
-
-//component props 
-
-//button 
+//button
 import React from "react";
 /**
  * BaseButtonProps is an interface that extends React.ButtonHTMLAttributes<HTMLButtonElement>.
  * It contains additional properties to customize the button component.
  */
-export interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface BaseButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   color?: "primary" | "secondary" | "accent" | HSLAColor; // Defines the color of the button
   rounded?: boolean; // Determines if the button should have rounded corners
   className?: string; // Allows for custom styling via class names
@@ -173,8 +176,7 @@ export interface FirebaseButtonProps extends BaseButtonProps {
  */
 export type ButtonProps = RegularButtonProps | FirebaseButtonProps;
 
-
-//Input 
+//Input
 
 export interface InputProps {
   label: string;
@@ -185,10 +187,10 @@ export interface InputProps {
   placeholder?: string;
 }
 
-
 //large Text
 
-export interface BaseLTProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface BaseLTProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   placeholder?: string;
 }
 

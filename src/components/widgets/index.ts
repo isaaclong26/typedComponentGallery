@@ -1,19 +1,26 @@
 import Header from "./Header";
 
-import { CollectionRender } from "./CollectionRender";
-import { CardListProps, DBCards } from "./DBCards";
-import { DBTable, DBTableProps } from "./DBTable";
 import { EloiseWidget } from "./EloiseWidget";
 import CalendarComponent from "./calendar";
 import Chat from "./chat";
+import {
+  CardListProps,
+  CollectionRender,
+  DBCards,
+  DBItem,
+  DBList,
+  DBListProps,
+  DBTable,
+  DBTableProps,
+  FlatList,
+} from "./collectionRendering";
+import { Map, MapProps } from "./collectionRendering/map";
 import { ConvoList } from "./convoList";
-import { DBItem, DBList, DBListProps } from "./dbList";
 import EloiseChat from "./eloise";
 import FileTable from "./fileTable";
 import { FileUpload, FileUploadProps } from "./fileUpload";
-import FlatList from "./flatList";
 import Footer from "./footer";
-import { Map, MapProps } from "./map";
+import { UserDependentWidget } from "./userDependentWidget";
 export {
   CalendarComponent,
   CardListProps,
@@ -36,4 +43,5 @@ export {
   Header,
   Map,
   MapProps,
+  UserDependentWidget,
 };

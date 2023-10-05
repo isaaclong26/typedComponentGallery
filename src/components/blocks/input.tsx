@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
-import {Addy, useEloise } from "../../";
-import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import Modal from "react-bootstrap/Modal";
-
-
+import { geocodeByAddress, getLatLng } from "react-places-autocomplete";
+import styled from "styled-components";
+import { Addy, useEloise } from "../../";
 
 /**
  * A styled wrapper for an input component.
- * 
+ *
  * @component
  * @param {Object} props - The props object for the component.
  * @param {boolean} [props.extLabel=false] - Whether the label is outside of the input field or not.
@@ -21,7 +19,7 @@ export const InputWrapper = styled.div<{ extLabel?: boolean }>`
 
 /**
  * A styled input component.
- * 
+ *
  * @component
  * @param {Object} props - The props object for the component.
  * @param {boolean} [props.border=true] - Whether the input field has a border or not.
@@ -49,7 +47,7 @@ export const StyledInput = styled.input<{ border?: boolean }>`
 
 /**
  * A styled label component.
- * 
+ *
  * @component
  * @param {Object} props - The props object for the component.
  * @param {boolean} props.hasValue - Whether the input field has a value or not.
@@ -91,7 +89,6 @@ export interface DefaultInputProps {
   type?: string;
   style?: React.CSSProperties;
   rounded?: boolean;
-  
 }
 export interface InputProps extends DefaultInputProps {
   label: string;
@@ -100,9 +97,8 @@ export interface InputProps extends DefaultInputProps {
   cacheKey?: string;
   locked?: boolean;
   warning?: boolean;
-  warningMessage?: string;  
+  warningMessage?: string;
   addy?: boolean;
-
 }
 
 /**
@@ -126,9 +122,8 @@ export interface InputProps extends DefaultInputProps {
  * @returns {JSX.Element} A styled input component.
  */
 
-const AddressInput: React.FC<InputProps> = (props:InputProps) => {
-
-  const {theme} = useEloise()
+const AddressInput: React.FC<InputProps> = (props: InputProps) => {
+  const { theme } = useEloise();
 
   const {
     label,
@@ -148,260 +143,266 @@ const AddressInput: React.FC<InputProps> = (props:InputProps) => {
     cacheKey,
   } = { ...theme.input, ...props };
 
-    const [hasValue, setHasValue] = useState<boolean>(false)
-  
-    const [showWarningModal, setShowWarningModal] = useState(false);
-    const inputRef = useRef<any>();
+  const [hasValue, setHasValue] = useState<boolean>(false);
 
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const inputRef = useRef<any>();
 
-    const getDisplayValue = () => {
-      if (state && typeof state === 'object' && state.street) {
+  useEffect(() => {
+    if (addy && window.google) {
+      const autocomplete = new window.google.maps.places.Autocomplete(
+        inputRef.current
+      );
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place && place.formatted_address) {
+          handleAddySelect(place.formatted_address);
+        }
+      });
+    }
+  }, [addy]);
+
+  useEffect(() => {
+    setHasValue(state !== "");
+  }, [state]);
+
+  const handleAddySelect = async (address: string) => {
+    const results = await geocodeByAddress(address);
+    const latLng = await getLatLng(results[0]);
+
+    // Extract address components
+    const addressComponents = results[0].address_components;
+
+    let street = "";
+    let city = "";
+    let state = "";
+
+    for (let i = 0; i < addressComponents.length; i++) {
+      const types = addressComponents[i].types;
+
+      if (types.includes("street_number")) {
+        street += addressComponents[i].long_name;
+      }
+
+      if (types.includes("route")) {
+        street += " " + addressComponents[i].long_name;
+      }
+
+      if (types.includes("locality")) {
+        city = addressComponents[i].long_name;
+      }
+
+      if (types.includes("administrative_area_level_1")) {
+        state = addressComponents[i].short_name;
+      }
+    }
+
+    const addy: Addy = {
+      street,
+      city,
+      state,
+      lat: latLng.lat,
+      lng: latLng.lng,
+    };
+
+    setState(addy);
+  };
+  const getDisplayValue = () => {
+    if (state && typeof state === "object") {
+      if (state.street) {
         return state.street;
-      } else {
-        return state || ""; // Return an empty string if state is null or undefined
+      } else if (state.city) {
+        return state.city;
       }
-    };
+    }
 
- 
+    return state || ""; // Return an empty string if state is null or undefined
+  };
+  const handleCloseModal = () => setShowWarningModal(false);
 
-    useEffect(() => {
-        if (addy && window.google) {
-          const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current);
-      
-          autocomplete.addListener('place_changed', () => {
-            const place = autocomplete.getPlace();
-            if (place && place.formatted_address) {
-              handleAddySelect(place.formatted_address);
-            }
-          });
-        }
-      }, [addy]);
-
-      useEffect(() => {
-        setHasValue(state !== "");
-      }, [state]);
-   
-
-    const handleAddySelect = async (address: string) => {
-
-      const results = await geocodeByAddress(address);
-      const latLng = await getLatLng(results[0]);
-    
-      // Extract address components
-      const addressComponents = results[0].address_components;
-    
-      let street = "";
-      let city = "";
-      let state = "";
-    
-      for (let i = 0; i < addressComponents.length; i++) {
-        const types = addressComponents[i].types;
-    
-        if (types.includes("street_number")) {
-          street += addressComponents[i].long_name;
-        }
-    
-        if (types.includes("route")) {
-          street += " " + addressComponents[i].long_name;
-        }
-    
-        if (types.includes("locality")) {
-          city = addressComponents[i].long_name;
-        }
-    
-        if (types.includes("administrative_area_level_1")) {
-          state = addressComponents[i].short_name;
-        }
-      }
-    
-      const addy: Addy = {
-        street,
-        city,
-        state,
-        lat: latLng.lat,
-        lng: latLng.lng,
-      };
-    
-    
-      setState(addy);
-    };
-    
-    const handleCloseModal = () => setShowWarningModal(false);
-  
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (locked || warning) {
-        setShowWarningModal(true);
-      } else {
-        setState(e.target.value);
-      }
-    };
-  
-    const handleInputBlur = async () => {
-      if (state) {
-        await handleAddySelect(state);
-      }
-    };
-  
-    useEffect(() => {
-      if(state !== "")
-      setHasValue(true);
-    }, [state]);
-  
-    useEffect(() => {
-      if (cacheKey !== undefined) {
-        const cachedValue = localStorage.getItem(cacheKey);
-        if (cachedValue !== null) {
-          setState(cachedValue);
-        }
-      }
-    }, [ cacheKey]);
-  
-    useEffect(() => {
-      if (cacheKey !== undefined) {
-        localStorage.setItem(cacheKey, state);
-      }
-  
-      return () => {
-        if (cacheKey !== undefined) {
-          localStorage.removeItem(cacheKey);
-        }
-      };
-    }, [ cacheKey, state]);
-
-    return (
-      <>
-        <InputWrapper extLabel={extLabel}>
-          {extLabel && <StyledLabel hasValue={hasValue}>{label}</StyledLabel>}
-          <StyledInput
-            ref={inputRef}
-            border={border}
-             value={getDisplayValue()} // here
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-            placeholder={!extLabel ? placeholder : undefined}
-            type={type}
-            readOnly={locked}
-            style={{...style, borderRadius: rounded? "3px": 0}}
-          />
-        </InputWrapper>
-  
-        {/* Warning Modal */}
-        <Modal show={showWarningModal} onHide={handleCloseModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Warning</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>{warningMessage}</Modal.Body>
-          <Modal.Footer>
-            <button className="btn btn-primary" onClick={handleCloseModal}>
-              Close
-            </button>
-          </Modal.Footer>
-        </Modal>
-      </>
-    );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (locked || warning) {
+      setShowWarningModal(true);
+    } else {
+      setState(e.target.value);
+    }
   };
 
-const RegularInput: React.FC<InputProps> = (props:InputProps) => {
-
-    const {theme} = useEloise()
-  
-    const {
-      label,
-      extLabel,
-      border,
-      state,
-      setState,
-      placeholder,
-      type,
-      onEnter,
-      locked,
-      warning,
-      warningMessage,
-      style,
-      rounded,
-      addy,
-      cacheKey,
-    } = { ...theme.input, ...props };
-  
-      const [hasValue, setHasValue] = useState<boolean>(false)
-    
-      const [showWarningModal, setShowWarningModal] = useState(false);
-      const inputRef = useRef<any>();
-
-        useEffect(() => {
-          setHasValue(state !== "");
-        }, [state]);
-     
-      const handleCloseModal = () => setShowWarningModal(false);
-    
-      const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (locked || warning) {
-          setShowWarningModal(true);
-        } else {
-          setState(e.target.value);
-        }
-      };
-      useEffect(() => {
-        if (cacheKey !== undefined) {
-          const cachedValue = localStorage.getItem(cacheKey);
-          if (cachedValue !== null) {
-            setState(cachedValue);
-          }
-        }
-      }, [ cacheKey]);
-    
-      useEffect(() => {
-        if (cacheKey !== undefined) {
-          localStorage.setItem(cacheKey, state);
-        }
-    
-        return () => {
-          if (cacheKey !== undefined) {
-            localStorage.removeItem(cacheKey);
-          }
-        };
-      }, [ cacheKey, state]);
-  
-      return (
-        <>
-          <InputWrapper extLabel={extLabel}>
-            {extLabel && <StyledLabel hasValue={hasValue}>{label}</StyledLabel>}
-            <StyledInput
-              ref={inputRef}
-              border={border}
-              value={ state}
-              onChange={handleInputChange}
-              placeholder={!extLabel ? placeholder : undefined}
-              type={type}
-              readOnly={locked}
-              style={{...style, borderRadius: rounded? "3px": 0}}
-            />
-          </InputWrapper>
-    
-          {/* Warning Modal */}
-          <Modal show={showWarningModal} onHide={handleCloseModal} centered>
-            <Modal.Header closeButton>
-              <Modal.Title>Warning</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>{warningMessage}</Modal.Body>
-            <Modal.Footer>
-              <button className="btn btn-primary" onClick={handleCloseModal}>
-                Close
-              </button>
-            </Modal.Footer>
-          </Modal>
-        </>
-      );
-    };
-
-  const Input: React.FC<InputProps> = (props:InputProps) => {
-    const { addy } = props;
-  
-    if (addy) {
-      return <AddressInput {...props} />
+  const handleInputBlur = async () => {
+    if (state) {
+      await handleAddySelect(state);
     }
-  
-    return <RegularInput {...props} />
+  };
+
+  useEffect(() => {
+    if (state !== "") setHasValue(true);
+  }, [state]);
+
+  useEffect(() => {
+    if (cacheKey !== undefined) {
+      const cachedValue = localStorage.getItem(cacheKey);
+      if (cachedValue !== null) {
+        setState(cachedValue);
+      }
+    }
+  }, [cacheKey]);
+
+  useEffect(() => {
+    if (cacheKey !== undefined) {
+      localStorage.setItem(cacheKey, state);
+    }
+
+    return () => {
+      if (cacheKey !== undefined) {
+        localStorage.removeItem(cacheKey);
+      }
+    };
+  }, [cacheKey, state]);
+
+  return (
+    <>
+      <InputWrapper extLabel={extLabel}>
+        {extLabel && <StyledLabel hasValue={hasValue}>{label}</StyledLabel>}
+        <StyledInput
+          ref={inputRef}
+          border={border}
+          value={getDisplayValue()} // here
+          onChange={handleInputChange}
+          onBlur={handleInputBlur}
+          placeholder={!extLabel ? placeholder : undefined}
+          type={type}
+          readOnly={locked}
+          style={{ ...style, borderRadius: rounded ? "3px" : 0 }}
+        />
+      </InputWrapper>
+
+      {/* Warning Modal */}
+      <Modal
+        show={showWarningModal}
+        onHide={handleCloseModal}
+        centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Warning</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{warningMessage}</Modal.Body>
+        <Modal.Footer>
+          <button
+            className="btn btn-primary"
+            onClick={handleCloseModal}>
+            Close
+          </button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+};
+
+const RegularInput: React.FC<InputProps> = (props: InputProps) => {
+  const { theme } = useEloise();
+
+  const {
+    label,
+    extLabel,
+    border,
+    state,
+    setState,
+    placeholder,
+    type,
+    onEnter,
+    locked,
+    warning,
+    warningMessage,
+    style,
+    rounded,
+    addy,
+    cacheKey,
+  } = { ...theme.input, ...props };
+
+  const [hasValue, setHasValue] = useState<boolean>(false);
+
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const inputRef = useRef<any>();
+
+  useEffect(() => {
+    setHasValue(state !== "");
+  }, [state]);
+
+  const handleCloseModal = () => setShowWarningModal(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (locked || warning) {
+      setShowWarningModal(true);
+    } else {
+      setState(e.target.value);
+    }
+  };
+  useEffect(() => {
+    if (cacheKey !== undefined) {
+      const cachedValue = localStorage.getItem(cacheKey);
+      if (cachedValue !== null) {
+        setState(cachedValue);
+      }
+    }
+  }, [cacheKey]);
+
+  useEffect(() => {
+    if (cacheKey !== undefined) {
+      localStorage.setItem(cacheKey, state);
+    }
+
+    return () => {
+      if (cacheKey !== undefined) {
+        localStorage.removeItem(cacheKey);
+      }
+    };
+  }, [cacheKey, state]);
+
+  return (
+    <>
+      <InputWrapper extLabel={extLabel}>
+        {extLabel && <StyledLabel hasValue={hasValue}>{label}</StyledLabel>}
+        <StyledInput
+          ref={inputRef}
+          border={border}
+          value={state}
+          onChange={handleInputChange}
+          placeholder={!extLabel ? placeholder : undefined}
+          type={type}
+          readOnly={locked}
+          style={{ ...style, borderRadius: rounded ? "3px" : 0 }}
+        />
+      </InputWrapper>
+
+      {/* Warning Modal */}
+      <Modal
+        show={showWarningModal}
+        onHide={handleCloseModal}
+        centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Warning</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{warningMessage}</Modal.Body>
+        <Modal.Footer>
+          <button
+            className="btn btn-primary"
+            onClick={handleCloseModal}>
+            Close
+          </button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+};
+
+const Input: React.FC<InputProps> = (props: InputProps) => {
+  const { addy } = props;
+
+  if (addy) {
+    return <AddressInput {...props} />;
   }
-  
-  export default Input;
+
+  return <RegularInput {...props} />;
+};
+
+export default Input;

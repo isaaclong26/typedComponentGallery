@@ -1,26 +1,26 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Table,  Row } from 'react-bootstrap';
-import styled from 'styled-components';
-import { useEloise, AppIcon, View, Button } from '../../';
-import { mdiFileUploadOutline } from '@mdi/js';
+import { mdiFileUploadOutline } from "@mdi/js";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Table } from "react-bootstrap";
+import styled from "styled-components";
+import { AppIcon, Button, useEloise } from "../../";
+import { Color } from "../../functions/color";
 
 const StyledTable = styled(Table)`
   // Your styles here
   border: 2px solid grey;
   border-radius: 5px !important;
   min-height: 40vh;
-
 `;
 const DropZone = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 40vh;
-  text-align:center;
+  text-align: center;
   width: 100%;
   overflow: hidden;
 `;
-interface File {
+export interface File {
   name: string;
   fullPath: string;
 }
@@ -33,48 +33,76 @@ interface Action {
 interface FileTableProps {
   folderPath: string;
   actions: Action[];
-  color?: "primary" | "secondary" | "accent" | "accent2";
-  uploadCallBack?: Function
-  noAuth?: boolean
+  color?: Color | number;
+  uploadCallBack?: Function;
+  noAuth?: boolean;
   otherUser?: string;
-
+  setSelectedState?: React.Dispatch<React.SetStateAction<File[]>>; // new prop
 }
 
-const FileTable = ({ folderPath, actions, color, uploadCallBack, noAuth, otherUser}: FileTableProps) => {
+const FileTable = ({
+  folderPath,
+  actions,
+  color,
+  uploadCallBack,
+  noAuth,
+  otherUser,
+  setSelectedState,
+}: FileTableProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [dragging, setDragging] = useState(false);
-  const [manual, setManual] = useState(false)
+  const [manual, setManual] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]); // Local state for selected files
 
-  const {logic} = useEloise()
+  const { logic } = useEloise();
 
   useEffect(() => {
-    if(!noAuth){
-    const fetchFiles = async () => {
-      const result = await logic.fb.storageMethods.getUserStorageFolder(folderPath);
-      if (result) {
-        
-        setFiles(result);
-      }
-    };
-    fetchFiles();
+    if (!noAuth) {
+      const fetchFiles = async () => {
+        const result = await logic.fb.storageMethods.getUserStorageFolder(
+          folderPath
+        );
+        if (result) {
+          setFiles(result);
+        }
+      };
+      fetchFiles();
     }
   }, [folderPath, manual]);
 
-  const getResult = async(file:any)=>{
-    if(otherUser){
-      let x = await logic.fb.storage.uploadOtherUserFile(folderPath, otherUser, file)
-      return x
+  const getResult = async (file: any) => {
+    if (otherUser) {
+      let x = await logic.fb.storageMethods.uploadOtherUserFile(
+        folderPath,
+        otherUser,
+        file
+      );
+      return x;
+    } else if (noAuth) {
+      let x = await logic.fb.storageMethods.uploadFileNoAuth(folderPath, file);
+      return x;
+    } else {
+      let x = await logic.fb.storageMethods.uploadFile(folderPath, file);
+      return x;
     }
-    else if(noAuth){
-      let x = await logic.fb.storage.uploadFileNoAuth(folderPath, file) 
-      return x
-    }
-    else{
-      let x = await logic.fb.storage.uploadFile(folderPath, file)
-      return x
-    }
-  }
+  };
 
+  useEffect(() => {
+    // When a file is selected or unselected, use the prop to update the parent component.
+    if (setSelectedState) {
+      setSelectedState(selectedFiles);
+    }
+  }, [selectedFiles, setSelectedState]);
+
+  const toggleFileSelected = (file: File) => {
+    setSelectedFiles((prevSelectedFiles) => {
+      if (prevSelectedFiles.includes(file)) {
+        return prevSelectedFiles.filter((f) => f !== file);
+      } else {
+        return [...prevSelectedFiles, file];
+      }
+    });
+  };
   const onDragOver = (event: React.DragEvent) => {
     event.preventDefault();
     setDragging(true);
@@ -93,20 +121,19 @@ const FileTable = ({ folderPath, actions, color, uploadCallBack, noAuth, otherUs
         // Upload the file to Firebase here.
         // Update your state with the new file info.
         // You may need to adjust this depending on how your Firebase upload function works.
-        const result = await getResult(file)
+        const result = await getResult(file);
 
         if (result) {
-            if(uploadCallBack){
-                uploadCallBack()
-            }
-          setFiles(prevFiles => [...prevFiles, result]);
+          if (uploadCallBack) {
+            uploadCallBack();
+          }
+          setFiles((prevFiles) => [...prevFiles, result]);
         }
       });
     },
-    [folderPath],
+    [folderPath]
   );
 
-  
   const fileInputRef = useRef<HTMLInputElement>(null); // Create a ref
 
   const onIconClick = () => {
@@ -121,85 +148,100 @@ const FileTable = ({ folderPath, actions, color, uploadCallBack, noAuth, otherUs
       Array.from(files).forEach(async (file) => {
         // Upload the file to Firebase here.
         // Update your state with the new file info.
-        const result = noAuth? await logic.fb.storage.uploadFileNoAuth(folderPath, file) : await logic.fb.storage.uploadFile(folderPath, file);
+        const result = noAuth
+          ? await logic.fb.storageMethods.uploadFileNoAuth(folderPath, file)
+          : await logic.fb.storageMethods.uploadFile(folderPath, file);
 
         if (result) {
-            if(uploadCallBack){
-                uploadCallBack()
-            }
-                      setFiles(prevFiles => [...prevFiles, result]);
+          if (uploadCallBack) {
+            uploadCallBack();
+          }
+          setFiles((prevFiles) => [...prevFiles, result]);
         }
       });
     }
   };
 
   const getFileExtension = (file: File): string => {
-    const parts = file.name.split('.');
-    return parts.length > 1 ? `.${parts[parts.length - 1]}` : '';
+    const parts = file.name.split(".");
+    return parts.length > 1 ? `.${parts[parts.length - 1]}` : "";
   };
 
-  const actionHandler = async(action:any, file:any)=>{
+  const actionHandler = async (action: any, file: any) => {
+    await action.action(file);
 
-    await action.action(file)
-
-    setManual(!manual)
-  }
+    setManual(!manual);
+  };
 
   return (
-    <StyledTable  onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}  striped bordered hover responsive>
-          <input
+    <StyledTable
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      striped
+      bordered
+      hover
+      responsive>
+      <input
         type="file"
         ref={fileInputRef}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         onChange={onFileInputChange}
       />
       <thead>
         <tr>
+          {setSelectedState && <th>Select</th>}
           <th>File Name</th>
-          {!(files.length === 0 || dragging) && (
-            actions.map((action, index) => (
-            <th key={index}>{action.text}</th>
-          )))
-             }
-         
+          {!(files.length === 0 || dragging) &&
+            actions.map((action, index) => <th key={index}>{action.text}</th>)}
         </tr>
       </thead>
-      <tbody >
-       
-
-            
-        {(files.length === 0 || dragging) ? ( 
-            <tr>
+      <tbody>
+        {files.length === 0 || dragging ? (
+          <tr>
             <td>
-          <DropZone className="mx-auto">
-
-             <AppIcon  title="upload file" onClick={onIconClick} icon={mdiFileUploadOutline}  color="grey" size={3} />
-
-          </DropZone>
-          </td>
-        </tr>
-        ) : 
-
-         ( files.map((file, fileIndex) => (
+              <DropZone className="mx-auto">
+                <AppIcon
+                  title="upload file"
+                  onClick={onIconClick}
+                  icon={mdiFileUploadOutline}
+                  color="grey"
+                  size={3}
+                />
+              </DropZone>
+            </td>
+          </tr>
+        ) : (
+          files.map((file, fileIndex) => (
             <tr key={fileIndex}>
+              {setSelectedState && (
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedFiles.some(
+                      (f) => f.fullPath === file.fullPath
+                    )}
+                    onChange={() => toggleFileSelected(file)}
+                  />
+                </td>
+              )}
               <td>{file.name}</td>
-              {/* <td>{getFileExtension(file)}</td> */}
               {actions.map((action, actionIndex) => (
                 <td key={actionIndex}>
-                  <Button  style={{padding:"2px 5px" }}color={color?? "primary"} onClick={()=>actionHandler(action, file)}>
+                  <Button
+                    style={{ padding: "2px 5px" }}
+                    color={color ?? 0}
+                    onClick={() => actionHandler(action, file)}>
                     {action.text}
                   </Button>
                 </td>
               ))}
             </tr>
           ))
-         )
-        }
-
+        )}
       </tbody>
     </StyledTable>
   );
-  
-}
+};
 
 export default FileTable;

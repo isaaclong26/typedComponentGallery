@@ -1,30 +1,24 @@
-import {
-  FirebaseConfig,
-  BaseEloiseUser,
-  SiteConfig,
-  HistoryItem,
-} from "../";
+import { BaseEloiseUser, FirebaseConfig, HistoryItem, SiteConfig } from "../";
 
+import { ColorMethods, HSLAColor, color } from "./color";
 import { FB, FBInterface } from "./firebase";
 import { Generic } from "./generic";
-import { color,HSLAColor, ColorMethods , getColor} from "./color";
 import { GptText, gptText } from "./gptText";
 import { Hooks } from "./hooks";
 
-
- class Logic {
+class Logic {
   /**
    * The prefix for all API calls made by the application.
    * This URL can be replaced with a local address for development purposes.
    * @type {string}
    */
-  api: string
+  api: string;
   /**
    * Firebase Parent Object
    * Imported from firebase.ts
    * @type {FB}
    */
-
+  fb: FBInterface;
   /**
    * Makes an API call to the specified route with optional body data.
    *
@@ -64,26 +58,22 @@ import { Hooks } from "./hooks";
         const data = await response.json();
         return data;
       } else if (response.status === 403) {
-        this.auth()
+        this.auth();
       } else if (response.status === 402) {
-        this.perms()
+        this.perms();
       } else {
-        // this.other()     
-           console.log(response)
-
+        // this.other()
+        console.log(response);
       }
     } catch (error: any) {
       throw new Error(error.message);
     }
   };
   zillowParse = async (text: string) => {
+    let ots = await this.apiCall("zillowParse", { text });
+    return ots;
+  };
 
-    let ots = await this.apiCall("zillowParse", { text })
-    return ots
-
-  }
-
-  fb: FBInterface;
   /**
    * Chat Gpt Text Functions
    */
@@ -107,7 +97,7 @@ import { Hooks } from "./hooks";
     window.location.href = "/other";
   }
 
-  hooks = Hooks
+  hooks = Hooks;
 
   siteConfig: SiteConfig;
 
@@ -150,13 +140,8 @@ import { Hooks } from "./hooks";
   constructor(config: FirebaseConfig, siteConfig: SiteConfig) {
     this.fb = new FB(config, siteConfig);
     this.siteConfig = siteConfig;
-    this.api = siteConfig.api
+    this.api = siteConfig.api;
   }
 }
 
-export {
-Logic,
-ColorMethods,
-HSLAColor,
-
-}
+export { ColorMethods, HSLAColor, Logic };

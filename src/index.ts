@@ -1,7 +1,5 @@
 import React, { ReactNode } from "react";
 import Eloise, { EloiseIntel, useEloise } from "./App";
-import { HSLAColor, Logic } from "./functions";
-
 import {
   AppIcon,
   Button,
@@ -47,6 +45,10 @@ import {
 } from "./components";
 import { DefaultHeadingProps } from "./components/blocks/heading";
 import { DefaultInputProps } from "./components/blocks/input";
+import { UserDependentWidget } from "./components/widgets";
+import { File } from "./components/widgets/fileTable";
+import { HSLAColor, Logic } from "./functions";
+import { Color } from "./functions/color";
 
 export {
   AppIcon,
@@ -72,6 +74,7 @@ export {
   DropDown,
   Eloise,
   EloiseWidget,
+  File,
   FileTable,
   FileUpload,
   FileUploadProps,
@@ -86,7 +89,7 @@ export {
   Input,
   InputProps,
   LargeTextInput,
-  Life, // Updated
+  Life,
   Loading,
   Logic,
   Login,
@@ -95,20 +98,12 @@ export {
   MapProps,
   Other,
   ReportBug,
+  UserDependentWidget,
   View,
   ViewCol,
   useEloise,
 };
 
-export interface EloisePage {
-  name: string;
-  component?: ReactNode;
-  pages?: EloisePage[];
-  hidden?: boolean;
-  url?: string;
-  intel?: EloiseIntel;
-  noAuth?: boolean;
-}
 export interface SideWidget {
   name: string;
   component: React.FC;
@@ -142,13 +137,24 @@ export interface Contact {
   first: string;
   last: string;
 }
+export interface EloisePage {
+  name: string;
+  component?: ReactNode;
+  pages?: EloisePage[];
+  hidden?: boolean;
+  url?: string;
+  intel?: EloiseIntel;
+  noAuth?: boolean;
+}
+export type PagesType = EloisePage[] | ((key: string) => EloisePage[]);
 
 export interface SiteConfig {
   api: string;
   name: string;
   id: string;
-  pages: EloisePage[];
+  pages: PagesType;
   logo: string;
+  defaultMode: string;
   inverseLogo: string;
   sideWidget: SideWidget[];
   eloiseConfig: EloiseConfig;
@@ -156,6 +162,7 @@ export interface SiteConfig {
   bugReporting?: boolean;
   userConfig?: UserConfig;
   peopleConfig: Array<PeopleType>;
+  noAuth?: boolean;
 }
 
 export type Event = {
@@ -270,16 +277,12 @@ export type BorderRadius =
 
 // Defines an interface for theme colors
 export interface Theme {
-  primary: HSLAColor;
-  secondary: HSLAColor;
+  colors: Array<Color>;
   white: HSLAColor;
   font: string;
   fontSize: FontSize;
   borderRadius: BorderRadius;
   border: string;
-  accent: HSLAColor;
-  accent2: HSLAColor;
-  accent3: HSLAColor;
   mode: "light" | "dark" | "auto";
   heading?: DefaultHeadingProps;
   input?: DefaultInputProps;

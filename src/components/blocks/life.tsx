@@ -1,8 +1,6 @@
-
-import { FC, useState, useRef, useCallback, useContext } from "react";
-import useInterval from "./useInterval";
+import React, { FC, useCallback, useRef, useState } from "react";
 import { useEloise } from "../../App";
-import React from "react";
+import useInterval from "./useInterval";
 const numRows = 25;
 const numCols = 35;
 
@@ -35,9 +33,7 @@ const randomTiles = (): number[][] => {
 };
 
 const Life: FC = () => {
-
-    const {theme, logic} = useEloise()
-
+  const { theme, logic } = useEloise();
 
   const [grid, setGrid] = useState(() => {
     return randomTiles();
@@ -47,7 +43,7 @@ const Life: FC = () => {
   const runningRef = useRef(running);
   runningRef.current = running;
 
-  const runSimulation = useCallback((grid:any) => {
+  const runSimulation = useCallback((grid: any) => {
     if (!runningRef.current) {
       return;
     }
@@ -83,15 +79,13 @@ const Life: FC = () => {
 
   return (
     <div className="container  py-1`">
-
       <div
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${numCols}, 20px)`,
           width: "fit-content",
           margin: "0 auto",
-        }}
-      >
+        }}>
         {grid.map((rows, i) =>
           rows.map((col, k) => (
             <div
@@ -105,10 +99,9 @@ const Life: FC = () => {
               style={{
                 width: 20,
                 height: 20,
-                backgroundColor: grid[i][k] ? theme.primary : undefined,
+                backgroundColor: grid[i][k] ? theme.colors[0] : undefined,
                 border: "none",
-              }}
-            ></div>
+              }}></div>
           ))
         )}
       </div>

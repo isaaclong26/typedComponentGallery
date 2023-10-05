@@ -3,7 +3,7 @@ import { Col, Dropdown, DropdownButton, Row, Table } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
-import { useEloise } from "../..";
+import { Loading, useEloise } from "../../..";
 
 function formatKey(key: string): string {
   return key
@@ -51,6 +51,7 @@ export type DBTableProps = {
   fields?: FieldSelection;
   manualDefault?: string[];
   Empty?: React.ComponentType; // <-- Add this line for Empty prop
+  noAuth?: boolean;
 } & DBTableProps1;
 
 export const DBTable: React.FC<DBTableProps> = ({
@@ -63,6 +64,7 @@ export const DBTable: React.FC<DBTableProps> = ({
   expandComponent: ExpandComponent,
   link,
   Empty,
+  noAuth,
 }) => {
   const { logic, theme } = useEloise();
   const navigate = useNavigate();
@@ -80,7 +82,9 @@ export const DBTable: React.FC<DBTableProps> = ({
     }
   }, []);
   logic.hooks.useAsyncEffect(async () => {
-    const data = await logic.fb.docs.getUserCollection(path);
+    const data = noAuth
+      ? await logic.fb.docs.getCollection(path)
+      : await logic.fb.docs.getUserCollection(path);
     if (data) {
       setDocs(data);
       if (manualDefault) {
@@ -297,6 +301,9 @@ export const DBTable: React.FC<DBTableProps> = ({
     }
   };
 
+  if (!docs) {
+    return <Loading />;
+  }
   return (
     <>
       <Row className="my-3">
@@ -316,7 +323,7 @@ export const DBTable: React.FC<DBTableProps> = ({
           responsive>
           <thead
             style={{
-              borderBottom: `3px solid ${theme.primary}`,
+              borderBottom: `3px solid ${theme.colors[0]}`,
               borderRadius: "3px",
             }}>
             {renderTableHeader()}

@@ -1,51 +1,56 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Form, FormControl, Button } from "react-bootstrap";
-import firebase from "firebase/firestore";
-import {v4 as uuidv4} from "uuid"
+import { mdiArrowLeft } from "@mdi/js";
+import Icon from "@mdi/react";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Form, FormControl } from "react-bootstrap";
+import { v4 as uuidv4 } from "uuid";
+import { useEloise } from "../..";
+import { EloiseIntel } from "../../App";
 import {
   ChatContainer,
-  MessagesContainer,
-  MessageWrapper,
-  MessageSender,
-  MessageContent,
   InputContainer,
-  StyledHole,
-  userMessageStyle,
+  MessageContent,
+  MessageWrapper,
+  MessagesContainer,
   otherMessageStyle,
-} from "../styles/chatStyles"
-import { useEloise } from "../..";
-import Icon from "@mdi/react";
-import { mdiArrowLeft } from "@mdi/js";
-import { EloiseIntel } from "../../App";
+  userMessageStyle,
+} from "../styles/chatStyles";
 
 type Message = {
-    id: string;
-    content: string;
-    senderId: string;
-  };
-  
-type GptMessage ={
-  role:"user"| "system"| "assistant";
-  content: string
+  id: string;
+  content: string;
+  senderId: string;
+};
+
+type GptMessage = {
+  role: "user" | "system" | "assistant";
+  content: string;
+};
+
+export interface Convo {
+  id: string;
+  connectedTo: string;
+  connectedName: string;
 }
 
-export interface Convo{
-    id:string,
-    connectedTo: string;
-    connectedName: string;
-
-}
-
-const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; right: number; bottom: number; left: number }; setHoleCoords: (coords: { top: number; right: number; bottom: number; left: number }) => void } > = ({convo, back, holeCoords, setHoleCoords}) => {
-  
+const Chat: React.FC<{
+  convo: Convo;
+  back: Function;
+  holeCoords: { top: number; right: number; bottom: number; left: number };
+  setHoleCoords: (coords: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  }) => void;
+}> = ({ convo, back, holeCoords, setHoleCoords }) => {
   const [eloiseTyping, setEloiseTyping] = useState(false);
 
-  const {logic, siteConfig, theme, eloiseContent} = useEloise()
+  const { logic, siteConfig, theme, eloiseContent } = useEloise();
   const [messages, setMessages] = useState<Message[] | GptMessage[]>([]);
   const [input, setInput] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [uid, setUID] = useState<string>(logic.fb.getAuthenticatedUserUid())
- 
+  const [uid, setUID] = useState<string>(logic.fb.getAuthenticatedUserUid());
+
   const squareSize = 100;
 
   const targetCoords = {
@@ -55,30 +60,27 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
     left: (window.innerWidth - squareSize) / 2,
   };
 
- 
-
-  logic.hooks.useAsyncEffect(async()=>{
-   
-    if(convo.id === "eloise"){
-      setMessages([{role:"assistant", content: "Hi how can I help?"}])
+  logic.hooks.useAsyncEffect(async () => {
+    if (convo.id === "eloise") {
+      setMessages([{ role: "assistant", content: "Hi how can I help?" }]);
+    } else {
+      let test2 = await logic.fb.docs.getUserCollection(
+        "convos/" + convo.id + "/messages"
+      );
+      let ots = test2.map((message: any) => message.data);
+      setMessages(ots);
     }
-    else{
-    let test2 = await logic.fb.docs.getUserCollection("convos/"+ convo.id+"/messages")
-    let ots = test2.map((message:any)=> message.data)
-    setMessages(ots)
-    }
+  }, []);
 
-  },[])
-  
   function formatEloiseIntelData(data: EloiseIntel[]): string {
     const formattedData = data.map((item) => {
       const { id, position, ...rest } = item;
       const lines = ` \n\n ${Object.entries(rest)
         .map(([key, value]) => `${key}: ${value}`)
-        .join('\n')}`;
+        .join("\n")}`;
       return lines;
     });
-    let semi = formattedData.join('\n\n');
+    let semi = formattedData.join("\n\n");
 
     return `Content on Page: ${semi}`;
   }
@@ -90,92 +92,111 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async(e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     setInput("");
 
     e.preventDefault();
     if (input.trim() === "") return;
 
-  
-  
-    if(convo.id === "eloise"){
-      setMessages([...messages  as Array<GptMessage>, {role:'user', content:input}])
+    if (convo.id === "eloise") {
+      setMessages([
+        ...(messages as Array<GptMessage>),
+        { role: "user", content: input },
+      ]);
       setEloiseTyping(true); // Eloise is typing
 
-      let prompt = formatEloiseIntelData(eloiseContent)
-    
-      let test = await logic.apiCall("siteChat", {
-      convo: [
-        ...messages,
-       { role: "user", content: prompt },
-        { role: "user", content: input }
-      ]  }
-         ,siteConfig.eloiseConfig.endPoint)
+      let prompt = formatEloiseIntelData(eloiseContent);
 
-      setMessages([...messages as Array<GptMessage>,  {role:'user', content:input}, test])
-      setEloiseTyping(false)
+      let test = await logic.apiCall(
+        "siteChat",
+        {
+          convo: [
+            ...messages,
+            { role: "user", content: prompt },
+            { role: "user", content: input },
+          ],
+        },
+        siteConfig.eloiseConfig.endPoint
+      );
+
+      setMessages([
+        ...(messages as Array<GptMessage>),
+        { role: "user", content: input },
+        test,
+      ]);
+      setEloiseTyping(false);
     }
-  
-    // Replace with the current user's ID
-    let newId = uuidv4()
 
-    logic.fb.docs.setUserDoc("convos/"+convo.id + "/messages/"+ newId, {
+    // Replace with the current user's ID
+    let newId = uuidv4();
+
+    logic.fb.docs.setUserDoc("convos/" + convo.id + "/messages/" + newId, {
       content: input,
       senderId: uid,
     });
 
-    if(convo.id !== "eloise"){
+    if (convo.id !== "eloise") {
+      let newMessage: Message = { content: input, senderId: uid, id: newId };
+      setMessages([...(messages as Message[]), newMessage]);
 
-      let newMessage: Message = {content: input, senderId:uid, id:newId}
-       setMessages([...messages as Message[], newMessage ]);
-
-    logic.fb.docs.setOtherUserDoc("convos/"+convo.id + "/messages/"+ newId,  {
-        content: input,
-        senderId:uid,
-      }, convo.connectedTo);
+      logic.fb.docs.setOtherUserDoc(
+        "convos/" + convo.id + "/messages/" + newId,
+        {
+          content: input,
+          senderId: uid,
+        },
+        convo.connectedTo
+      );
     }
-  
+
     setInput("");
   };
   return (
     <ChatContainer>
-       
-      <div style={{
-        position: "absolute",
-        top: '10px',
-        left: '10px',
-      }}
-      onClick={()=>back()}
-      >
-      <Icon path={mdiArrowLeft} size={1} color={theme.primary} />
+      <div
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+        }}
+        onClick={() => back()}>
+        <Icon
+          path={mdiArrowLeft}
+          size={1}
+          color={theme.colors[0]}
+        />
       </div>
-      {messages &&
-      <MessagesContainer>
-       {messages &&
-  <MessagesContainer>
-    {messages.map((message: GptMessage | Message) => {
-            const isUserMessage =
-            "senderId" in message
-              ? message.senderId === uid
-              : message.role === "user";
-     
-      const messageStyle = isUserMessage ? userMessageStyle : otherMessageStyle;
+      {messages && (
+        <MessagesContainer>
+          {messages && (
+            <MessagesContainer>
+              {messages.map((message: GptMessage | Message) => {
+                const isUserMessage =
+                  "senderId" in message
+                    ? message.senderId === uid
+                    : message.role === "user";
 
-      return (
-        <MessageWrapper key={uuidv4()} style={messageStyle}>
-          <MessageContent>{message.content}</MessageContent>
-        </MessageWrapper>
-      );
-    })}
-        {eloiseTyping && convo.id === "eloise" && <TypingIndicator />}
+                const messageStyle = isUserMessage
+                  ? userMessageStyle
+                  : otherMessageStyle;
 
-    <div ref={messagesEndRef} />
-  </MessagesContainer>
-}
+                return (
+                  <MessageWrapper
+                    key={uuidv4()}
+                    style={messageStyle}>
+                    <MessageContent>{message.content}</MessageContent>
+                  </MessageWrapper>
+                );
+              })}
+              {eloiseTyping && convo.id === "eloise" && <TypingIndicator />}
 
-        <div ref={messagesEndRef} />
-      </MessagesContainer>
-    }
+              <div ref={messagesEndRef} />
+            </MessagesContainer>
+          )}
+
+          <div ref={messagesEndRef} />
+        </MessagesContainer>
+      )}
       <InputContainer>
         <Form onSubmit={handleSendMessage}>
           <Form.Group className="d-flex">
@@ -184,7 +205,9 @@ const Chat: React.FC<{convo: Convo, back:Function ; holeCoords: { top: number; r
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
             />
-            <Button type="submit" className="ml-2">
+            <Button
+              type="submit"
+              className="ml-2">
               Send
             </Button>
           </Form.Group>
@@ -225,12 +248,15 @@ const TypingIndicator: React.FC = () => {
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: "8px" }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "flex-start",
+        marginBottom: "8px",
+      }}>
       <div style={typingDot1Style} />
       <div style={typingDot2Style} />
       <div style={typingDot3Style} />
     </div>
   );
 };
-
-

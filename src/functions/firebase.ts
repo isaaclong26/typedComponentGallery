@@ -1,20 +1,20 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
 import {
-  DocumentData,
   addDoc,
-  arrayRemove,
-  arrayUnion,
+  collection,
   deleteDoc,
   doc,
+  getDoc,
+  getDocs,
   getFirestore,
+  onSnapshot,
   query,
   setDoc,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import {
-  StorageReference,
   deleteObject,
   getDownloadURL,
   getStorage,
@@ -22,13 +22,16 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import { getDatabase } from "firebase/database";
-import { collection, getDocs, getDoc } from "firebase/firestore";
 import { throttle } from "lodash";
 import { useEffect, useState } from "react";
-import { FirebaseConfig, SiteConfig, Contact, User } from "..";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { HooksMethods, DocsMethods, StorageMethods, ContactsMethods } from "./firebasetypes";
+import { Contact, SiteConfig, Theme, User } from "..";
+import {
+  ContactsMethods,
+  DocsMethods,
+  HooksMethods,
+  StorageMethods,
+} from "./firebasetypes";
 
 /**
  * The FB class provides methods for interacting with Firebase services.
@@ -82,42 +85,40 @@ export interface FBInterface {
    * @param {any} config The configuration object.
    * @param {SiteConfig} siteConfig The site configuration.
    */
-  contacts: ContactsMethods,
-  docs: DocsMethods,
-  hooks: HooksMethods,
-  storageMethods: StorageMethods
-  getAuthenticatedUserUid(): string  ;
+  contacts: ContactsMethods;
+  docs: DocsMethods;
+  hooks: HooksMethods;
+  storageMethods: StorageMethods;
+  getAuthenticatedUserUid(): string;
 }
 
 class FB implements FBInterface {
-  app: any = '';
-  db: any = '';
-  auth: any = '';
-  storage: any = '';
-  database: any = '';
+  app: any = "";
+  db: any = "";
+  auth: any = "";
+  storage: any = "";
+  database: any = "";
   siteConfig: SiteConfig;
 
   constructor(config: any, siteConfig: SiteConfig) {
-    if(config.config){
-    this.app = initializeApp(config.config);
-    this.db = getFirestore(this.app);
-    this.auth = getAuth(this.app);
-    this.storage = getStorage(this.app);
-    this.database = getDatabase(this.app);
+    if (config.config) {
+      this.app = initializeApp(config.config);
+      this.db = getFirestore(this.app);
+      this.auth = getAuth(this.app);
+      this.storage = getStorage(this.app);
+      this.database = getDatabase(this.app);
     }
     this.siteConfig = siteConfig;
   }
 
-  getAuthenticatedUserUid= ()=> {
+  getAuthenticatedUserUid = () => {
     const user = this.auth.currentUser;
     if (user) {
       return user.uid;
     } else {
-      return 'not logged in';
+      return false;
     }
-  }
-
-  
+  };
 
   storageMethods: StorageMethods = {
     getUserStorageFolder: async (path: string): Promise<any> => {
@@ -151,11 +152,50 @@ class FB implements FBInterface {
         }
       }
     },
+    getStorageFolder: async (path: string): Promise<any> => {
+      const storage = getStorage();
+      const storageRef = ref(storage, this.siteConfig.id + "/Main/" + path);
 
-    uploadFile: async (path: string, file: File): Promise<any | boolean> => {
+      try {
+        const res = await listAll(storageRef);
+        const files = await Promise.all(
+          res.items.map(async (item) => {
+            const downloadURL = await getDownloadURL(item);
+            return {
+              name: item.name,
+              fullPath: item.fullPath,
+              downloadURL,
+            };
+          })
+        );
+        return files;
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
+    },
+
+    uploadFile: async (
+      path: string,
+      file: File,
+      log?: boolean
+    ): Promise<any | boolean> => {
+      const logMessage = (message: any) => {
+        if (log) {
+          console.log(message);
+        }
+      };
+
+      const logError = (error: any) => {
+        if (log) {
+          console.error(error);
+        }
+      };
+
       const uid = this.getAuthenticatedUserUid();
 
       if (!uid) {
+        logMessage("No authenticated user found.");
         return false;
       } else {
         const storageRef = ref(
@@ -173,45 +213,51 @@ class FB implements FBInterface {
         try {
           const uploadTask = uploadBytesResumable(storageRef, file);
 
-          // We return a new promise that resolves with the file object when the upload completes
           return new Promise((resolve, reject) => {
             uploadTask.on(
               "state_changed",
               (snapshot) => {
                 const progress =
                   (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                logMessage(`Upload is ${progress}% done`);
               },
               (error) => {
-                console.error(error);
+                logError(error);
                 reject(error);
               },
               async () => {
-                const downloadURL = await getDownloadURL(
-                  uploadTask.snapshot.ref
-                );
-
-                resolve({
-                  name: file.name,
-                  fullPath:
-                    "users/" +
-                    uid +
-                    "/" +
-                    this.siteConfig.id +
-                    "/Main/" +
-                    path +
-                    "/" +
-                    file.name,
-                  downloadURL,
-                });
+                try {
+                  const downloadURL = await getDownloadURL(
+                    uploadTask.snapshot.ref
+                  );
+                  logMessage(`File available at ${downloadURL}`);
+                  resolve({
+                    name: file.name,
+                    fullPath:
+                      "users/" +
+                      uid +
+                      "/" +
+                      this.siteConfig.id +
+                      "/Main/" +
+                      path +
+                      "/" +
+                      file.name,
+                    downloadURL,
+                  });
+                } catch (error) {
+                  logError(`Error getting download URL: ${error}`);
+                  reject(error);
+                }
               }
             );
           });
         } catch (error) {
-          console.error("Error uploading file:", error);
+          logError(`Error uploading file: ${error}`);
           return false;
         }
       }
     },
+
     uploadOtherUserFile: async (
       path: string,
       userId: string,
@@ -274,40 +320,63 @@ class FB implements FBInterface {
         }
       }
     },
-    uploadFileNoAuth:async(path: string, file: File)=> {
+    uploadFileNoAuth: async (
+      path: string,
+      file: File,
+      log?: boolean
+    ): Promise<string | null> => {
       const storageRef = ref(this.storage, path + "/" + file.name);
-  
+
+      const logMessage = (message: any) => {
+        if (log) {
+          console.log(message);
+        }
+      };
+
+      const logError = (error: any) => {
+        if (log) {
+          console.error(error);
+        }
+      };
+
       try {
         const uploadTask = uploadBytesResumable(storageRef, file);
-  
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            // You can use this function to observe state change events such as progress, pause, and resume
-            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log("Upload is " + progress + "% done");
-          },
-          (error) => {
-            // Handle unsuccessful uploads
-            console.error(error);
-          },
-          () => {
-            // Handle successful uploads on complete
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              console.log("File available at", downloadURL);
-              return downloadURL; // you can return the URL of the uploaded file here
-            });
-          }
-        );
+
+        return new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              logMessage(`Upload is ${progress}% done`);
+            },
+            (error) => {
+              logError(error);
+              reject(error);
+            },
+            async () => {
+              try {
+                const downloadURL = await getDownloadURL(
+                  uploadTask.snapshot.ref
+                );
+                logMessage(`File available at ${downloadURL}`);
+                resolve(downloadURL);
+              } catch (error) {
+                logError(`Error getting download URL: ${error}`);
+                reject(error);
+              }
+            }
+          );
+        });
       } catch (error) {
-        console.error("Error uploading file:", error);
+        logError(`Error uploading file: ${error}`);
+        return null;
       }
     },
-   deleteFile:async(path: string)=> {
+
+    deleteFile: async (path: string) => {
       const storageRef = ref(this.storage, path);
-  
+
       try {
         await deleteObject(storageRef);
         console.log("File deleted successfully");
@@ -320,105 +389,109 @@ class FB implements FBInterface {
   contacts: ContactsMethods = {
     getUserContacts: async () => {
       const uid = this.getAuthenticatedUserUid();
-    
+
       const userContactsCollectionRef = collection(
         this.db,
         "users/" + uid + "/" + this.siteConfig.id + "/Main/contacts"
       );
       const contactsQuerySnapshot = await getDocs(userContactsCollectionRef);
-    
+
       let contactObjects: Array<Contact> = [];
       contactsQuerySnapshot.forEach((contactDoc) => {
         const contactData = contactDoc.data();
-    
+
         contactObjects.push({
           user: contactData.user,
           type: contactData.type,
           initials: contactData.initials,
           email: contactData.email,
           first: contactData.first,
-          last: contactData.last
+          last: contactData.last,
         });
       });
-    
+
       return contactObjects;
     },
-    
+
     addExistingUserToContacts: async (userId: string, type: string) => {
       const uid = this.getAuthenticatedUserUid();
-    
+
       const contactUserDocRef = doc(this.db, "users/" + userId);
       const contactUserDoc = await getDoc(contactUserDocRef);
-    
+
       if (!contactUserDoc.exists()) {
         console.warn("User document not found");
         return;
       }
-    
+
       const contactUserData = contactUserDoc.data();
-    
+
       const newContact: Contact = {
         user: userId,
         type: type,
         initials: contactUserData.first[0] + contactUserData.last[0],
         email: contactUserData.email,
         first: contactUserData.first,
-        last: contactUserData.last
+        last: contactUserData.last,
       };
-    
+
       const userContactsCollectionRef = collection(
         this.db,
         "users/" + uid + "/" + this.siteConfig.id + "/Contacts"
       );
-    
+
       await addDoc(userContactsCollectionRef, newContact);
     },
-    
+
     addNewUserToContacts: async (user: User, type: string) => {
       const uid = this.getAuthenticatedUserUid();
-    
+
       // Create the new user document
       const newUserDocRef = doc(this.db, "users");
       const newUser = {
         ...user,
         account: false,
       };
-    
+
       await setDoc(newUserDocRef, newUser);
-    
+
       const newUserId = newUserDocRef.id;
-    
+
       const newContact: Contact = {
         user: newUserId,
         type: type,
         initials: user.first[0] + user.last[0],
         email: user.email,
         first: user.first,
-        last: user.last
+        last: user.last,
       };
-    
+
       const userContactsCollectionRef = collection(
         this.db,
         "users/" + uid + "/" + this.siteConfig.id + "/Contacts"
       );
-    
+
       await addDoc(userContactsCollectionRef, newContact);
     },
-    
-    
+
     removeUserFromContacts: async (contactIdToRemove: string) => {
       const uid = this.getAuthenticatedUserUid();
-    
+
       const contactDocRef = doc(
         this.db,
-        "users/" + uid + "/" + this.siteConfig.id + "/Main/contacts/" + contactIdToRemove
+        "users/" +
+          uid +
+          "/" +
+          this.siteConfig.id +
+          "/Main/contacts/" +
+          contactIdToRemove
       );
-    
+
       // Deleting the document in the contacts collection
       await deleteDoc(contactDocRef);
     },
-    
-    searchAllUsers: async(email: string) =>{
+
+    searchAllUsers: async (email: string) => {
       let ots;
       try {
         const q = query(
@@ -426,7 +499,7 @@ class FB implements FBInterface {
           where("apps", "array-contains", this.siteConfig.id),
           where("email", "==", email)
         );
-  
+
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           // doc.data() is never undefined for query doc snapshots
@@ -435,144 +508,213 @@ class FB implements FBInterface {
       } catch (error) {
         console.log("Error getting documents: ", error);
       }
-  
+
       return ots ? ots : null;
     },
-    
   };
 
   docs: DocsMethods = {
-  setUserDoc: async(path: string, data: any)=> {
-    const test = this.getAuthenticatedUserUid();
-    if (!test) {
-      return false;
-    } else {
-      const ots: any = await setDoc(
-        doc(
-          this.db,
-          "users/" + test + "/" + this.siteConfig.id + "/Main/" + path
-        ),
-        data,
-        { merge: true }, // This will merge the fields rather than replacing the document
-
-      );
-      if (ots) {
-        return true;
-      }
-      return false;
-    }
-  },
-  setUser: async(data: any) => {
-    const test = this.getAuthenticatedUserUid();
-    if (!test) {
+    setUserDoc: async (path: string, data: any) => {
+      const test = this.getAuthenticatedUserUid();
+      if (!test) {
         return false;
-    } else {
+      } else {
         const ots: any = await setDoc(
-            doc(this.db, "users/" + test),
-            data,
-            { merge: true } // This will merge the fields rather than replacing the document
+          doc(
+            this.db,
+            "users/" + test + "/" + this.siteConfig.id + "/Main/" + path
+          ),
+          data,
+          { merge: true } // This will merge the fields rather than replacing the document
         );
         if (ots) {
-            return true;
+          return true;
         }
         return false;
-    }
-},
-  getUser: async() =>{
-    const test = this.getAuthenticatedUserUid();
-    if (!test) {
-      return false;
-    } else {
+      }
+    },
+    setDoc: async (path: string, data: any) => {
+      try {
+        const ots: any = await setDoc(
+          doc(this.db, this.siteConfig.id + "/Main/" + path),
+          data,
+          { merge: true } // This will merge the fields rather than replacing the document
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    deleteUserDoc: async (path: string) => {
+      const test = this.getAuthenticatedUserUid();
+      if (!test) {
+        return false;
+      } else {
+        const docRef = doc(
+          this.db,
+          "users/" + test + "/" + this.siteConfig.id + "/Main/" + path
+        );
+        await deleteDoc(docRef);
+        return true;
+      }
+    },
+    setUser: async (data: any) => {
+      const test = this.getAuthenticatedUserUid();
+      if (!test) {
+        return false;
+      } else {
+        const ots: any = await setDoc(
+          doc(this.db, "users/" + test),
+          data,
+          { merge: true } // This will merge the fields rather than replacing the document
+        );
+        if (ots) {
+          return true;
+        }
+        return false;
+      }
+    },
+    getUser: async () => {
+      const test = this.getAuthenticatedUserUid();
+      if (!test) {
+        return false;
+      } else {
+        const ots: any = await getDoc(doc(this.db, "users/" + test));
+        return ots.data();
+      }
+    },
+    getUploadLink: async (id: string, docId: string) => {
       const ots: any = await getDoc(
-        doc(
-          this.db,
-          "users/" + test 
-        )
+        doc(this.db, "utils/uploadLinks/" + id + "/" + docId)
       );
-      return ots.data()
-    }
-  },
-  getUploadLink: async (id: string, docId: string)=> {
-    const ots: any = await getDoc(
-      doc(this.db, "utils/uploadLinks/" + id + "/" + docId)
-    );
-    return {
-      data: ots.data(),
-      id: ots.id,
-    };
-  },
+      return {
+        data: ots.data(),
+        id: ots.id,
+      };
+    },
 
-   generateUploadLink:async(id: string, data: any)=> {
-    const ots: any = await setDoc(
-      doc(this.db, "utils/uploadLinks/" + id),
-      data
-    );
-    if (ots) {
-      return true;
-    }
-    return false;
-  },
-  setOtherUserDoc: async(path: string, data: any, otherUser: string) =>{
-    if (!test) {
-      return false;
-    } else {
+    generateUploadLink: async (id: string, data: any) => {
       const ots: any = await setDoc(
-        doc(
-          this.db,
-          "users/" + otherUser + "/" + this.siteConfig.id + "/Main/" + path
-        ),
+        doc(this.db, "utils/uploadLinks/" + id),
         data
       );
       if (ots) {
         return true;
       }
       return false;
-    }
-  },
-   getUserCollection: async(path: string)=> {
-    const test = this.getAuthenticatedUserUid();
-    if (!test) {
-      return false;
-    } else {
-      const ots: any = await getDocs(
-        collection(
-          this.db,
-          "users/" + test + "/" + this.siteConfig.id + "/Main/" + path
-        )
-      );
-      return ots.docs.map((doc: any) => {
-        const temp = doc.data();
-        const ots = {
-          id: doc.id,
-          data: doc.data(),
+    },
+    setOtherUserDoc: async (path: string, data: any, otherUser: string) => {
+      if (!test) {
+        return false;
+      } else {
+        const ots: any = await setDoc(
+          doc(
+            this.db,
+            "users/" + otherUser + "/" + this.siteConfig.id + "/Main/" + path
+          ),
+          data
+        );
+        if (ots) {
+          return true;
+        }
+        return false;
+      }
+    },
+    getUserCollection: async (path: string) => {
+      const test = this.getAuthenticatedUserUid();
+      console.log(test);
+      if (!test) {
+        return false;
+      } else {
+        try {
+          const ots: any = await getDocs(
+            collection(
+              this.db,
+              "users/" + test + "/" + this.siteConfig.id + "/Main/" + path
+            )
+          );
+          if (ots.docs.length > 0) {
+            return ots.docs.map((doc: any) => {
+              const temp = doc.data();
+              const ots = {
+                id: doc.id,
+                data: doc.data(),
+              };
+              return ots;
+            });
+          } else {
+            return [];
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    },
+    getCollection: async (path: string) => {
+      try {
+        const ots: any = await getDocs(
+          collection(this.db, this.siteConfig.id + "/Main/" + path)
+        );
+        if (ots.docs.length > 0) {
+          return ots.docs.map((doc: any) => {
+            const temp = doc.data();
+            const ots = {
+              id: doc.id,
+              data: doc.data(),
+            };
+            return ots;
+          });
+        } else {
+          return [];
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+
+    // Make sure to define getAuthenticatedUserUid() and this.siteConfig.id properties in the class
+
+    getUserDoc: async (path: string) => {
+      const test = this.getAuthenticatedUserUid();
+      if (!test) {
+        return false;
+      } else {
+        const ots: any = await getDoc(
+          doc(
+            this.db,
+            "users/" + test + "/" + this.siteConfig.id + "/Main/" + path
+          )
+        );
+        return {
+          data: ots.data(),
+          id: ots.id,
         };
-        return ots;
-      });
-    }
-  },
-
-  // Make sure to define getAuthenticatedUserUid() and this.siteConfig.id properties in the class
-
- 
- getUserDoc: async(path: string) =>{
-    const test = this.getAuthenticatedUserUid();
-    if (!test) {
-      return false;
-    } else {
+      }
+    },
+    getDoc: async (path: string) => {
       const ots: any = await getDoc(
-        doc(
-          this.db,
-          "users/" + test + "/" + this.siteConfig.id + "/Main/" + path
-        )
+        doc(this.db, this.siteConfig.id + "/Main/" + path)
       );
       return {
         data: ots.data(),
         id: ots.id,
       };
-    }
-  }
-  }
- 
+    },
+    getTheme: async () => {
+      const ots: any = await getDoc(
+        doc(this.db, "siteThemes/" + this.siteConfig.id)
+      );
+      return ots.data() as Theme;
+    },
+    setTheme: async (local: Theme) => {
+      const ots: any = await setDoc(
+        doc(this.db, "siteThemes/" + this.siteConfig.id),
+        local
+      );
+      return local;
+    },
+  };
+
   /**
    * A custom hook for throttling state updates to Firebase.
    *
@@ -592,64 +734,100 @@ class FB implements FBInterface {
    *   />
    * );
    */
-  hooks: HooksMethods= {
-
-  useThrottleChange:(path: string, ms: number = 150): Array<any>=> {
-    const [data, setData] = useState("");
-    const [initialDataFetched, setInitialDataFetched] = useState(false);
-
-    useEffect(() => {
-      const fetchInitialData = async () => {
+  hooks: HooksMethods = {
+    useLocalStorage(key: string): string | null {
+      const [value, setValue] = useState<string | null>(() => {
         try {
-          const doc = await this.docs.getUserDoc(path);
-          if (doc) setData(doc.data);
-
-          setInitialDataFetched(true);
+          return window.localStorage.getItem(key);
         } catch (error) {
-          console.error("Error fetching initial data:", error);
+          console.error(`Error reading localStorage key “${key}”:`, error);
+          return null;
         }
-      };
+      });
 
-      if (!initialDataFetched) {
-        fetchInitialData();
-      }
-    }, [path, initialDataFetched]);
-
-    useEffect(() => {
-      const updateFirestore = throttle(async (newValue) => {
-        try {
-          const result = await this.docs.setUserDoc(path, { value: newValue });
-          if (result) {
-            console.log("Value updated successfully");
-          } else {
-            console.error("Error updating value: User not authenticated");
+      useEffect(() => {
+        const onStorageChange = (e: StorageEvent) => {
+          if (e.key === key) {
+            setValue(e.newValue);
           }
-        } catch (error) {
-          console.error("Error updating value:", error);
-        }
-      }, ms);
+        };
 
-      if (initialDataFetched && data) {
-        updateFirestore(data);
-      }
-    }, [data, ms, path, initialDataFetched]);
+        window.addEventListener("storage", onStorageChange);
+        return () => {
+          window.removeEventListener("storage", onStorageChange);
+        };
+      }, [key]);
 
-    return [data, setData];
-  },
+      return value;
+    },
+    useThrottleChange: (path: string, ms: number = 150): Array<any> => {
+      const [data, setData] = useState("");
+      const [initialDataFetched, setInitialDataFetched] = useState(false);
 
-  useThrottleField:(path: string, field: string, ms: number = 150): Array<any>=> {
-    const [user, loading, error] = useAuthState(this.auth);
-
-    const [data, setData] = useState("");
-    const [initialDataFetched, setInitialDataFetched] = useState(false);
-
-    useEffect(() => {
-      if (user) {
+      useEffect(() => {
         const fetchInitialData = async () => {
           try {
             const doc = await this.docs.getUserDoc(path);
+            if (doc) setData(doc.data);
+
+            setInitialDataFetched(true);
+          } catch (error) {
+            console.error("Error fetching initial data:", error);
+          }
+        };
+
+        if (!initialDataFetched) {
+          fetchInitialData();
+        }
+      }, [path, initialDataFetched]);
+
+      useEffect(() => {
+        const updateFirestore = throttle(async (newValue) => {
+          try {
+            const result = await this.docs.setUserDoc(path, {
+              value: newValue,
+            });
+            if (result) {
+              console.log("Value updated successfully");
+            } else {
+              console.error("Error updating value: User not authenticated");
+            }
+          } catch (error) {
+            console.error("Error updating value:", error);
+          }
+        }, ms);
+
+        if (initialDataFetched && data) {
+          updateFirestore(data);
+        }
+      }, [data, ms, path, initialDataFetched]);
+
+      return [data, setData];
+    },
+    useThrottleField: <T = string>(
+      path: string,
+      field: string,
+      ms: number = 150,
+      log?: boolean
+    ): [T, React.Dispatch<React.SetStateAction<T>>] => {
+      const user = this.getAuthenticatedUserUid();
+
+      const initialState: T = Array.isArray([] as T) ? ([] as T) : ("" as T);
+      const [data, setData] = useState<T>(initialState);
+      const [initialDataFetched, setInitialDataFetched] = useState(false);
+
+      useEffect(() => {
+        // log && console.log("useEffect 1 (with Auth)");
+
+        const fetchInitialData = async () => {
+          try {
+            // log && console.log("fetch initial data (with Auth)");
+            const doc = await this.docs.getUserDoc(path);
+            log && console.log(doc);
+
             if (doc) {
               if (doc.data) {
+                log && console.log(doc.data[field]);
                 setData(doc.data[field]);
               }
             }
@@ -659,53 +837,61 @@ class FB implements FBInterface {
             console.error("Error fetching initial data:", error);
           }
         };
+        fetchInitialData();
+      }, []);
 
-        if (!initialDataFetched) {
-          fetchInitialData();
-        }
-      }
-    }, [path, initialDataFetched]);
+      useEffect(() => {
+        // log && console.log("useEffect 2 (with Auth)");
 
-    useEffect(() => {
-      if (user) {
         const updateFirestore = throttle(async (newValue) => {
           try {
-            let prev: any = await this.docs.getUserDoc(path);
-            if (prev.data) {
-              prev = prev.data;
-            } else {
-              prev = {};
+            if (newValue !== undefined) {
+              // Add this line to prevent setting undefined value
+              let ots: { [key: string]: any } = {};
+              ots[field] = newValue;
+              log && console.log(ots);
+
+              const result = await this.docs.setUserDoc(path, ots);
             }
-            let ots: { [key: string]: any } = { ...prev };
-            ots[field] = newValue;
-            const result = await this.docs.setUserDoc(path, ots);
           } catch (error) {
             console.error("Error updating value:", error);
           }
         }, ms);
 
-        if (initialDataFetched && data) {
+        if (initialDataFetched && data !== undefined) {
+          // Add a check for undefined data here too
           updateFirestore(data);
         }
-      }
-    }, [data, ms, path, initialDataFetched]);
+      }, [data]);
 
-    return [data, setData];
-  },
-  useThrottleUserField:(field: string, ms: number = 150): Array<any>=> {
-    const [user, loading, error] = useAuthState(this.auth);
+      return [data, setData];
+    },
 
-    const [data, setData] = useState("");
-    const [initialDataFetched, setInitialDataFetched] = useState(false);
+    useThrottleFieldNoAuth: <T = string>(
+      path: string,
+      field: string,
+      ms: number = 150,
+      log?: boolean
+    ): [T, React.Dispatch<React.SetStateAction<T>>] => {
+      const initialState: T = Array.isArray([] as T) ? ([] as T) : ("" as T);
+      const [data, setData] = useState<T>(initialState);
+      const [initialDataFetched, setInitialDataFetched] = useState(false);
 
-    useEffect(() => {
-      if (user) {
+      useEffect(() => {
+        log && console.log("useEffect 1");
+
         const fetchInitialData = async () => {
           try {
-            const doc = await this.docs.getUser();
+            log && console.log("fetch intitoal data");
+
+            const doc = await this.docs.getDoc(path);
+            log && console.log(doc);
+
             if (doc) {
-                setData(doc[field]);
-              
+              if (doc.data) {
+                log && console.log(doc.data[field]);
+                setData(doc.data[field]);
+              }
             }
 
             setInitialDataFetched(true);
@@ -713,18 +899,19 @@ class FB implements FBInterface {
             console.error("Error fetching initial data:", error);
           }
         };
+        fetchInitialData();
+      }, []);
 
-        if (!initialDataFetched) {
-          fetchInitialData();
-        }
-      }
-    }, [ initialDataFetched]);
+      useEffect(() => {
+        log && console.log("useEffect 2");
 
-    useEffect(() => {
-      if (user) {
         const updateFirestore = throttle(async (newValue) => {
+          log && console.log("updateFirestore");
+
           try {
-            let prev: any = await this.docs.getUser();
+            let prev: any = await this.docs.getDoc(path);
+            log && console.log(prev);
+
             if (prev.data) {
               prev = prev.data;
             } else {
@@ -732,21 +919,177 @@ class FB implements FBInterface {
             }
             let ots: { [key: string]: any } = { ...prev };
             ots[field] = newValue;
-            const result = await this.docs.setUser( ots);
+            log && console.log(ots);
+
+            const result = await this.docs.setDoc(path, ots);
           } catch (error) {
             console.error("Error updating value:", error);
           }
         }, ms);
 
-        if (initialDataFetched && data) {
+        if (initialDataFetched) {
           updateFirestore(data);
         }
-      }
-    }, [data, ms,  initialDataFetched]);
+      }, [data]);
 
-    return [data, setData];
-  }
-  }
+      return [data, setData];
+    },
+    useThrottleUserField: (field: string, ms: number = 150): Array<any> => {
+      const [user, loading, error] = useAuthState(this.auth);
+
+      const [data, setData] = useState("");
+      const [initialDataFetched, setInitialDataFetched] = useState(false);
+
+      useEffect(() => {
+        if (user) {
+          const fetchInitialData = async () => {
+            try {
+              const doc = await this.docs.getUser();
+              if (doc) {
+                setData(doc[field]);
+              }
+
+              setInitialDataFetched(true);
+            } catch (error) {
+              console.error("Error fetching initial data:", error);
+            }
+          };
+
+          if (!initialDataFetched) {
+            fetchInitialData();
+          }
+        }
+      }, [initialDataFetched]);
+
+      useEffect(() => {
+        if (user) {
+          const updateFirestore = throttle(async (newValue) => {
+            try {
+              let prev: any = await this.docs.getUser();
+              if (prev.data) {
+                prev = prev.data;
+              } else {
+                prev = {};
+              }
+              let ots: { [key: string]: any } = { ...prev };
+              ots[field] = newValue;
+              const result = await this.docs.setUser(ots);
+            } catch (error) {
+              console.error("Error updating value:", error);
+            }
+          }, ms);
+
+          if (initialDataFetched && data) {
+            updateFirestore(data);
+          }
+        }
+      }, [data, ms, initialDataFetched]);
+
+      return [data, setData];
+    },
+
+    useUserCollection: (
+      path: string
+    ): {
+      docs: { id: string; data: any }[];
+      loading: boolean;
+      error: Error | null | undefined;
+    } => {
+      const uid = this.getAuthenticatedUserUid();
+      if (!uid) {
+        return {
+          docs: [],
+          loading: false,
+          error: null,
+        };
+      }
+
+      const [docs, setDocs] = useState<{ id: string; data: any }[]>([]);
+      const [loading, setLoading] = useState<boolean>(true);
+      const [error, setError] = useState<Error | null | undefined>(null);
+
+      useEffect(() => {
+        setLoading(true);
+
+        // Construct the complete path
+        const completePath = `users/${uid}/${this.siteConfig.id}/Main/${path}`;
+        const q = query(collection(this.db, completePath));
+
+        const unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const newDocs = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              data: doc.data(),
+            }));
+            setDocs(newDocs);
+            setLoading(false);
+          },
+          (err) => {
+            setError(err);
+            setLoading(false);
+          }
+        );
+
+        return () => {
+          // Cleanup: unsubscribe to the snapshot
+          unsubscribe();
+        };
+      }, [path]);
+
+      return {
+        docs,
+        loading,
+        error,
+      };
+    },
+    useCollection: (
+      path: string
+    ): {
+      docs: { id: string; data: any }[];
+      loading: boolean;
+      error: Error | null | undefined;
+    } => {
+      const [docs, setDocs] = useState<{ id: string; data: any }[]>([]);
+      const [loading, setLoading] = useState<boolean>(true);
+      const [error, setError] = useState<Error | null | undefined>(null);
+
+      useEffect(() => {
+        setLoading(true);
+
+        // Construct the complete path
+        const completePath = `${this.siteConfig.id}/Main/${path}`;
+        const q = query(collection(this.db, completePath));
+
+        const unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const newDocs = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              data: doc.data(),
+            }));
+            setDocs(newDocs);
+            setLoading(false);
+          },
+          (err) => {
+            setError(err);
+            setLoading(false);
+          }
+        );
+
+        return () => {
+          // Cleanup: unsubscribe to the snapshot
+          unsubscribe();
+        };
+      }, [path]);
+
+      return {
+        docs,
+        loading,
+        error,
+      };
+    },
+  };
 }
 
 export { FB };

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { useEloise } from "../../"; // Update the import path
+import { Loading, useEloise } from "../../../"; // Update the import path
 
 /**
  * Styled component for the horizontal scroll container.
@@ -24,7 +24,8 @@ interface FlatListProps {
    * The path from which data should be fetched.
    */
   path: string;
-
+  filter?: (data: any) => boolean; // added this line
+  noAuth?: boolean;
   /**
    * Component to render each item in the list.
    */
@@ -33,6 +34,7 @@ interface FlatListProps {
     update: (data: any) => Promise<any | false>;
     select?: (data: any) => void; // Optional prop for selection
   }>;
+  Empty?: React.ComponentType; // added this line
 
   /**
    * Optional function for item selection
@@ -47,7 +49,14 @@ interface FlatListProps {
  * @param {FlatListProps} props The props passed to the FlatList component.
  * @returns {JSX.Element} The rendered horizontal list.
  */
-const FlatList: React.FC<FlatListProps> = ({ path, Component, select }) => {
+const FlatList: React.FC<FlatListProps> = ({
+  path,
+  Component,
+  select,
+  Empty,
+  filter,
+  noAuth,
+}) => {
   /**
    * Custom hook useEloise assumed to provide logic for fetching and updating data.
    */
@@ -68,7 +77,9 @@ const FlatList: React.FC<FlatListProps> = ({ path, Component, select }) => {
    */
   useEffect(() => {
     const fetchData = async () => {
-      const fetchedData = await logic.fb.docs.getUserCollection(path);
+      const fetchedData = noAuth
+        ? await logic.fb.docs.getCollection(path)
+        : await logic.fb.docs.getUserCollection(path);
       setData(fetchedData);
     };
 
@@ -111,10 +122,20 @@ const FlatList: React.FC<FlatListProps> = ({ path, Component, select }) => {
   /**
    * Render the horizontal list.
    */
+  if (!data) {
+    return <Loading />;
+  }
+
+  let filteredDocs = filter ? data.filter(filter) : data;
+
+  if (filteredDocs && filteredDocs.length === 0 && Empty) {
+    return <Empty />;
+  }
+
   return (
     <HorizontalScrollContainer ref={scrollRef}>
-      {data &&
-        data.map((item, index) => (
+      {filteredDocs &&
+        filteredDocs.map((item, index) => (
           <div
             key={index}
             style={{ display: "inline-block" }}>

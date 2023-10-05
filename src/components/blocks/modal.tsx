@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
 
 interface Props {
   open: boolean;
@@ -8,7 +8,12 @@ interface Props {
   style?: any;
 }
 
-export const ChildrenModal: React.FC<Props> = ({ open, onClose, children, style }) => {
+export const ChildrenModal: React.FC<Props> = ({
+  open,
+  onClose,
+  children,
+  style,
+}) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -26,24 +31,23 @@ export const ChildrenModal: React.FC<Props> = ({ open, onClose, children, style 
     <>
       {open && (
         <ModalOverlay onClick={handleClose}>
-            <ModalContent
-              style={{
-                backgroundColor: 'white',
-                color: 'black',
-                borderRadius: '10px',
-                maxWidth: '75%',
-                padding: '20px',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                height: '75%',
-                overflowY: 'scroll',
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {children}
-            </ModalContent>
+          <ModalContent
+            style={{
+              backgroundColor: "white",
+              color: "black",
+              borderRadius: "10px",
+              maxWidth: "75%",
+              padding: "20px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              height: "75%",
+              overflowY: "scroll",
+            }}
+            onClick={(e) => e.stopPropagation()}>
+            {children}
+          </ModalContent>
         </ModalOverlay>
       )}
     </>
@@ -65,5 +69,11 @@ const ModalOverlay = styled.div`
 
 const ModalContent = styled.div`
   border-radius: 10px;
-`;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+`;
