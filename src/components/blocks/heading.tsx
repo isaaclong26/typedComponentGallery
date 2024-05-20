@@ -118,7 +118,7 @@ const Heading = (props: HeadingProps) => {
       onClick={props.link ? handleClick : () => {}}>
       <Head
         $border={border ? border : false}
-        style={props.style}
+        style={{ ...props.style, fontFamily: theme.font }}
         className={props.className}
         color={
           color

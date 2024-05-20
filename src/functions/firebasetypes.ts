@@ -146,13 +146,14 @@ export interface ContactsMethods {
 export interface DocsMethods {
   /**
    * Sets the user's document.
-   *
+   *`
    * @param {string} path The path to the user's document.
    * @param {any} data The data to set for the user's document.
    * @returns {Promise<boolean>} A promise that resolves with true if the document was successfully set, or false if the document could not be set.
    */
   setUserDoc(path: string, data: any): Promise<boolean>;
   setDoc(path: string, data: any): Promise<boolean>;
+  setBaseDoc(path: string, data: any): Promise<boolean | any>;
 
   /** Fetches the Theme for the Site from the Database */
   getTheme(): Promise<Theme>;
@@ -202,6 +203,7 @@ export interface DocsMethods {
    */
   getUserCollection(path: string): Promise<{ id: string; data: any }[]>;
   getCollection(path: string): Promise<{ id: string; data: any }[]>;
+  getBaseCollection(path: string): Promise<{ id: string; data: any }[]>;
 
   /**
    * Gets the user's document.
@@ -211,6 +213,7 @@ export interface DocsMethods {
    */
   getUserDoc(path: string): Promise<any>;
   getDoc(path: string): Promise<any>;
+  getBaseDoc(path: string): Promise<any>;
 
   getUser(): Promise<any>;
   /**
@@ -246,6 +249,12 @@ export interface HooksMethods {
     ms?: number,
     log?: boolean
   ): [T, React.Dispatch<React.SetStateAction<T>>];
+  useThrottleBaseField<T = string>(
+    path: string,
+    field: string,
+    ms?: number,
+    log?: boolean
+  ): [T, React.Dispatch<React.SetStateAction<T>>];
   useThrottleFieldNoAuth<T = string>(
     path: string,
     field: string,
@@ -261,6 +270,7 @@ export interface HooksMethods {
    * @param {number} ms The number of milliseconds between updates.
    * @returns {Array<any>} An array containing the user's data for the given field and a function to set the data.
    */
+
   useThrottleUserField(field: string, ms?: number): Array<any>;
   /**
    * A custom React Hook that provides a way to interact with the local storage of the browser.
@@ -279,14 +289,21 @@ export interface HooksMethods {
    * // Otherwise, `storedValue` will be null
    */
   useLocalStorage(key: string): string | null;
-  useUserCollection(path: string): {
+  useUserCollection(
+    path: string,
+    complete?: boolean
+  ): {
     docs: { id: string; data: any }[];
     loading: boolean;
     error: Error | null | undefined;
   };
-  useCollection(path: string): {
+  useCollection(
+    path: string,
+    complete?: boolean
+  ): {
     docs: { id: string; data: any }[];
     loading: boolean;
     error: Error | null | undefined;
   };
+  useDoc(path: string, ms?: number): [any, (field: string, value: any) => void];
 }

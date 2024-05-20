@@ -545,6 +545,18 @@ class FB implements FBInterface {
         return false;
       }
     },
+    setBaseDoc: async (path: string, data: any) => {
+      try {
+        const ots: any = await setDoc(
+          doc(this.db, path),
+          data,
+          { merge: true } // This will merge the fields rather than replacing the document
+        );
+        return true;
+      } catch (e: any) {
+        return e;
+      }
+    },
     deleteUserDoc: async (path: string) => {
       const test = this.getAuthenticatedUserUid();
       if (!test) {
@@ -671,6 +683,25 @@ class FB implements FBInterface {
         console.error(e);
       }
     },
+    getBaseCollection: async (path: string) => {
+      try {
+        const ots: any = await getDocs(collection(this.db, path));
+        if (ots.docs.length > 0) {
+          return ots.docs.map((doc: any) => {
+            const temp = doc.data();
+            const ots = {
+              id: doc.id,
+              data: doc.data(),
+            };
+            return ots;
+          });
+        } else {
+          return [];
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
 
     // Make sure to define getAuthenticatedUserUid() and this.siteConfig.id properties in the class
 
@@ -695,6 +726,13 @@ class FB implements FBInterface {
       const ots: any = await getDoc(
         doc(this.db, this.siteConfig.id + "/Main/" + path)
       );
+      return {
+        data: ots.data(),
+        id: ots.id,
+      };
+    },
+    getBaseDoc: async (path: string) => {
+      const ots: any = await getDoc(doc(this.db, path));
       return {
         data: ots.data(),
         id: ots.id,
@@ -866,6 +904,67 @@ class FB implements FBInterface {
 
       return [data, setData];
     },
+    useThrottleBaseField: <T = string>(
+      path: string,
+      field: string,
+      ms: number = 150,
+      log?: boolean
+    ): [T, React.Dispatch<React.SetStateAction<T>>] => {
+      const initialState: T = Array.isArray([] as T) ? ([] as T) : ("" as T);
+      const [data, setData] = useState<T>(initialState);
+      const [initialDataFetched, setInitialDataFetched] = useState(false);
+
+      useEffect(() => {
+        log && console.log("useEffect 1 (with Auth)");
+
+        const fetchInitialData = async () => {
+          try {
+            log && console.log("fetch initial data (with Auth)");
+            const doc = await this.docs.getBaseDoc(path);
+            log && console.log(doc);
+
+            if (doc) {
+              if (doc.data) {
+                log && console.log(doc.data[field]);
+                setData(doc.data[field]);
+              }
+            }
+
+            setInitialDataFetched(true);
+          } catch (error) {
+            console.error("Error fetching initial data:", error);
+          }
+        };
+        fetchInitialData();
+      }, [path, field]);
+
+      useEffect(() => {
+        log && console.log("useEffect 2 (with Auth)");
+
+        const updateFirestore = throttle(async (newValue) => {
+          try {
+            if (newValue !== undefined) {
+              // Add this line to prevent setting undefined value
+              let ots: { [key: string]: any } = {};
+              ots[field] = newValue;
+              log && console.log(ots);
+
+              const result = await this.docs.setBaseDoc(path, ots);
+              log && console.log(result);
+            }
+          } catch (error) {
+            console.error("Error updating value:", error);
+          }
+        }, ms);
+
+        if (initialDataFetched && data !== undefined) {
+          // Add a check for undefined data here too
+          updateFirestore(data);
+        }
+      }, [data]);
+
+      return [data, setData];
+    },
 
     useThrottleFieldNoAuth: <T = string>(
       path: string,
@@ -900,7 +999,7 @@ class FB implements FBInterface {
           }
         };
         fetchInitialData();
-      }, []);
+      }, [path, field]);
 
       useEffect(() => {
         log && console.log("useEffect 2");
@@ -996,14 +1095,63 @@ class FB implements FBInterface {
       error: Error | null | undefined;
     } => {
       const uid = this.getAuthenticatedUserUid();
-      if (!uid) {
-        return {
-          docs: [],
-          loading: false,
-          error: null,
-        };
-      }
 
+      const [docs, setDocs] = useState<{ id: string; data: any }[]>([]);
+      const [loading, setLoading] = useState<boolean>(true);
+      const [error, setError] = useState<Error | null | undefined>(null);
+
+      useEffect(() => {
+        if (!uid) {
+          // Set state to indicate no data should be loaded
+          setDocs([]);
+          setLoading(false);
+          setError(null);
+          return;
+        }
+
+        setLoading(true);
+
+        // Construct the complete path
+        const completePath = `users/${uid}/${this.siteConfig.id}/Main/${path}`;
+        const q = query(collection(this.db, completePath));
+
+        const unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const newDocs = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              data: doc.data(),
+            }));
+            setDocs(newDocs);
+            setLoading(false);
+          },
+          (err) => {
+            setError(err);
+            setLoading(false);
+          }
+        );
+
+        return () => {
+          // Cleanup: unsubscribe to the snapshot
+          unsubscribe();
+        };
+      }, [uid, path]); // Include uid in the dependency array
+
+      return {
+        docs,
+        loading,
+        error,
+      };
+    },
+
+    useCollection: (
+      path: string,
+      complete?: boolean
+    ): {
+      docs: { id: string; data: any }[];
+      loading: boolean;
+      error: Error | null | undefined;
+    } => {
       const [docs, setDocs] = useState<{ id: string; data: any }[]>([]);
       const [loading, setLoading] = useState<boolean>(true);
       const [error, setError] = useState<Error | null | undefined>(null);
@@ -1012,7 +1160,9 @@ class FB implements FBInterface {
         setLoading(true);
 
         // Construct the complete path
-        const completePath = `users/${uid}/${this.siteConfig.id}/Main/${path}`;
+        const completePath = complete
+          ? path
+          : `${this.siteConfig.id}/Main/${path}`;
         const q = query(collection(this.db, completePath));
 
         const unsubscribe = onSnapshot(
@@ -1043,51 +1193,59 @@ class FB implements FBInterface {
         error,
       };
     },
-    useCollection: (
-      path: string
-    ): {
-      docs: { id: string; data: any }[];
-      loading: boolean;
-      error: Error | null | undefined;
-    } => {
-      const [docs, setDocs] = useState<{ id: string; data: any }[]>([]);
-      const [loading, setLoading] = useState<boolean>(true);
-      const [error, setError] = useState<Error | null | undefined>(null);
+    useDoc: (
+      path: string,
+      ms: number = 150,
+      log?: boolean
+    ): [any, (field: string, value: any) => void] => {
+      const initialState = {};
+      const [data, setData] = useState<any>(initialState);
+      const [initialDataFetched, setInitialDataFetched] = useState(false);
 
       useEffect(() => {
-        setLoading(true);
+        log && console.log("useEffect 1 (with Auth)");
 
-        // Construct the complete path
-        const completePath = `${this.siteConfig.id}/Main/${path}`;
-        const q = query(collection(this.db, completePath));
+        const fetchInitialData = async () => {
+          try {
+            log && console.log("fetch initial data (with Auth)");
+            const doc = await this.docs.getBaseDoc(path);
+            log && console.log(doc);
 
-        const unsubscribe = onSnapshot(
-          q,
-          (snapshot) => {
-            const newDocs = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              data: doc.data(),
-            }));
-            setDocs(newDocs);
-            setLoading(false);
-          },
-          (err) => {
-            setError(err);
-            setLoading(false);
+            if (doc?.data) {
+              setData(doc.data);
+            }
+
+            setInitialDataFetched(true);
+          } catch (error) {
+            console.error("Error fetching initial data:", error);
           }
-        );
-
-        return () => {
-          // Cleanup: unsubscribe to the snapshot
-          unsubscribe();
         };
+        fetchInitialData();
       }, [path]);
 
-      return {
-        docs,
-        loading,
-        error,
+      useEffect(() => {
+        log && console.log("useEffect 2 (with Auth)");
+
+        const updateFirestore = throttle(async (updatedData) => {
+          try {
+            log && console.log(updatedData);
+            const result = await this.docs.setBaseDoc(path, updatedData);
+            log && console.log(result);
+          } catch (error) {
+            console.error("Error updating value:", error);
+          }
+        }, ms);
+
+        if (initialDataFetched && data) {
+          updateFirestore(data);
+        }
+      }, [data]);
+
+      const setField = (field: string, value: any, log?: boolean) => {
+        setData((prevData: any) => ({ ...prevData, [field]: value }));
       };
+
+      return [data, setField];
     },
   };
 }

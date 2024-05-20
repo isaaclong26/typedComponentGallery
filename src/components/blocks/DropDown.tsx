@@ -24,6 +24,7 @@ export interface dropdownProps {
   locked?: boolean;
   warning?: boolean;
   warningMessage?: string;
+  style?: any;
 }
 
 const DropDown = (props: dropdownProps) => {

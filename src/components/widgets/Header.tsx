@@ -66,8 +66,9 @@ const Header: React.FC = () => {
             <Nav.Link
               href={"/" + pageUrl}
               style={{
+                fontFamily: theme.font,
                 borderBottom: `3px solid ${
-                  location.pathname === `/${pageUrl}` ? `#fff` : theme.colors[0]
+                  location.pathname !== `/${pageUrl}` ? `#fff` : theme.colors[0]
                 }`,
               }}>
               {page.name}
@@ -82,20 +83,29 @@ const Header: React.FC = () => {
     <EloiseWidget
       eloiseIntel={{ title: "Header", desc: "Navigation for Application" }}>
       <Navbar
+        style={theme.headerStyle ?? {}}
         sticky="top"
         expand="lg"
         bg={siteConfig.headerTrans ? "" : "white"}>
         <Container className="mx-1">
-          <Navbar.Brand href="#home">
-            <img
-              src={siteConfig.logo}
-              width="50"
-              height="50"
-              className="d-inline-block align-top"
-              alt="React Bootstrap logo"
-            />
-          </Navbar.Brand>
-          <Navbar.Brand href="/">{siteConfig.name}</Navbar.Brand>
+          {!theme.noHeaderLogo && (
+            <Navbar.Brand href="/">
+              <img
+                src={siteConfig.logo}
+                width={siteConfig.logoWidth ?? "50"}
+                height={"auto"}
+                className="d-inline-block align-top"
+                alt="React Bootstrap logo"
+              />
+            </Navbar.Brand>
+          )}
+          {!theme.noHeaderText && (
+            <Navbar.Brand
+              href="/"
+              style={{ fontFamily: theme.font }}>
+              {siteConfig.name}
+            </Navbar.Brand>
+          )}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">

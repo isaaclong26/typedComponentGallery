@@ -163,6 +163,9 @@ export interface SiteConfig {
   userConfig?: UserConfig;
   peopleConfig: Array<PeopleType>;
   noAuth?: boolean;
+  hostingSite: string;
+  noHeader?: boolean;
+  logoWidth?: number;
 }
 
 export type Event = {
@@ -286,6 +289,9 @@ export interface Theme {
   mode: "light" | "dark" | "auto";
   heading?: DefaultHeadingProps;
   input?: DefaultInputProps;
+  headerStyle?: any;
+  noHeaderLogo?: boolean;
+  noHeaderText?: boolean;
 }
 
 //component props
@@ -312,7 +318,7 @@ export interface BaseLTProps
 export interface RegularLTProps extends BaseLTProps {
   firebase?: false; // Indicates that this is not a Firebase button
   state: string;
-  setState: React.Dispatch<React.SetStateAction<string>>;
+  setState: React.Dispatch<React.SetStateAction<string>> | ((x: any) => void);
 }
 
 export interface FirebaseLTProps extends BaseLTProps {

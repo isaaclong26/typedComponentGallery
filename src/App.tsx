@@ -36,6 +36,7 @@ const siteConfigPlace = {
   },
   headerTrans: false,
   peopleConfig: [],
+  hostingSite: "test",
 };
 
 export class UndefinedLogic {
@@ -120,7 +121,7 @@ const ThemeContext = createContext<EloiseContext>({
   },
   logic: new UndefinedLogic(),
   eloiseContent: [], // Add this line
-  setEloiseContent: () => {}, // Add this line
+  setEloiseContent: () => {},
 });
 
 export const useEloise = (): {
@@ -276,7 +277,7 @@ function Eloise({ theme, siteConfig, fireBaseConfig }: AppProps) {
         }}>
         <div className="App">
           <BrowserRouter>
-            <Header />
+            {siteConfig.noHeader ? <></> : <Header />}
             <SideModal />
 
             <Routes>

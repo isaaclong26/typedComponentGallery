@@ -93,7 +93,8 @@ export interface DefaultInputProps {
 export interface InputProps extends DefaultInputProps {
   label: string;
   state: any | undefined;
-  setState: React.Dispatch<React.SetStateAction<any>>;
+  setState: React.Dispatch<React.SetStateAction<any>> | ((x: any) => void);
+
   cacheKey?: string;
   locked?: boolean;
   warning?: boolean;
@@ -273,7 +274,7 @@ const AddressInput: React.FC<InputProps> = (props: InputProps) => {
           placeholder={!extLabel ? placeholder : undefined}
           type={type}
           readOnly={locked}
-          style={{ ...style, borderRadius: rounded ? "3px" : 0 }}
+          style={{ ...style, borderRadius: rounded ? theme.borderRadius : 0 }}
         />
       </InputWrapper>
 

@@ -73,6 +73,7 @@ export const Map: React.FC<MapProps> = ({
     lat: 40.712776,
     lng: -74.005974,
   });
+
   const [zoom, setZoom] = useState<number>(10);
   const mapRef = useRef<any>(null);
 
@@ -82,11 +83,14 @@ export const Map: React.FC<MapProps> = ({
         const listings = await logic.fb.docs.getUserCollection(path);
         setLocations(listings.map((listing: any) => listing.data));
       } else if (manual) {
+        console.log(manual);
+
         setLocations(manual);
       }
     })();
   }, [logic]);
 
+  console.log("testingsss");
   const onMapLoad = React.useCallback((map: any) => {
     mapRef.current = map;
   }, []);

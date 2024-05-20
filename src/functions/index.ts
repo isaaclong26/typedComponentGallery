@@ -36,12 +36,15 @@ class Logic {
   apiCall: Function = async (
     route: string,
     body?: any,
+    raw?: boolean,
+
     url?: string
   ): Promise<any> => {
     let user = await this.fb.auth.currentUser?.getIdToken();
 
     const headers = {
       Authorization: `Bearer ${user}`,
+      "Content-Type": "application/json",
     };
 
     const options: RequestInit = {
@@ -55,6 +58,7 @@ class Logic {
     try {
       const response = await fetch(`${apiUrl}/${route}`, options);
       if (response.ok) {
+        if (raw) return response;
         const data = await response.json();
         return data;
       } else if (response.status === 403) {
